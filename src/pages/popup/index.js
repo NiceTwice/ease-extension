@@ -1,0 +1,1 @@
+window.open('http://ease.space');

@@ -1,0 +1,51 @@
+{
+   "background": {
+      "page": "pages/background.html",
+      "persistent": false
+   },
+   "browser_action": {
+      "default_icon": "assets/images/logo_296.png",
+      "default_popup": "pages/popup.html"
+   },
+   "chrome_url_overrides": {
+      "newtab": "pages/homepage.html"
+   },
+   "omnibox":{
+      "keyword": "e"
+   },
+   "commands": {
+      "logout-ease": {
+         "description": "Logout from ease and all connected websites.",
+         "suggested_key": {
+            "default": "Ctrl+L",
+            "mac": "Ctrl+L"
+         }
+      },
+      "open-ease": {
+         "description": "Open Ease in a new tab.",
+         "suggested_key": {
+            "default": "Ctrl+Space",
+            "mac": "Ctrl+Space"
+         }
+      }
+   },
+   "content_scripts": [ {
+      "js": [ "pages/ease-content.js"],
+      "matches": [ "https://ease.space/*", "https://www.ease.space/*", "http://ease.space/*", "http://www.ease.space/*", "https://turfu.ease.space:8443/*", "https://localhost:8443/*" ],
+      "run_at": "document_end"
+   }, {
+      "all_frames": true,
+      "js": [ "pages/content.js"],
+      "matches": [ "<all_urls>"]
+   } ],
+   "description": "Ease extension, log you in and out",
+   "icons": {
+      "128": "assets/images/logo_128.png"
+   },
+   "key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAliT2uy++UkJdLFwTGSrMEhes+xNfSGuGmBnwt+8xSoFx6/Pzwk/Eu7DLxOgCCAGEgDeADqAsXWOP3mzDPkuwTRsx3iK/Xw+jfTUK9ypvfpKUYD9V2/8bW9wTkokJpjAwyX2U05IraFmTmYEPPX6dZT9srwTK2xFzwn2qp4eu9tcguYtwLAWNcii7s6KWBaBaGpo9zQ0HM57gyV4bj91LwQo8AfvLb0X6WMAoVDjtLuTYJGs9B009GsAlsUaE44WKQumfb4uCAV+jVblJlPCAh3rZVT0eh5drkyJ1XIadMxM/EzFrB4zr+Z8GzNOJMhpct3ljnfX9c6sOmCMLb9fhhwIDAQAB",
+   "manifest_version": 2,
+   "name": "Ease",
+   "permissions": [ "tabs", "<all_urls>", "http://*/*", "https://*/*", "webNavigation", "storage","unlimitedStorage", "identity", "identity.email", "contentSettings", "privacy", "cookies", "bookmarks", "notifications","topSites", "history"],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.6.1"
+}
