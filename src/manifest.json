@@ -30,14 +30,13 @@
       }
    },
    "content_scripts": [ {
-      "js": [ "pages/ease-content.js"],
-      "matches": [ "https://ease.space/*", "https://www.ease.space/*", "http://ease.space/*", "http://www.ease.space/*", "https://turfu.ease.space:8443/*", "https://localhost:8443/*" ],
-      "run_at": "document_end"
-   }, {
       "all_frames": true,
       "js": [ "pages/content.js"],
       "matches": [ "<all_urls>"]
    } ],
+   "externally_connectable": {
+      "matches": ["*://*.ease.space/*", "https://localhost:8443/*", "http://localhost:8080/*"]
+   },
    "description": "Ease extension, log you in and out",
    "icons": {
       "128": "assets/images/logo_128.png"

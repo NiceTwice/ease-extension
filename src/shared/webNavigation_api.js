@@ -1,10 +1,10 @@
 import "./browser";
 
-webNavigation = {
+const webNavigation = {
   getFrame: (details) => {
     return new Promise((resolve, reject) => {
       browser.webNavigation.getFrame(details, (frameDetails) => {
-        if (!!frameDetails)
+        if (!frameDetails)
           reject();
         resolve(frameDetails);
       });
@@ -13,7 +13,7 @@ webNavigation = {
   getAllFrames: (details) => {
     return new Promise((resolve, reject) => {
       browser.webNavigation.getAllFrames(details, (frameDetails) => {
-        if (!!frameDetails)
+        if (!frameDetails)
           reject();
         resolve(frameDetails);
       });

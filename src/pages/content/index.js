@@ -1,4 +1,4 @@
 import $ from 'jquery';
-import React,{Component} from "react";
+import "./message_listeners";
 
-console.log('here am i');
+console.log('content script created');

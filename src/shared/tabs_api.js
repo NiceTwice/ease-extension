@@ -1,6 +1,6 @@
 import './browser';
 
-tabs = {
+const tabs = {
   get: (tabId) => {
     return new Promise((resolve, reject) => {
       browser.tabs.get(tabId, (tab) => {
@@ -20,17 +20,24 @@ tabs = {
   },
   sendMessage: (tabId, message, options) => {
     return new Promise((resolve, reject) => {
-      browser.tabs.sendMesage(tabId, message, options, (response) => {
-        if (!!browser.runtime.lastError)
+      browser.tabs.sendMessage(tabId, message, options, (response) => {
+        if (!!browser.runtime.lastError) {
           reject(browser.runtime.lastError.message);
-        resolve(response);
+          return;
+        }
+        if (!!response.error) {
+          reject(response.response);
+          return;
+        }
+        console.log('message:', message, 'response:', response.response);
+        resolve(response.response);
       });
     });
   },
   create: (createProperties) => {
     return new Promise((resolve, reject) => {
       browser.tabs.create(createProperties, (tab) => {
-        resolve(tab);
+          resolve(tabs.waitLoading(tab.id));
       });
     });
   },
@@ -118,6 +125,25 @@ tabs = {
           reject();
         resolve(tab);
       });
+    });
+  },
+  waitLoading: (tabId) => {
+    return new Promise(async (resolve, reject) => {
+      const listenerComplete = (tabid, info, tab) => {
+        if (tabid === tabId && info.status === 'complete'){
+          browser.tabs.onUpdated.removeListener(listenerComplete);
+          browser.tabs.onRemoved.removeListener(listenerRemoved);
+          setTimeout(() => {resolve(tab)}, 100);
+        }
+      };
+      const listenerRemoved = (tabid, removeInfo) => {
+        if (tabid === tabId){
+          browser.tabs.onUpdated.removeListener(listenerComplete);
+          browser.tabs.onRemoved.removeListener(listenerRemoved);
+        }
+      };
+      browser.tabs.onUpdated.addListener(listenerComplete);
+      browser.tabs.onRemoved.addListener(listenerRemoved);
     });
   }
 };

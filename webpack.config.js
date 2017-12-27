@@ -28,12 +28,7 @@ module.exports = {
       `${PAGES_PATH}/popup`,
     ],
     content: [
-      'babel-polyfill',
       `${PAGES_PATH}/content`
-    ],
-    'ease-content': [
-      'babel-polyfill',
-      `${PAGES_PATH}/ease-content`
     ],
     homepage: [
       'babel-polyfill',

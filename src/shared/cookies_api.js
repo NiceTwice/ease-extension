@@ -1,6 +1,6 @@
 import './browser';
 
-cookies = {
+const cookies = {
   get: (details) => {
     return new Promise((resolve, reject) => {
       browser.cookies.get(details, (cookie) => {

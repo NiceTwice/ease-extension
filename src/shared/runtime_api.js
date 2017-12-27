@@ -19,9 +19,15 @@ runtime = {
   sendMessage: (extensionId, message, options) => {
     return new Promise((resolve, reject) => {
       browser.runtime.sendMessage(extensionId, message, options, (response) => {
-        if (!!browser.runtime.lastError)
+        if (!!browser.runtime.lastError) {
           reject(browser.runtime.lastError.message);
-        resolve(response);
+          return;
+        }
+        if (!!response.error) {
+          reject(response.response);
+          return;
+        }
+        resolve(response.response);
       });
     });
   }

@@ -1,6 +1,6 @@
 import "./browser";
 
-privacy = {
+const privacy = {
   passwordSaving : {
     get: () => {
       return new Promise((resolve, reject) => {
