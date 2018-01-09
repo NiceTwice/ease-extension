@@ -44,6 +44,7 @@ const content_actions = {
     div[0].focus();
     fire_before_fill(div[0]);
     div[0].value = value;
+    div.val(value);
     fire_onchange(div[0]);
     div[0].blur();
     sendResponse(MessageResponse(false, `"${selector}" successfully filled`));
@@ -58,9 +59,12 @@ const content_actions = {
       console.log(`Unable to find "${selector}"`);
       return;
     }
-    div[0].click();
-    sendResponse(MessageResponse(false, `"${selector}" successfully clicked`));
-    console.log(`"${selector}" successfully clicked`);
+    div.prop('disabled', false);
+    setTimeout(() => {
+      div[0].click();
+      sendResponse(MessageResponse(false, `"${selector}" successfully clicked`));
+      console.log(`"${selector}" successfully clicked`);
+    }, 250);
   },
   waitfor: ({selector}, sendResponse) => {
     console.log(`Waiting for "${selector}"`);
@@ -119,8 +123,8 @@ const content_actions = {
       return;
     }
     const href = element.attr('href');
-    window.location.href = href;
     window.location.reload();
+    window.location.href = href;
     sendResponse(MessageResponse(false, `"${selector}" successfully clicked`));
     console.log(`"${selector}" successfully clicked`);
   }

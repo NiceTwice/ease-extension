@@ -33,7 +33,14 @@
       "all_frames": true,
       "js": [ "pages/content.js"],
       "matches": [ "<all_urls>"]
-   } ],
+   }, {
+      "css": ["assets/css/content.css", "assets/css/loading.css", "assets/fonts/museo-font.css"],
+      "matches": [ "<all_urls>"],
+      "run_at": "document_start"
+      }, {
+      "js": ["pages/facebook.js"],
+      "matches": ["*://*.facebook.com/*"]
+   }],
    "externally_connectable": {
       "matches": ["*://*.ease.space/*", "https://localhost:8443/*", "http://localhost:8080/*"]
    },
@@ -46,5 +53,8 @@
    "name": "Ease",
    "permissions": [ "tabs", "<all_urls>", "http://*/*", "https://*/*", "webNavigation", "storage","unlimitedStorage", "identity", "identity.email", "contentSettings", "privacy", "cookies", "bookmarks", "notifications","topSites", "history"],
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "1.6.1"
+   "version": "1.6.1",
+   "web_accessible_resources": [
+      "assets/*"
+   ]
 }

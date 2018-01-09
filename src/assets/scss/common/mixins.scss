@@ -1,0 +1,178 @@
+//flex mixins
+@mixin display-flex(){
+  display: -webkit-box ;
+  display: -webkit-flex ;
+  display: -moz-flex ;
+  display: -ms-flexbox ;
+  display: flex ;
+}
+
+@mixin display-inline-flex(){
+  display: -webkit-box;
+  display: -webkit-inline-flex;
+  display: -moz-inline-flex;
+  display: -ms-inline-flex;
+  display: inline-flex;
+}
+
+@mixin justify-content($param){
+  -webkit-justify-content: $param;
+  -moz-justify-content: $param;
+  justify-content: $param;
+}
+
+@mixin flex-direction($param){
+  -ms-flex-direction: $param;
+  -moz-flex-direction: $param;
+  -webkit-flex-direction: $param;
+  flex-direction: $param;
+}
+
+@mixin flex-wrap($param) {
+  -ms-flex-wrap: $param;
+  -webkit-flex-wrap: $param;
+  -moz-flex-wrap: $param;
+  flex-wrap: $param;
+}
+
+@mixin flex-basis($param) {
+  -webkit-flex-basis: $param;
+  -moz-flex-basis: $param;
+  -ms-flex-preferred-size: $param;
+  flex-basis: $param;
+}
+
+@mixin align-items($param){
+  -ms-flex-align: $param;
+  -webkit-align-items: $param;
+  -webkit-box-align: $param;
+  -moz-align-items: $param;
+  align-items: $param;
+}
+
+@mixin flex-grow($param){
+  -webkit-flex-grow: $param;
+  -moz-flex-grow: $param;
+  -ms-flex-positive: $param;
+  flex-grow: $param;
+}
+
+@mixin flex-shrink($param){
+  -webkit-flex-shrink: $param;
+  -moz-flex-shrink: $param;
+  -ms-flex-negative: $param;
+  flex-shrink: $param;
+}
+
+@mixin flex($param){
+  -ms-flex: $param;
+  -webkit-flex: $param;
+  flex: $param;
+}
+//flex mixins end
+
+@mixin box-shadow($param1, $param2) {
+  -webkit-box-shadow: $param1, $param2;
+     -moz-box-shadow: $param1, $param2;
+     -o-box-shadow: $param1, $param2;
+          box-shadow: $param1, $param2;
+}
+
+@mixin simple-box-shadow($param1) {
+  -webkit-box-shadow: $param1;
+     -moz-box-shadow: $param1;
+     -o-box-shadow: $param1;
+          box-shadow: $param1;
+}
+
+
+@mixin placeholder-color($color, $size:"", $fontStyle:normal) {
+  &::placeholder {
+    color: $color;
+    font-style: $fontStyle;
+    @if $size != "" {
+      font-size: $size;
+    }
+  }
+  &::-webkit-input-placeholder {
+    color: $color;
+    font-style: $fontStyle;
+    @if $size != "" {
+      font-size: $size;
+    }
+  }
+  &:-moz-placeholder {
+    color: $color;
+    font-style: $fontStyle;
+    @if $size != "" {
+      font-size: $size;
+    }
+  }
+  &:-ms-input-placeholder {
+    color: $color;
+    font-style: $fontStyle;
+    @if $size != "" {
+      font-size: $size;
+    }
+  }
+}
+@mixin custom-placeholder($color, $size:"", $fontStyle:normal) {
+  &::placeholder {
+    color: $color;
+    font-style: $fontStyle;
+    @if $size != "" {
+      font-size: $size;
+    }
+  }
+  &::-webkit-input-placeholder {
+    color: $color;
+    font-style: $fontStyle;
+    @if $size != "" {
+      font-size: $size;
+    }
+  }
+  &:-moz-placeholder {
+    color: $color;
+    font-style: $fontStyle;
+    @if $size != "" {
+      font-size: $size;
+    }
+  }
+  &:-ms-input-placeholder {
+    color: $color;
+    font-style: $fontStyle;
+    @if $size != "" {
+      font-size: $size;
+    }
+  }
+}
+@mixin size($width , $height: $width ) {
+  width: $width;
+  height: $height;
+}
+
+@mixin fontsize($size: 24, $base: 16) {
+  font-size: $size + px;
+  font-size: ($size / $base) * 1rem;
+}
+
+@mixin absPosition ($top: auto, $right: auto, $bottom: auto, $left: auto) {
+     position: absolute;
+     top: $top;
+     right: $right;
+     bottom: $bottom;
+     left: $left;
+}
+
+@mixin opacity($opacity) {
+     opacity: $opacity;
+     $opacityIE: $opacity * 100;
+     filter: alpha(opacity=$opacityIE);
+}
+
+@mixin animation($animation...) {
+  -o-animation: $animation;
+  -moz-animation: $animation;
+  -webkit-animation: $animation;
+  animation: $animation;
+}

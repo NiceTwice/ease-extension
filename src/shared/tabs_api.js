@@ -51,6 +51,10 @@ const tabs = {
   query: (queryInfo) => {
     return new Promise((resolve, reject) => {
       browser.tabs.query(queryInfo, (tabs) => {
+        if (!!browser.runtime.lastError){
+          reject(browser.runtime.lastError.message);
+          return;
+        }
         resolve(tabs);
       });
     });

@@ -1,8 +1,8 @@
 import './browser';
 
-runtime = {
-  getUrl: (path) => {
-    return browser.runtime.getUrl(path);
+const runtime = {
+  getURL: (path) => {
+    return browser.runtime.getURL(path);
   },
   setUninstallUrl: (url) => {
     return new Promise((resolve, reject) => {

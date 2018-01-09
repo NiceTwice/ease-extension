@@ -1,0 +1,21 @@
+/*******************************
+     User Global Variables
+*******************************/
+
+@green          : #45C997;
+
+@fontName          : "Museo";
+@fontSmoothing     : antialiased;
+
+@headerFont        : @fontName, 'Helvetica Neue', Arial, Helvetica, sans-serif;
+@pageFont          : @fontName, 'Helvetica Neue', Arial, Helvetica, sans-serif;
+
+@googleFontName    : @fontName;
+@importGoogleFonts : false;
+@googleFontSizes   : '300,500,400italic,700italic';
+@googleSubset      : 'latin';
+
+@googleProtocol    : 'https://';
+@googleFontRequest : '@{googleFontName}:@{googleFontSizes}&subset=@{googleSubset}';
+
+@textColor           : rgba(41, 41, 41, 0.95);

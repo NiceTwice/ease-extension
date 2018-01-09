@@ -1,6 +1,6 @@
 import "./browser";
 
-contentSettings = {
+const contentSettings = {
   popups: {
     clear: (details) => {
       return new Promise((resolve, reject) => {

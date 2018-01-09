@@ -1,0 +1,9 @@
+@font-face {
+    font-family: Museo;
+    src: url(chrome-extension://hnacegpfmpknpdjmhdmpkmedplfcmdmp/assets/fonts/museo-sans-300.otf);
+}
+@font-face {
+    font-family: Museo;
+    src: url(chrome-extension://hnacegpfmpknpdjmhdmpkmedplfcmdmp/assets/fonts/museo-sans-700.otf);
+    font-weight: bold;
+}

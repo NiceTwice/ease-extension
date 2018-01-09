@@ -1,0 +1,78 @@
+@import "../common/variables";
+@import "../common/mixins";
+@import "../common/common_lib";
+
+#new_ease_extension {
+  all: initial !important;
+  z-index: 2140000000 !important;
+  font-family: $defaultFont;
+  .spacer {
+    @include flex-grow(1);
+  }
+  .ease-progress-bar {
+    position: relative;
+    border-radius: 4px;
+    height: 5px;
+    background-color: #949eb7;
+    width: 100%;
+    .ease-progress-bar-filler {
+      position: absolute;
+      left:0;
+      top: 0;
+      bottom: 0;
+      border-radius: 4px;
+      background-color: $themeColor;
+      transition: width .2s;
+    }
+  }
+  #connection-modal {
+    @include display-flex();
+    @include align-items(center);
+    @include justify-content(center);
+    position: fixed;
+    left: 0;
+    right: 0;
+    top:0;
+    bottom: 0;
+    z-index: 2140000000;
+    background-color: rgba(white, .3);
+    .content-box {
+      @include display-flex();
+      @include flex-direction(column);
+      @include align-items(center);
+      position: relative;
+      border-radius: 8px;
+      border: 1px solid $themeLightGreyColor;
+      background-color: white;
+      box-shadow: -5px 5px 10px 0 rgba(0, 0, 0, 0.15);
+      width: 35vh;
+      height: 35vh;
+      padding: 5.8vh 3.5vh 4.1vh 3.5vh;
+      .ease-progress-bar {
+        @include flex-shrink(0);
+      }
+      .close_button {
+        font-size: 3vh;
+        position: absolute;
+        right: 1.2vh;
+        top: 1vh;
+        color: $themeLightBlueColor;
+        cursor: pointer;
+        opacity: .8;
+        &:hover {
+          opacity: 1;
+        }
+      }
+      .logo_handler {
+        width:20vh;
+      }
+      .text {
+        margin-top: 2.3vh;
+        width: 100%;
+        text-align: center;
+        font-size: 2vh;
+        color:$themeColor;
+      }
+    }
+  }
+}

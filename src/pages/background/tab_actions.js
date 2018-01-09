@@ -9,6 +9,9 @@ const actions = {
   fill: ({tabId, frameId}, {search, what}, values) => {
     return Tabs.sendMessage(tabId, {type: 'fill', data: {selector: search, value: values[what]}}, {frameId});
   },
+  val: ({tabId, frameId}, {search, what}, values) => {
+    return Tabs.sendMessage(tabId, {type: 'fill', data: {selector: search, value: values[what]}}, {frameId});
+  },
   click: ({tabId, frameId}, {search}) => {
     return Tabs.sendMessage(tabId, {type: 'click', data: {selector: search}}, {frameId});
   },
@@ -33,6 +36,7 @@ const actions = {
   },
   aclick: async ({tabId, frameId}, {search}) => {
     await Tabs.sendMessage(tabId, {type: 'aclick', data: {selector: search}}, {frameId});
+
     return await Tabs.waitLoading(tabId);
   },
   erasecookies: async ({tabId, frameId}, {name}) => {

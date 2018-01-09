@@ -33,6 +33,9 @@ module.exports = {
     homepage: [
       'babel-polyfill',
       `${PAGES_PATH}/homepage`
+    ],
+    facebook: [
+      `${PAGES_PATH}/facebook`
     ]
   },
   output: {
@@ -53,6 +56,9 @@ module.exports = {
         test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/,
         loader: 'url-loader?limit=10000&mimetype=application/fontwoff'
       },
+      { test: /\.css$/,
+        loader: "style-loader!css-loader"
+      }
     ]
   },
   plugins: [
@@ -67,14 +73,16 @@ module.exports = {
             from: 'src',
             to: path.resolve('dist'),
             ignore: [ 'pages/**/*' ]
+          },
+          {
+            from: 'src/pages/html-pages',
+            to: path.resolve('dist/pages')
           }
         ]
     ),
     ...generateHtmlPlugins(
         [
-          'background',
-          'popup',
-          'homepage'
+          'background'
         ]
     )
   ]

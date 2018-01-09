@@ -1,0 +1,49 @@
+@import "./mixins";
+
+.display_flex {
+  display: -webkit-box !important;
+  display: -webkit-flex !important;
+  display: -moz-flex !important;
+  display: -ms-flexbox !important;
+  display: flex !important;
+}
+
+.full_flex {
+  @include flex(1);
+}
+
+.min_flex {
+  @include flex-shrink(0);
+  @include flex-grow(0);
+}
+
+.flex_direction_column {
+  @include flex-direction(column);
+}
+
+.justify_content_center {
+  @include justify-content(center);
+}
+
+.justify_content_space {
+  @include justify-content(space-between);
+}
+
+.flex_column {
+  @include flex-direction(column);
+}
+
+.min_flex_shrink {
+  @include flex-shrink(0);
+}
+
+.align_items_center {
+  @include align-items(center);
+}
+
+.overflow-ellipsis {
+  display: block;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}

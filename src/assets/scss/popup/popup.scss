@@ -1,0 +1,94 @@
+@import "../common/variables";
+@import "../common/mixins";
+@import "../common/common_lib";
+
+html {
+  font-size: 18px;
+}
+
+body {
+  font-family: $defaultFont;
+  max-width: 400px;
+  width: 400px;
+}
+
+#ease-extension-anchor {
+  @include display-flex();
+  @include flex-direction(column);
+}
+
+#connected_header {
+  @include display-flex();
+  padding: 7px 15px;
+  background-color: $themeColor;
+  color: white;
+}
+
+#strong_password_generator {
+  padding: 15px;
+  color: $themeColor;
+  cursor: pointer;
+  text-align: center;
+  font-size: .7rem;
+  &:hover {
+    background-color: #e8ecf1;
+  }
+}
+
+#dashboard_button {
+  white-space: nowrap;
+  cursor: pointer;
+  color: white;
+}
+
+
+#popup_body {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  .app {
+    padding: 14px 15px;
+    color: $themeBlue2Color;
+    border-bottom: 1px solid #e8ecf1;
+    background-color: white;
+    transition: background-color .1s;
+    &:hover {
+      background-color: #e8ecf1;
+    }
+  }
+}
+
+#popup_body {
+  .copy_input {
+    button.button {
+      padding-top: 5px;
+      padding-bottom: 5px;
+      font-size: .7rem;
+      .icon {
+        margin-left: 5px !important;
+      }
+    }
+    input {
+      border-color: $themeGreenColor;
+      color: $themeBlue2Color;
+      padding: 5px 10px;
+      font-size: .7rem;
+      width: 113px;
+    }
+  }
+}
+
+.app.classic {
+  span {
+    padding-right: 5px;
+  }
+  .button {
+    padding: 5px 10px;
+    margin: 0;
+  }
+}
+
+.app.any {
+  .copy_inputs_list {
+    padding: 0;
+  }
+}

@@ -3,6 +3,10 @@ import "./message_listeners";
 import Storage from "../../shared/storage_api";
 import Tabs from "../../shared/tabs_api";
 import TabActions from "./tab_actions";
+import "./runtime_listeners";
+import store from "./store";
+import Cookies from "../../shared/cookies_api";
+import axios from "axios";
 
 const storage = {
   settings: {
@@ -25,3 +29,12 @@ Promise.all(calls).then(response => {
     console.log('bytes in use :', bytes);
   });
 });
+
+window.store = store;
+window.storage = () => {
+  Storage.local.get(null).then(storage => {
+    console.log('storage:', storage);
+  });
+};
+
+axios.defaults.baseURL = 'https://localhost:8443/';
