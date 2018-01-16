@@ -1,6 +1,7 @@
 @import "../common/variables";
 @import "../common/mixins";
 @import "../common/common_lib";
+@import "./chromeScraping";
 
 #new_ease_extension {
   all: initial !important;

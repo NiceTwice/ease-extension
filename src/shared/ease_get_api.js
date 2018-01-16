@@ -15,7 +15,17 @@ const api = {
     return basic_get('/api/v1/common/GetMyInformation');
   },
   getProfiles: () => {
-    return basic_get('/api/rest/GetProfiles');
+    return basic_get('/api/rest/GetProfilesAndApps');
+  },
+  getAppConnectionInformation: ({app_id}) => {
+    return basic_get('/api/v1/dashboard/GetConnection', {
+      app_id: app_id
+    });
+  },
+  catalog: {
+    getWebsites: () => {
+      return basic_get('/api/v1/catalog/GetWebsites');
+    }
   }
 };
 

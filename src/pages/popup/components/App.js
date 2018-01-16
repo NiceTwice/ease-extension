@@ -1,36 +1,30 @@
 import React, {Component, Fragment} from "react";
 import {Button, Loader} from "semantic-ui-react";
-import StrongPasswordGenerator from "./StrongPasswordGenerator";
-import ConnectedHeader from "./ConnectedHeader";
-import PopupBody from "./PopupBody";
+import LoginView from "./LoginView";
+import ConnectedView from "./ConnectedView";
 import {connect} from "react-redux";
-import Runtime from "../../../shared/runtime_api";
+import {BackgroundMessage} from "../../../shared/utils";
 
 class App extends Component {
   constructor(props){
     super(props);
   }
-  test = () => {
-    Runtime.sendMessage(null, {
-      type: 'getUser'
-    }, null);
-  };
+  componentWillMount(){
+    BackgroundMessage('getUser');
+    BackgroundMessage('getCatalogWebsites');
+    BackgroundMessage('setCurrentTab');
+  }
   render(){
-    const {loading} = this.props;
-    console.log('loading', loading);
-    if (!!loading)
-      return <Loader/>;
-    return (
-        <Fragment>
-          <Button content={'Click me!'} onClick={this.test}/>
-          <ConnectedHeader/>
-          <PopupBody/>
-          <StrongPasswordGenerator/>
-        </Fragment>
-    )
+    const {loading, user} = this.props;
+    if (!!loading || user.fetching)
+      return (<Loader active size="mini" inline="centered"/>);
+    if (!user.information)
+      return <LoginView/>;
+    return <ConnectedView/>
   }
 }
 
 export default connect(store => ({
-  loading: store.loading
+  loading: store.loading,
+  user: store.user
 }))(App);

@@ -28,6 +28,7 @@ module.exports = {
       `${PAGES_PATH}/popup`,
     ],
     content: [
+      'babel-polyfill',
       `${PAGES_PATH}/content`
     ],
     homepage: [
@@ -36,6 +37,9 @@ module.exports = {
     ],
     facebook: [
       `${PAGES_PATH}/facebook`
+    ],
+    ease: [
+      `${PAGES_PATH}/ease`
     ]
   },
   output: {
@@ -72,7 +76,7 @@ module.exports = {
           {
             from: 'src',
             to: path.resolve('dist'),
-            ignore: [ 'pages/**/*' ]
+            ignore: [ 'pages/**/*', 'shared/**/*' ]
           },
           {
             from: 'src/pages/html-pages',

@@ -32,14 +32,19 @@
    "content_scripts": [ {
       "all_frames": true,
       "js": [ "pages/content.js"],
-      "matches": [ "<all_urls>"]
+      "matches": [ "<all_urls>"],
+      "exclude_matches": ["*://*.ease.space/*", "*://localhost/*"]
    }, {
       "css": ["assets/css/content.css", "assets/css/loading.css", "assets/fonts/museo-font.css"],
       "matches": [ "<all_urls>"],
-      "run_at": "document_start"
-      }, {
+      "run_at": "document_start",
+      "exclude_matches": ["*://*.ease.space/*", "*://localhost/*"]
+   }, {
       "js": ["pages/facebook.js"],
       "matches": ["*://*.facebook.com/*"]
+   }, {
+      "js": ["pages/ease.js"],
+      "matches": ["<all_urls>","*://*.ease.space/*", "*://localhost/*"]
    }],
    "externally_connectable": {
       "matches": ["*://*.ease.space/*", "https://localhost:8443/*", "http://localhost:8080/*"]

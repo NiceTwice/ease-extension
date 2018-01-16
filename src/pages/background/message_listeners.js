@@ -3,25 +3,31 @@ import TabActions from "./tab_actions";
 import Tabs from "../../shared/tabs_api";
 import Storage from "../../shared/storage_api";
 import Privacy from "../../shared/privacy_api";
+import Cookies from "../../shared/cookies_api";
 import WebNavigation from "../../shared/webNavigation_api";
 import ContentSettings from "../../shared/contentSettings_api";
 import {reflect, MessageResponse, getUrl, asyncWait} from "../../shared/utils";
 import store from "./store";
+import get_api from "../../shared/ease_get_api";
 import {getUserInformation} from "../../shared/actions/user";
-
+import {getProfiles} from "../../shared/actions/dashboard";
 import {InitialiseConnectionOverlay, UpdateConnectionOverlay, DeleteConnectionOverlay} from "../../shared/actions/connectionOverlay";
+import {setCurrentTab, getCatalogWebsites} from "../../shared/actions/common";
+import {scrapChrome} from "./google";
+import {deleteScrapingChromeOverlay, showScrapingChromeOverlay} from "../../shared/actions/scraping";
 
-const execActionList = async (tabId, actions, values) => {
+const execActionList = async (tabId, actions, values, noOverlay) => {
   let frameId = 0;
   for (let i = 0; i < actions.length; i++){
     const state = store.getState();
-    if (!state.connectionOverlay[tabId])
+    if (!noOverlay && !state.connectionOverlay[tabId])
       throw 'Connection overlay closed';
-    store.dispatch(UpdateConnectionOverlay({
-      tabId: tabId,
-      steps: actions.length,
-      currentStep: i + 1
-    }));
+    if (!noOverlay)
+      store.dispatch(UpdateConnectionOverlay({
+        tabId: tabId,
+        steps: actions.length,
+        currentStep: i + 1
+      }));
     if (actions[i].action === 'enterFrame'){
       const src = await TabActions['getAttr']({tabId, frameId}, {selector : actions[i].search, attr: 'src'});
       const url = src.split('?')[0];
@@ -52,10 +58,10 @@ const execActionList = async (tabId, actions, values) => {
 const isAccountConnected = async ({websiteName, account}) => {
   const store = await Storage.local.get(null);
   const connectInformation = store.connectedAccounts[websiteName];
-  return !!connectInformation && !!connectInformation.accounts.find(acc => (acc.login === account.login));
+  return (!!connectInformation && !!connectInformation.accounts.find(acc => (acc.login === account.login)));
 };
 
-const setSimpleAccountConnected = async ({websiteName, account}) => {
+const setSimpleAccountConnected = async ({websiteName, account, website}) => {
   const store = await Storage.local.get(null);
   store.connectedAccounts[websiteName] = {
     logwith: {
@@ -63,6 +69,7 @@ const setSimpleAccountConnected = async ({websiteName, account}) => {
       logwithName: '',
       account: null
     },
+    website: website,
     accounts: [account]
   };
   return await Storage.local.set(store);
@@ -74,7 +81,7 @@ const setAccountDisconnected = async ({websiteName}) => {
   return await Storage.local.set(store);
 };
 
-const setLogwithAccountConnected = async ({websiteName, logwithName, account}) => {
+const setLogwithAccountConnected = async ({websiteName, logwithName, account, website}) => {
   const store = await Storage.local.get(null);
   store.connectedAccounts[websiteName] = {
     logwith: {
@@ -82,6 +89,7 @@ const setLogwithAccountConnected = async ({websiteName, logwithName, account}) =
       logwithName: logwithName,
       account: account
     },
+    website: website,
     accounts: []
   };
   return await Storage.local.set(store);
@@ -105,12 +113,16 @@ const connection = {
   accounts: [{}]
 };
 
-const connectSimpleAccount = async ({websiteData, active_tab}) => {
+const connectSimpleAccount = async ({websiteData, active_tab, current_tab}) => {
   const websiteName = !!websiteData.website.sso ? websiteData.website.sso : websiteData.website_name;
-  const hostname = getUrl(websiteData.website.home).hostname;
+  const hostname = getUrl(websiteData.website.loginUrl).hostname;
 
   let checkAlreadyLogged;
-  let tab = await Tabs.create({url: websiteData.website.home, active: active_tab});
+  let tab = current_tab;
+  if (!tab)
+    tab = await Tabs.create({url: websiteData.website.home, active: active_tab});
+  else
+    tab = await TabActions.goto({tabId: tab.id}, {url: websiteData.website.home});
   store.dispatch(InitialiseConnectionOverlay({
     tabId: tab.id,
     websiteName: websiteName
@@ -146,35 +158,37 @@ const connectSimpleAccount = async ({websiteData, active_tab}) => {
     throw e;
   }
   console.log('connection worked');
-  await setSimpleAccountConnected({websiteName: hostname, account: websiteData.user});
+  await setSimpleAccountConnected({
+    websiteName: hostname,
+    account: websiteData.user,
+    website: websiteData.website
+  });
   return tab;
 };
 
-const connectLogWithAccount = async ({details, active_tab}) => {
+const connectLogWithAccount = async ({details, active_tab, current_tab}) => {
   console.log('start logwith connect');
   const logwith = details[1];
   const primaryAccount = details[0];
-  let url = getUrl(logwith.website.home);
-  const setting = {
-    primaryPattern: `${url.protocol}//${url.hostname}/*`,
-    setting: chrome.contentSettings.PopupsContentSetting.ALLOW
-  };
-  const isPrimaryAccountConnected = isAccountConnected({
-    websiteName: getUrl(primaryAccount.website.home),
+  let url = getUrl(logwith.website.loginUrl);
+  const isPrimaryAccountConnected = await isAccountConnected({
+    websiteName: getUrl(primaryAccount.website.loginUrl).hostname,
     account: primaryAccount.user
   });
-  let tab;
-  await ContentSettings.popups.set(setting);
+  console.log('primary account connected ?', isPrimaryAccountConnected);
 
+  let tab = current_tab;
   if (isPrimaryAccountConnected)
-    tab = await Tabs.create({url: logwith.website.home});
-  else
-    tab = await connectSimpleAccount({websiteData: details[0], active_tab: active_tab});
+    if (!tab)
+      tab = await Tabs.create({url: logwith.website.home});
+    else
+      tab = await TabActions.goto({tabId: tab.id}, {url: logwith.website.home});
+  else {
+    tab = await connectSimpleAccount({websiteData: details[0], active_tab: active_tab, current_tab: tab});
+  }
   if (!isPrimaryAccountConnected){
     await asyncWait(20);
-    tab = await Tabs.get(tab.id);
-    if (tab.status !== 'complete')
-      tab = await Tabs.waitLoading(tab.id);
+    tab = await Tabs.waitLoading(tab.id);
     console.log('simple account connection finished');
   }
   console.log('avant goto');
@@ -182,9 +196,9 @@ const connectLogWithAccount = async ({details, active_tab}) => {
     tabId: tab.id,
     websiteName: logwith.website_name
   }));
+  console.log('lala');
   if (!isPrimaryAccountConnected)
     tab = await TabActions['goto']({tabId: tab.id}, {url: logwith.website.home});
-  console.log("settings", setting);
   console.log('apres goto');
   let checkAlreadyLogged;
   console.log('checking is connected');
@@ -212,6 +226,10 @@ const connectLogWithAccount = async ({details, active_tab}) => {
     }
   }
   console.log('connection');
+  await ContentSettings.popups.set({
+    primaryPattern: `${url.protocol}//${url.hostname}/*`,
+    setting: chrome.contentSettings.PopupsContentSetting.ALLOW
+  });
   try {
     await execActionList(tab.id, logwith.website[logwith.logWith].todo);
   } catch (e) {
@@ -224,7 +242,8 @@ const connectLogWithAccount = async ({details, active_tab}) => {
   await setLogwithAccountConnected({
     websiteName: url.hostname,
     logwithName: logwith.logWith,
-    account: details[0].user
+    account: details[0].user,
+    website: logwith.website
   });
   return tab;
 };
@@ -274,8 +293,21 @@ const test_connection = async ({websiteData}) => {
     throw e;
   }
   console.log('connection worked');
-  await setSimpleAccountConnected({websiteName: hostname, account: websiteData.user});
+  await setSimpleAccountConnected({websiteName: hostname, account: websiteData.user, website: websiteData.website});
   return tab;
+};
+
+const disconnect_account = async ({website, hostname}) => {
+  const tab = await Tabs.create({
+    url: website.home,
+    active: false
+  });
+  const checkLogged = await reflect(execActionList(tab.id, website.checkAlreadyLogged, null, true));
+  if (!checkLogged.error)
+    await execActionList(tab.id, website.logout.todo, null, true);
+  await setAccountDisconnected({
+    websiteName: hostname
+  });
 };
 
 const actions = {
@@ -284,24 +316,47 @@ const actions = {
     let connectionResponse = null;
     console.log('start website connection', data);
     console.log('test_conneciton', data.test_connection);
-    const PasswordSavingDetails = await Privacy.passwordSaving.get();
     await Privacy.passwordSaving.set(false);
+    await Privacy.autofill.set(false);
     if (!!data.test_connection)
-      connectionResponse = await reflect(test_connection({websiteData: details[0]}));
+      connectionResponse = await reflect(test_connection({
+        websiteData: details[0]
+      }));
     else if (details.length > 1)
-      connectionResponse = await reflect(connectLogWithAccount({details: details, active_tab: data.highlight}));
+      connectionResponse = await reflect(connectLogWithAccount({
+        details: details,
+        active_tab: data.highlight,
+        current_tab: data.tab}));
     else
-      connectionResponse = await reflect(connectSimpleAccount({websiteData: details[0], active_tab: data.highlight}));
+      connectionResponse = await reflect(connectSimpleAccount({
+        websiteData: details[0],
+        active_tab: data.highlight,
+        current_tab: data.tab}));
     if (!connectionResponse.error) {
       store.dispatch(DeleteConnectionOverlay({
         tabId: connectionResponse.data.id
       }));
+      let tab = connectionResponse.data;
+      tab = await Tabs.get(tab.id);
+      if (tab.status !== 'complete')
+        await Tabs.waitLoading(tab.id);
     }
-    console.log('connection result', connectionResponse);
-    console.log("storage", await Storage.local.get(null));
-
-    await Privacy.passwordSaving.set(PasswordSavingDetails.value);
+    await Privacy.passwordSaving.set(true);
+    await Privacy.autofill.set(true);
     sendResponse(MessageResponse(false, 'connection finished'));
+  },
+  generalLogout: async (data, sendResponse) => {
+    const storage = await Storage.local.get(null);
+    const accounts = storage.connectedAccounts;
+
+    const calls = Object.keys(accounts).map(hostname => {
+      return disconnect_account({
+        hostname: hostname,
+        website: accounts[hostname].website
+      });
+    });
+    await Promise.all(calls.map(reflect));
+    sendResponse(MessageResponse(false, 'General logout finished'));
   },
   getHomePage: async (data, sendResponse) => {
     const store = await Storage.local.get(null);
@@ -313,20 +368,20 @@ const actions = {
 
     store.settings.homepage = data;
     await Storage.local.set(store);
-    sendResponse(false, 'Homepage setting changed');
+    sendResponse(MessageResponse(false, 'Homepage setting changed'));
   },
   formSubmission: async (data, sendResponse) => {
     const {account, websiteName} = data;
     console.log('form submission detected !');
     console.log('account:', account, 'website:', websiteName);
-    sendResponse(false, 'form received');
+    sendResponse(MessageResponse(false, 'form received'));
   },
   setAccountDisconnected: async (data, sendResponse) => {
     const {websiteName} = data;
     await setAccountDisconnected({
       websiteName: websiteName
     });
-    sendResponse(false, 'account is set disconnected');
+    sendResponse(MessageResponse(false, 'account is set disconnected'));
   },
   setAccountConnected: async (data, sendResponse) => {
     const {websiteName, account} = data;
@@ -335,10 +390,78 @@ const actions = {
       websiteName:websiteName,
       account: account
     });
-    sendResponse(false, "account is set connected");
+    sendResponse(MessageResponse(false, "account is set connected"));
   },
   getUser: async (data, sendResponse) => {
-    store.dispatch(getUserInformation());
+    const resp = await reflect(store.dispatch(getUserInformation()));
+    sendResponse(MessageResponse(resp.error, resp.data));
+  },
+  getCatalogWebsites: async (data, sendResponse) => {
+    const resp = await reflect(store.dispatch(getCatalogWebsites()));
+    sendResponse(MessageResponse(resp.error, resp.data));
+  },
+  getProfiles: async (data, sendResponse) => {
+    const resp = await reflect(store.dispatch(getProfiles()));
+    sendResponse(MessageResponse(resp.error, resp.data));
+  },
+  setCurrentTab:  async (data, sendResponse) => {
+    const tab = await store.dispatch(setCurrentTab());
+    sendResponse(MessageResponse(false, tab));
+  },
+  getCurrentTab: async (data, sendResponse) => {
+    const resp = await reflect(Tabs.query({
+      currentWindow: true,
+      active: true
+    }));
+    if (resp.error)
+      sendResponse(MessageResponse(resp.error, resp.data));
+    else
+      sendResponse(MessageResponse(resp.error, resp.data[0]));
+  },
+  getCookie: async (data, sendResponse) => {
+    const {url, name} = data;
+
+    const cookie = await Cookies.get({
+      url: url,
+      name: name
+    });
+    sendResponse(MessageResponse(false, cookie));
+  },
+  connect_tab: async (data, sendResponse) => {
+    const {app_id, account_information, tab} = data;
+
+    const connection_info = await get_api.getAppConnectionInformation({
+      app_id: app_id
+    });
+    let json = {};
+    json.detail = connection_info;
+    json.tab = tab;
+    json.detail[0].user = account_information;
+    actions.website_connection(json, sendResponse);
+  },
+  scrapChrome: async (data, sendResponse) => {
+    console.log('start scrapping chrome');
+    console.log('values are:', data);
+    await Privacy.passwordSaving.set(false);
+    await Privacy.autofill.set(false);
+    let tab = await Tabs.create({
+      url: 'https://accounts.google.com/Logout',
+      active: false
+    });
+    store.dispatch(showScrapingChromeOverlay({
+      tabId: tab.id
+    }));
+    const response = await reflect(scrapChrome(data, tab));
+    await Tabs.remove(tab.id);
+    store.dispatch(deleteScrapingChromeOverlay({
+      tabId: tab.id
+    }));
+    await Privacy.passwordSaving.set(true);
+    await Privacy.autofill.set(true);
+    console.log('scrapping result:', response);
+    if (response.error && response.data.indexOf('Wrong') === -1)
+      response.data = 'It seems you closed the tab. Please try again';
+    sendResponse(MessageResponse(response.error, response.data));
   }
 };
 

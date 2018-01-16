@@ -4,9 +4,9 @@ const runtime = {
   getURL: (path) => {
     return browser.runtime.getURL(path);
   },
-  setUninstallUrl: (url) => {
+  setUninstallURL: (url) => {
     return new Promise((resolve, reject) => {
-      browser.runtime.setUninstallUrl(url, () => {
+      browser.runtime.setUninstallURL(url, () => {
         if (!!browser.runtime.lastError)
           reject();
         resolve();

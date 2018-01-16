@@ -1,10 +1,8 @@
-import $ from 'jquery';
 import "./message_listeners";
 import React from "react";
 import {render} from "react-dom";
 import {Provider} from "react-redux";
 import {Store} from "react-chrome-redux";
-import "./document_events_listener";
 import App from "./components/App";
 import "../../assets/fonts/fontawesome/css/fontawesome-all.min.css";
 

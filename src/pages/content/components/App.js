@@ -4,6 +4,7 @@ import ContentApi from "../content_api";
 import {connect} from "react-redux";
 import FormSubmissionListener from "./FormSubmissionListener";
 import ConnectionOverlay from "./ConnectionOverlay";
+import ScrapGoogleOverlay from "./ScrapGoogleOverlay";
 
 class App extends Component {
   constructor(props){
@@ -22,6 +23,7 @@ class App extends Component {
     return (
         <Fragment>
           <ConnectionOverlay tabId={this.state.tabId}/>
+          <ScrapGoogleOverlay tabId={this.state.tabId}/>
           <FormSubmissionListener tabId={this.state.tabId}/>
         </Fragment>
     )

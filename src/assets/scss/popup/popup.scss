@@ -17,19 +17,53 @@ body {
   @include flex-direction(column);
 }
 
-#connected_header {
+#login_view {
+  padding: 20px;
+  color:$themeColor;
+  text-align: center;
+  a {
+    color: $themeColor;
+    text-decoration: underline;
+  }
+}
+
+.content_div {
+  padding: 15px 7px;
+  color: $themeColor;
+  text-align: center;
+  font-size: .7rem;
+  a {
+    color: $themeColor;
+  }
+}
+
+#header {
   @include display-flex();
   padding: 7px 15px;
   background-color: $themeColor;
   color: white;
 }
 
+.password_generator_popup {
+  background-color: $themeGreenColor !important;
+  color: white !important;
+  &:before {
+    background-color: $themeGreenColor !important;
+  }
+}
+
 #strong_password_generator {
   padding: 15px;
   color: $themeColor;
-  cursor: pointer;
   text-align: center;
   font-size: .7rem;
+  .renew {
+    float: right;
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
   &:hover {
     background-color: #e8ecf1;
   }
@@ -59,6 +93,20 @@ body {
 
 #popup_body {
   .copy_input {
+    .copied_helper {
+      position: absolute;
+      left: 0;
+      right:0;
+      bottom:0;
+      top:0;
+      font-size: .7rem;
+      font-weight: bold;
+      color: white;
+      background-color: $themeGreenColor;
+      border-radius: .28571429rem;
+      text-align: center;
+      padding: 5px 0;
+    }
     button.button {
       padding-top: 5px;
       padding-bottom: 5px;
@@ -77,7 +125,15 @@ body {
   }
 }
 
-.app.classic {
+.app.logwith {
+  .logwith_label {
+    color: white;
+    border-radius: 5px;
+    padding: 4px;
+  }
+}
+
+.app.classic, .app.logwith {
   span {
     padding-right: 5px;
   }
@@ -89,6 +145,9 @@ body {
 
 .app.any {
   .copy_inputs_list {
+    @include display-flex();
+    @include flex-direction(column);
+    @include align-items(flex-end);
     padding: 0;
   }
 }

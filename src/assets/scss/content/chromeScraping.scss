@@ -1,0 +1,92 @@
+.overlayScrap {
+  position: fixed;
+  top:0;
+  left:0;
+  bottom:0;
+  right:0;
+  z-index: 100000;
+  background: rgba(0,0,0,0.25);
+  visibility: visible;
+}
+
+.containerScrap {
+  position: fixed;
+  width: 400px;
+  top: 15%;
+  padding : 10px;
+  text-align: center;
+  left: calc(50% - 200px);
+  background: rgba(255,255,255,0.95);
+  border-radius: 7px;
+  color: #373b60;
+}
+
+.containerScrap .logoEase{
+  width: 320px;
+  margin: 0px 30px 0px 30px !important;
+}
+
+.containerScrap .titleContainer{
+  margin : 0px 10px 20px 10px !important;
+font-family: Arial !important;
+}
+
+.containerScrap .titleContainer .title{
+  font-size: 25px;
+  font-weight: bold;
+  margin : 0px 0px 2px 0px !important;
+font-family: Arial !important;
+}
+
+.containerScrap .websiteContainer{
+  padding: 3px;
+  padding: 2px 3px 2px 3px;
+  margin: 0px 10px 20px 10px !important;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #373b60;
+  border-radius : 5px;
+  width : 370px;
+  height: 36px;
+  text-align: center;
+}
+
+.containerScrap .websiteContainer img{
+  display: inline;
+  width : 36px;
+  float:left;
+  margin : 0px 0px 0px 4px !important;
+}
+
+.containerScrap .websiteContainer span{
+  display: inline;
+  line-height: normal !important;
+  margin-left : 10px !important;
+  font-size: 28px !important;
+  font-family: Arial !important;
+}
+
+.containerScrap .infoContainer{
+  margin : 0px 10px 10px 10px !important;
+}
+
+.containerScrap .infoContainer p{
+  font-size: 20px;
+  margin : 0px 0px 2px 0px !important;
+  font-family: Arial !important;
+}
+
+.containerScrap .loader {
+  margin : 0px 160px 20px 160px;
+  border: 10px solid #f0f0f0;
+  border-top: 10px solid #373b60;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spinEase 1s linear infinite;
+}
+
+@keyframes spinEase {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

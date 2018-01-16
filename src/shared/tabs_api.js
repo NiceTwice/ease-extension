@@ -1,9 +1,14 @@
 import './browser';
+import {reflect} from "./utils";
 
 const tabs = {
   get: (tabId) => {
     return new Promise((resolve, reject) => {
       browser.tabs.get(tabId, (tab) => {
+        if (!!browser.runtime.lastError){
+          reject(browser.runtime.lastError.message);
+          return;
+        }
         resolve(tab);
       });
     });
@@ -133,6 +138,16 @@ const tabs = {
   },
   waitLoading: (tabId) => {
     return new Promise(async (resolve, reject) => {
+      const tabResult = await reflect(tabs.get(tabId));
+      if (tabResult.error){
+        reject(tabResult.data);
+        return;
+      }
+      const tab = tabResult.data;
+      if (tab.status === 'complete'){
+        resolve(tab);
+        return;
+      }
       const listenerComplete = (tabid, info, tab) => {
         if (tabid === tabId && info.status === 'complete'){
           browser.tabs.onUpdated.removeListener(listenerComplete);
@@ -144,6 +159,7 @@ const tabs = {
         if (tabid === tabId){
           browser.tabs.onUpdated.removeListener(listenerComplete);
           browser.tabs.onRemoved.removeListener(listenerRemoved);
+          reject('tab closed');
         }
       };
       browser.tabs.onUpdated.addListener(listenerComplete);

@@ -1,8 +1,17 @@
+import Runtime from "./runtime_api";
+
 export const MessageResponse = (error, response) => {
   return {
     error: error,
     response: response
   }
+};
+
+export const BackgroundMessage = (type, data) => {
+  return Runtime.sendMessage(null, {
+    type: type,
+    data: data
+  }, null);
 };
 
 export function reflect(promise){

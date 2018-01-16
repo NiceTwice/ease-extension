@@ -6,29 +6,8 @@ import TabActions from "./tab_actions";
 import "./runtime_listeners";
 import store from "./store";
 import Cookies from "../../shared/cookies_api";
+import Runtime from "../../shared/runtime_api";
 import axios from "axios";
-
-const storage = {
-  settings: {
-    homepage: false
-  },
-  connectedAccounts: {
-    websiteName: ['login']
-  }
-};
-
-const calls = [
-  Storage.local.set(storage)
-];
-
-Promise.all(calls).then(response => {
-  Storage.local.get(null).then(storage => {
-    console.log(storage);
-  });
-  Storage.local.getBytesInUse(null).then(bytes => {
-    console.log('bytes in use :', bytes);
-  });
-});
 
 window.store = store;
 window.storage = () => {
@@ -37,4 +16,5 @@ window.storage = () => {
   });
 };
 
-axios.defaults.baseURL = 'https://localhost:8443/';
+//axios.defaults.baseURL = 'https://localhost:8443/';
+axios.defaults.baseURL = 'https://ease.space/';

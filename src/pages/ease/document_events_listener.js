@@ -28,3 +28,33 @@ document.addEventListener('SetHompage', (event) => {
     data: event.detail
   }, null);
 });
+
+document.addEventListener('Logout', (event) => {
+  Runtime.sendMessage(null, {
+    type: 'generalLogout'
+  }, null);
+});
+
+document.addEventListener('ScrapChrome', (event) => {
+  const detail = event.detail;
+  Runtime.sendMessage(null, {
+    type: 'scrapChrome',
+    data: detail
+  }, null).then(response => {
+    console.log('scrapping finished:',  response);
+    document.dispatchEvent(new CustomEvent('ScrapChromeResult', {
+      detail: {
+        success: true,
+        msg: response
+      }
+    }));
+  }).catch(err => {
+    document.dispatchEvent(new CustomEvent('ScrapChromeResult', {
+      detail: {
+        success: false,
+        msg: err
+      }
+    }));
+    console.log('scrapping error:', err);
+  });
+});

@@ -5,11 +5,6 @@ import Cookies from "../../shared/cookies_api";
 export const getUserInformation = () => {
   return async (dispatch, getState) => {
     dispatch({type: 'GET_USER_INFORMATION_PENDING'});
-    const jwt = await Cookies.get({
-      url: 'https://localhost',
-      name: 'JWT'
-    });
-    axios.defaults.headers.common['Authorization'] = jwt;
     return get_api.getUserInformation().then(response => {
       dispatch({
         type: 'GET_USER_INFORMATION_FULFILLED',

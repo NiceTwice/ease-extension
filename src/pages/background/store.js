@@ -6,7 +6,7 @@ import reducers from "./reducers";
 import {wrapStore, alias} from "react-chrome-redux";
 import aliases from "./store_aliases";
 
-const middleware = applyMiddleware(promise(), thunk, createLogger());
+const middleware = applyMiddleware(/*alias(aliases),*/ promise(), thunk, createLogger());
 
 let store = createStore(reducers, middleware);
 
