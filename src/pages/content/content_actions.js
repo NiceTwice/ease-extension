@@ -66,6 +66,19 @@ const content_actions = {
       console.log(`"${selector}" successfully clicked`);
     }, 250);
   },
+  submit: ({selector}, sendResponse) => {
+    console.log(`Start submitting on "${selector}"`);
+    let div = $(selector);
+
+    if (!div.length) {
+      sendResponse(MessageResponse(true, `Unable to find "${selector}"`));
+      console.log(`Unable to find "${selector}"`);
+      return;
+    }
+    div.submit();
+    sendResponse(MessageResponse(false, `"${selector}" successfully submitted`));
+    console.log(`"${selector}" successfully submitted`);
+  },
   waitfor: ({selector}, sendResponse) => {
     console.log(`Waiting for "${selector}"`);
     if (!!$(selector).length) {

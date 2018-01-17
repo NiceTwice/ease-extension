@@ -3,15 +3,15 @@ import Tabs from "../../shared/tabs_api";
 import Runtime from "../../shared/runtime_api";
 import Storage from "../../shared/storage_api";
 
-const storage = {
+/*const storage = {
   settings: {
     homepage: false
   },
   connectedAccounts: {
   }
-};
+};*/
 
-browser.runtime.onInstalled.addListener((details) => {
+browser.runtime.onInstalled.addListener(async (details) => {
   console.log('on installed event fired');
   Tabs.query({url: ["*://*.ease.space/*", "http://localhost:8080/*", "https://localhost:8443/*"]}).then(tabs => {
     tabs.map(tab => {
@@ -19,5 +19,10 @@ browser.runtime.onInstalled.addListener((details) => {
     });
   });
   Runtime.setUninstallURL('https://docs.google.com/forms/d/e/1FAIpQLSd2iAmqfxqpIPGVWVq4FuUWI-eqwtX_HsF3fkRKgtWOZ8Y5-g/viewform');
-  Storage.local.set(storage);
+  const storage = await Storage.local.get(null);
+  const newStorage = {
+    settings: (!!storage.settings && !!storage.settings.homepage) ? storage.settings : {homepage: false},
+    connectedAccounts: !!storage.connectedAccounts ? storage.connectedAccounts : {}
+  };
+  Storage.local.set(newStorage);
 });

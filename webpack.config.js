@@ -2,6 +2,7 @@ const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 const HtmlPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const webpack = require('webpack');
 
 require("babel-core/register");
 require("babel-polyfill");
@@ -17,7 +18,7 @@ function generateHtmlPlugins(items) {
   ))
 }
 
-module.exports = {
+config = {
   entry: {
     background: [
       'babel-polyfill',
@@ -91,3 +92,17 @@ module.exports = {
     )
   ]
 };
+
+if (process.env.NODE_ENV === 'production') {
+  config.plugins.push(
+      new webpack.DefinePlugin({
+        'process.env' : {
+          'NODE_ENV' : JSON.stringify(process.env.NODE_ENV)
+        }
+      }),
+      new webpack.optimize.UglifyJsPlugin(),
+      new webpack.optimize.OccurrenceOrderPlugin()
+  )
+}
+
+module.exports = config;

@@ -3,7 +3,8 @@
   "description": "Ease web browse extension to log in and out",
   "version": "0.0.1",
   "scripts": {
-    "build": "webpack --watch --progress"
+    "watch": "webpack --watch --progress",
+    "build": "NODE_ENV='production' webpack -p"
   },
   "babel": {
     "presets": [

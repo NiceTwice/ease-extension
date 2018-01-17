@@ -1,7 +1,7 @@
 import React, {Component, Fragment} from "react";
 import {List, Icon} from "semantic-ui-react";
 import {connect} from "react-redux";
-import {getUrl} from "../../../../shared/utils";
+import {getUrl, extractRootDomain} from "../../../../shared/utils";
 import AppWrapper from "./AppWrapper";
 
 const matchUrls = (website, hostname) => {
@@ -9,7 +9,8 @@ const matchUrls = (website, hostname) => {
 };
 
 function filter_apps(apps, url) {
-  const hostname = getUrl(url).hostname;
+  const hostname = extractRootDomain(url);
+
   return Object.keys(apps)
       .map(item => (apps[item]))
       .filter(item => {
@@ -50,9 +51,10 @@ class AppList extends Component {
   render(){
     const {tab, apps} = this.props;
     const filtered = filter_apps(apps, tab.url);
+
     if (!filtered.length)
       return (
-          <div class="content_div">
+          <div class="content_div" style={{borderBottom: '1px solid #e8ecf1'}}>
             <a target="_blank" href="https://ease.space/#/main/catalog/website">Add to my dashboard <Icon name="book"/></a>
           </div>
       );

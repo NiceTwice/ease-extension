@@ -138,16 +138,6 @@ const tabs = {
   },
   waitLoading: (tabId) => {
     return new Promise(async (resolve, reject) => {
-      const tabResult = await reflect(tabs.get(tabId));
-      if (tabResult.error){
-        reject(tabResult.data);
-        return;
-      }
-      const tab = tabResult.data;
-      if (tab.status === 'complete'){
-        resolve(tab);
-        return;
-      }
       const listenerComplete = (tabid, info, tab) => {
         if (tabid === tabId && info.status === 'complete'){
           browser.tabs.onUpdated.removeListener(listenerComplete);
@@ -164,6 +154,21 @@ const tabs = {
       };
       browser.tabs.onUpdated.addListener(listenerComplete);
       browser.tabs.onRemoved.addListener(listenerRemoved);
+      setTimeout(async () => {
+        const tabResult = await reflect(tabs.get(tabId));
+        if (tabResult.error){
+          browser.tabs.onUpdated.removeListener(listenerComplete);
+          browser.tabs.onRemoved.removeListener(listenerRemoved);
+          reject(tabResult.data);
+          return;
+        }
+        const tab = tabResult.data;
+        if (tab.status === 'complete'){
+          browser.tabs.onUpdated.removeListener(listenerComplete);
+          browser.tabs.onRemoved.removeListener(listenerRemoved);
+          resolve(tab);
+        }
+      }, 300);
     });
   }
 };

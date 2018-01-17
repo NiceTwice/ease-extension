@@ -20,7 +20,7 @@ export function reflect(promise){
 }
 
 export function getUrl(url_str){
-  var url = document.createElement("a");
+  let url = document.createElement("a");
   url.href = url_str;
   return url;
 }
@@ -45,3 +45,40 @@ export function copyTextToClipboard(str){
   document.body.removeChild(dummy);
   return worked;
 }
+
+export const  extractHostname = (url) => {
+  let hostname;
+  //find & remove protocol (http, ftp, etc.) and get hostname
+
+  if (url.indexOf("://") > -1) {
+    hostname = url.split('/')[2];
+  }
+  else {
+    hostname = url.split('/')[0];
+  }
+
+  //find & remove port number
+  hostname = hostname.split(':')[0];
+  //find & remove "?"
+  hostname = hostname.split('?')[0];
+
+  return hostname;
+};
+
+export const extractRootDomain = (url) => {
+  let domain = extractHostname(url),
+      splitArr = domain.split('.'),
+      arrLen = splitArr.length;
+
+  //extracting the root domain here
+  //if there is a subdomain
+  if (arrLen > 2) {
+    domain = splitArr[arrLen - 2] + '.' + splitArr[arrLen - 1];
+    //check to see if it's using a Country Code Top Level Domain (ccTLD) (i.e. ".me.uk")
+    if (splitArr[arrLen - 1].length === 2 && splitArr[arrLen - 1].length === 2) {
+      //this is using a ccTLD
+      domain = splitArr[arrLen - 3] + '.' + domain;
+    }
+  }
+  return domain;
+};

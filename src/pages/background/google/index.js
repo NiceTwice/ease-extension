@@ -110,9 +110,7 @@ export const googleExecActions = async (tabId, actions, values) => {
       const grave = !!actions[i].grave;
       const response = await reflect(TabActions[actions[i].action]({tabId, frameId}, actions[i], values));
       console.log('action response:', response);
-      if (actions[i].action === 'search' && response.error)
-        throw response.data;
-      else if (response.error && grave)
+      if (response.error && grave)
         throw response.data;
     }
     else if (!actions[i].action && !!actions[i].search)

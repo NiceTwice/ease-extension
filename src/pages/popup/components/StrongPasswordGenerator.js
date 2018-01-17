@@ -15,9 +15,16 @@ function generatePassword(length) {
 class GeneratedPasswordString extends Component {
   constructor(props){
     super(props);
-    this.state = {
-      popupOpen : false
-    }
+  }
+  componentDidMount(){
+    this.span.click();
+    this.span.select();
+  }
+  componentDidUpdate(){
+    setTimeout(() => {
+      this.span.click();
+      this.span.select();
+    }, 10);
   }
   render(){
     const {password} = this.props;
@@ -30,7 +37,16 @@ class GeneratedPasswordString extends Component {
             on="click"
             hideOnScroll
             trigger={
-              <span onClick={e => {copyTextToClipboard(password)}}>{password}</span>
+              <input
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    textAlign: 'center'
+                  }}
+                  ref={(item) => {this.span = item;}}
+                  onClick={e => {copyTextToClipboard(password)}}
+                  value={password}
+                  readOnly/>
             }
             content="Copied"
         />

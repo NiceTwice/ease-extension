@@ -58,7 +58,7 @@
    "name": "Ease",
    "permissions": [ "tabs", "<all_urls>", "http://*/*", "https://*/*", "webNavigation", "storage","unlimitedStorage", "identity", "identity.email", "contentSettings", "privacy", "cookies", "bookmarks", "notifications","topSites", "history"],
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "1.6.1",
+   "version": "1.6.4",
    "web_accessible_resources": [
       "assets/*"
    ]

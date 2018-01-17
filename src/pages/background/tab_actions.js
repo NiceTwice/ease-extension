@@ -1,10 +1,20 @@
 import "../../shared/browser";
 import Tabs from "../../shared/tabs_api";
 import Cookies from "../../shared/cookies_api";
+import {asyncWait, reflect} from "../../shared/utils";
 
 const actions = {
-  waitfor: ({tabId, frameId}, {search}) => {
-    return Tabs.sendMessage(tabId, {type: 'waitfor', data: {selector: search}}, {frameId});
+  waitfor: async ({tabId, frameId}, {search}) => {
+    let lastResponse;
+    for (let i = 0; i < 50; i++){
+      lastResponse = await reflect(Tabs.sendMessage(tabId, {type: 'search', data: {selector: search}}, {frameId}));
+      if (!lastResponse.error)
+        return lastResponse.data;
+      await asyncWait(200);
+    }
+    if (lastResponse.error)
+      throw lastResponse.data;
+    return lastResponse.data;
   },
   fill: ({tabId, frameId}, {search, what}, values) => {
     return Tabs.sendMessage(tabId, {type: 'fill', data: {selector: search, value: values[what]}}, {frameId});
@@ -14,6 +24,9 @@ const actions = {
   },
   click: ({tabId, frameId}, {search}) => {
     return Tabs.sendMessage(tabId, {type: 'click', data: {selector: search}}, {frameId});
+  },
+  submit: ({tabId, frameId}, {search}) => {
+    return Tabs.sendMessage(tabId, {type: 'submit', data: {selector: search}}, {frameId});
   },
   clickona: ({tabId, frameId}, {search}) => {
     return Tabs.sendMessage(tabId, {type: 'click', data: {selector: search}}, {frameId});
@@ -36,7 +49,6 @@ const actions = {
   },
   aclick: async ({tabId, frameId}, {search}) => {
     await Tabs.sendMessage(tabId, {type: 'aclick', data: {selector: search}}, {frameId});
-
     return await Tabs.waitLoading(tabId);
   },
   erasecookies: async ({tabId, frameId}, {name}) => {
