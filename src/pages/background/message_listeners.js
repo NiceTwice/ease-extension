@@ -117,7 +117,10 @@ const connectGoogle = async({websiteData, active_tab, current_tab}) => {
 
   console.log('google connection');
   let tab = current_tab;
-  const url = `https://accounts.google.com/AddSession?continue=${websiteData.website.home}&service=writely`;
+  let redirect_url = websiteData.website.home;
+  if (websiteData.website.website_name === 'Youtube')
+    redirect_url += '/signin?action_handle_signin=true';
+  const url = `https://accounts.google.com/AddSession?continue=${redirect_url}`;
   if (!tab)
     tab = await Tabs.create({url: url, active: active_tab});
   else
@@ -139,6 +142,67 @@ const connectGoogle = async({websiteData, active_tab, current_tab}) => {
   return tab;
 };
 
+const getTabCookies = async ({tabId, login}) => {
+  const tab = await Tabs.get(tabId);
+  const hostname = getUrl(tab.url).hostname;
+
+  const cookies = await Cookies.getAll({
+    url: tab.url
+  });
+  const storage = await Storage.local.get(null);
+
+  if (!storage.cookies[hostname])
+    storage.cookies[hostname] = {};
+  storage.cookies[hostname][login] = cookies;
+  await Storage.local.set(storage);
+  console.log('cookies', cookies);
+};
+
+const setHostnameCookies = async ({hostname, url, login}) => {
+  const storage = await Storage.local.get(null);
+
+  console.log('settings cookies');
+  if (!!storage.cookies[hostname] && !!storage.cookies[hostname][login]){
+    console.log('cookies exists');
+    const cookies = storage.cookies[hostname][login];
+    console.log('cookies are:', cookies);
+    const calls = cookies.map(item => {
+      const cookie = {
+        url: url,
+        domain: item.domain,
+        httpOnly: item.httpOnly,
+        name: item.name,
+        path: item.path,
+        sameSite: item.sameSite,
+        secure: item.secure,
+        storeId: item.storeId,
+        value: item.value,
+        expirationDate: item.expirationDate
+      };
+      console.log('setting cookie', cookie);
+      return Cookies.set(cookie);
+    });
+    console.log('setting cookies');
+    await Promise.all(calls);
+    console.log('cookies set');
+  }
+};
+
+const removeHostnameCookies = async ({url}) => {
+  const cookies = await Cookies.getAll({
+    url: url
+  });
+  const calls = cookies.map(item => {
+    return Cookies.remove({
+      url: url,
+      name: item.name
+    });
+  });
+  console.log('removing cookies', cookies);
+  await Promise.all(calls);
+  console.log('cookies removed');
+};
+
 const connectSimpleAccount = async ({websiteData, active_tab, current_tab}) => {
   if (websiteData.website.sso === 'Google')
     return connectGoogle({
@@ -151,6 +215,14 @@ const connectSimpleAccount = async ({websiteData, active_tab, current_tab}) => {
 
   let checkAlreadyLogged;
   let tab = current_tab;
+/*  await removeHostnameCookies({
+    url: websiteData.website.loginUrl
+  });
+  await setHostnameCookies({
+    hostname: hostname,
+    url: websiteData.website.loginUrl,
+    login: websiteData.user.login
+  });*/
   if (!tab)
     tab = await Tabs.create({url: websiteData.website.home, active: active_tab});
   else
@@ -231,7 +303,6 @@ const connectLogWithAccount = async ({details, active_tab, current_tab}) => {
     tabId: tab.id,
     websiteName: logwith.website_name
   }));
-  console.log('lala');
   if (!isPrimaryAccountConnected)
     tab = await TabActions['goto']({tabId: tab.id}, {url: logwith.website.home});
   console.log('apres goto');
@@ -348,8 +419,7 @@ const disconnect_account = async ({website, hostname}) => {
 const actions = {
   website_connection: async (data, sendResponse) => {
     await Privacy.passwordSaving.set(false);
-    const resp = await Privacy.autofill.set(false);
-    console.log('autofill resp', resp);
+    await Privacy.autofill.set(false);
     const details = checkForVariableHomeSubdomains(data.detail);
     let connectionResponse = null;
     console.log('start website connection', data);
@@ -374,13 +444,15 @@ const actions = {
       }));
       let tab = connectionResponse.data;
       await Tabs.waitLoading(tab.id);
+/*      await getTabCookies({
+        tabId: tab.id,
+        login: details[0].user.login
+      });*/
     }
-    /*    setTimeout(() => {
-          Privacy.passwordSaving.set(true);
-          Privacy.autofill.set(true);
-        }, 5000);*/
-    await Privacy.passwordSaving.set(true);
-    await Privacy.autofill.set(true);
+    setTimeout(() => {
+      Privacy.passwordSaving.set(true);
+      Privacy.autofill.set(true);
+    }, 2000);
     sendResponse(MessageResponse(false, 'connection finished'));
   },
   generalLogout: async (data, sendResponse) => {
@@ -410,8 +482,8 @@ const actions = {
   },
   formSubmission: async (data, sendResponse) => {
     const {account, websiteName} = data;
-    //console.log('form submission detected !');
-    //console.log('account:', account, 'website:', websiteName);
+    console.log('update detected !');
+    console.log('account:', account, 'website:', websiteName);
     sendResponse(MessageResponse(false, 'form received'));
   },
   setAccountDisconnected: async (data, sendResponse) => {
@@ -482,6 +554,7 @@ const actions = {
     console.log('values are:', data);
     await Privacy.passwordSaving.set(false);
     await Privacy.autofill.set(false);
+    await asyncWait(100);
     let tab = await Tabs.create({
       url: 'https://accounts.google.com/Logout',
       active: false
@@ -494,8 +567,10 @@ const actions = {
     store.dispatch(deleteScrapingChromeOverlay({
       tabId: tab.id
     }));
-    await Privacy.passwordSaving.set(true);
-    await Privacy.autofill.set(true);
+    setTimeout(() => {
+      Privacy.passwordSaving.set(true);
+      Privacy.autofill.set(true);
+    }, 2000);
     console.log('scrapping result:', response);
     if (response.error && response.data.indexOf('Wrong') === -1)
       response.data = 'It seems you closed the tab. Please try again';

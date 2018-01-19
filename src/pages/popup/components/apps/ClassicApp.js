@@ -29,7 +29,7 @@ class ClassicApp extends Component {
 
     return (
       <List.Item class="display_flex align_items_center app classic">
-        <span class="full_flex overflow-ellipsis">{app.account_information.login}</span>
+        <span class="full_flex overflow-ellipsis">{app.account_information.login} {(!!app.website.sso_id || app.website.name.indexOf('Google') !== -1) ? `(${app.name})` : null}</span>
         <Button
             onClick={this.connect}
             loading={this.state.connecting}

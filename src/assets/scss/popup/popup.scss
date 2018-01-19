@@ -20,6 +20,8 @@ input {
   @include display-flex();
   @include flex-direction(column);
   font-family: $defaultFont;
+  border-radius: 2px;
+  overflow: hidden;
 }
 
 #login_view {

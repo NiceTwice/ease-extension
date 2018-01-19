@@ -4,7 +4,7 @@ import {render} from "react-dom";
 import {Provider} from "react-redux";
 import {Store} from "react-chrome-redux";
 import App from "./components/App";
-import "../../assets/fonts/fontawesome/css/fontawesome-all.min.css";
+import "../../assets/fonts/fontawesome/css/font-awesome.min.css";
 
 if (window.top === window) {
   const anchor = document.createElement('div');

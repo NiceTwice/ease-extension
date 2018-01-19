@@ -2,6 +2,26 @@ import React, {Component, Fragment} from "react";
 import $ from "jquery";
 import Runtime from "../../../shared/runtime_api";
 
+const getVisibleInputs = ({form}) => {
+  const inputs = form.getElementsByTagName('input');
+  let ret = [];
+
+  for (let i = 0; i < inputs.length; i++){
+    const input = inputs[i];
+    if ($(input).is(':visible') && input.type !== 'checkbox')
+      ret.push(input);
+  }
+  return ret;
+};
+
+const getLastPasswordInputIndex = (inputs) => {
+  for (let i = 0; i < inputs.length; i++){
+    if (inputs[i].type === 'password')
+      return i;
+  }
+  return -1;
+};
+
 class FormSubmissionListener extends Component {
   constructor(props){
     super(props);
@@ -9,23 +29,16 @@ class FormSubmissionListener extends Component {
   componentDidMount(){
     console.log('mounted');
     $(document).on('submit', 'form', (e) => {
-      let form = $(this);
       let account = {};
-      let visibleFields = 0;
-      console.log(form[0]);
-      let fields = e.target.getElementsByTagName('input');
-      console.log('fields', fields);
-      for (let i = 0; i < fields.length; i++){
-        const input = fields[i];
-        if ($(input).is(':visible') && input.type !== 'checkbox' && input.type !== 'submit'){
-          visibleFields++;
-          if (input.type === 'password')
-            account.password = input.value;
-          else if (input.type !== 'password')
-            account.login = input.value;
-        }
-      }
-      if (visibleFields !== 2 || !account.login || !account.password)
+      let inputs = getVisibleInputs({
+        form: e.target
+      });
+      let pwdIndex = getLastPasswordInputIndex(inputs);
+      if (inputs.length < 2 || pwdIndex < 1)
+        return;
+      account.password = inputs[pwdIndex].value;
+      account.login = inputs[pwdIndex - 1].value;
+      if (!account.password || !account.login)
         return;
       Runtime.sendMessage(null, {type: 'formSubmission', data: {account: account, websiteName: document.location.hostname}}, null);
     });

@@ -18,8 +18,10 @@ const cookies = {
   set: (details) => {
     return new Promise((resolve, reject) => {
       browser.cookies.set(details, (cookie) => {
-        if (!cookie)
+        if (!cookie) {
           reject(browser.runtime.lastError.message);
+          return;
+        }
         resolve(cookie);
       });
     });

@@ -13,6 +13,7 @@ class ConnectionOverlay extends Component {
   render(){
     const {connectionOverlay, tabId} = this.props;
     const tabConnectionOverlay = !!connectionOverlay ? connectionOverlay[tabId] : null;
+//    const tabConnectionOverlay = {};
     if (!tabConnectionOverlay)
       return null;
     return (

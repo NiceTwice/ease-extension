@@ -16,7 +16,8 @@ const actions = {
       throw lastResponse.data;
     return lastResponse.data;
   },
-  fill: ({tabId, frameId}, {search, what}, values) => {
+  fill: async ({tabId, frameId}, {search, what}, values) => {
+    await asyncWait(50);
     return Tabs.sendMessage(tabId, {type: 'fill', data: {selector: search, value: values[what]}}, {frameId});
   },
   val: ({tabId, frameId}, {search, what}, values) => {
