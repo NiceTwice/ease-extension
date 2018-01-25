@@ -213,14 +213,12 @@ const connectSimpleAccount = async ({websiteData, active_tab, current_tab}) => {
     account: websiteData.user,
     website: websiteData.website
   });
-  const waitResponse = await reflect(Tabs.waitLoading(tab.id));
+  await Tabs.waitLoading(tab.id);
   await saveTabCookies({
     hostname: hostname,
     url: websiteData.website.loginUrl,
     login: websiteData.user.login
   });
-  if (waitResponse.error)
-    throw 'tab wait loading error';
   pollingCookies({
     tabId: tab.id,
     url: websiteData.website.loginUrl,
@@ -363,7 +361,7 @@ const connectLogWithAccount = async ({details, active_tab, current_tab}) => {
   store.dispatch(DeleteConnectionOverlay({
     tabId: tab.id
   }));
-  await reflect(Tabs.waitReload(tab.id));
+  await Tabs.waitReload(tab.id);
   console.log('wait loading finished');
   await saveLogwithTabCookies({
     url: logwith.website.loginUrl,

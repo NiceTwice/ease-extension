@@ -19,7 +19,7 @@ class ConnectionOverlay extends Component {
     return (
         <div id="connection-modal">
           <div class="content-box">
-            <i class="fa fa-times close_button" onClick={this.deleteOverlay}/>
+            <i class="ease ease-times close_button" onClick={this.deleteOverlay}/>
             <div class="logo_handler">
               <img src={EaseLogoIcon}/>
             </div>
