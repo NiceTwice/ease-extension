@@ -1,5 +1,6 @@
 import "./shortcut";
 import "./message_listeners";
+import "./omnibox";
 import Storage from "../../shared/storage_api";
 import Tabs from "../../shared/tabs_api";
 import TabActions from "./tab_actions";

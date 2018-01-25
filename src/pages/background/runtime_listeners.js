@@ -19,3 +19,25 @@ browser.runtime.onInstalled.addListener(async (details) => {
   };
   Storage.local.set(newStorage);
 });
+
+/*chrome.webNavigation.onCompleted.addListener((details) => {
+  console.log('on completed event fired:', details);
+});*/
+
+/*chrome.cookies.onChanged.addListener((info) => {
+  console.log('cookies changed:', info);
+});*/
+
+/*chrome.webNavigation.onBeforeNavigate.addListener(details => {
+  console.log('before navigation event', details);
+});*/
+
+/*chrome.tabs.onUpdated.addListener((tabid, info, tab) => {
+  if (info.status === 'complete'){
+    console.log('tab load complete event');
+  }
+});*/
+
+/*chrome.webNavigation.onErrorOccurred.addListener(details => {
+  console.log('web navigation error occurred event:', details);
+});*/

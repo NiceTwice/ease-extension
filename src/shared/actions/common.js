@@ -33,3 +33,12 @@ export const getCatalogWebsites = () => {
     });
   }
 };
+
+export const updateOmniboxText = ({text}) => {
+  return {
+    type: 'UPDATE_OMNIBOX_TEXT',
+    payload: {
+      text: text
+    }
+  }
+};

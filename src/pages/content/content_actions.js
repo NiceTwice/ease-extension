@@ -41,14 +41,16 @@ const content_actions = {
       console.log(`Unable to find "${selector}"`);
       return;
     }
-    div[0].focus();
-    fire_before_fill(div[0]);
-    div[0].value = value;
-    div.val(value);
-    fire_onchange(div[0]);
-    div[0].blur();
-    sendResponse(MessageResponse(false, `"${selector}" successfully filled`));
-    console.log(`"${selector}" successfully filled`);
+    setTimeout(() => {
+      div[0].focus();
+      fire_before_fill(div[0]);
+      div[0].value = value;
+      div.val(value);
+      fire_onchange(div[0]);
+      div[0].blur();
+      sendResponse(MessageResponse(false, `"${selector}" successfully filled`));
+      console.log(`"${selector}" successfully filled`);
+    }, 300);
   },
   click: ({selector}, sendResponse) => {
     console.log(`Start clicking on "${selector}"`);

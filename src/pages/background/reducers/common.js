@@ -11,3 +11,15 @@ export const common = createReducer({
     });
   }
 });
+
+export const omnibox = createReducer({
+  text: ''
+}, {
+  ['UPDATE_OMNIBOX_TEXT'](state, action){
+    const {text} = action.payload;
+
+    return update(state, {
+      text: {$set: text}
+    })
+  }
+});

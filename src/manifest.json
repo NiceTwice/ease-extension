@@ -56,9 +56,9 @@
    "key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAliT2uy++UkJdLFwTGSrMEhes+xNfSGuGmBnwt+8xSoFx6/Pzwk/Eu7DLxOgCCAGEgDeADqAsXWOP3mzDPkuwTRsx3iK/Xw+jfTUK9ypvfpKUYD9V2/8bW9wTkokJpjAwyX2U05IraFmTmYEPPX6dZT9srwTK2xFzwn2qp4eu9tcguYtwLAWNcii7s6KWBaBaGpo9zQ0HM57gyV4bj91LwQo8AfvLb0X6WMAoVDjtLuTYJGs9B009GsAlsUaE44WKQumfb4uCAV+jVblJlPCAh3rZVT0eh5drkyJ1XIadMxM/EzFrB4zr+Z8GzNOJMhpct3ljnfX9c6sOmCMLb9fhhwIDAQAB",
    "manifest_version": 2,
    "name": "Ease",
-   "permissions": [ "tabs", "<all_urls>", "webNavigation", "storage","unlimitedStorage", "identity", "identity.email", "contentSettings", "privacy", "cookies", "bookmarks", "notifications","topSites", "history"],
+   "permissions": [ "tabs", "<all_urls>", "webNavigation", "storage","unlimitedStorage", "identity", "identity.email", "contentSettings", "privacy", "cookies"],
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "1.6.4",
+   "version": "1.6.5",
    "web_accessible_resources": [
       "assets/*"
    ]

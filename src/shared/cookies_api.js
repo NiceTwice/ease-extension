@@ -18,8 +18,12 @@ const cookies = {
   set: (details) => {
     return new Promise((resolve, reject) => {
       browser.cookies.set(details, (cookie) => {
-        if (!cookie) {
+        if (!!browser.runtime.lastError){
           reject(browser.runtime.lastError.message);
+          return;
+        }
+        if (!cookie) {
+          reject('Failed to set the cookie:', details);
           return;
         }
         resolve(cookie);
@@ -29,8 +33,14 @@ const cookies = {
   remove: (details) => {
     return new Promise((resolve, reject) => {
       browser.cookies.remove(details, (cookie_details) => {
-        if (!cookie_details)
+        if (!!browser.runtime.lastError){
           reject(browser.runtime.lastError.message);
+          return;
+        }
+        if (!cookie_details) {
+          reject('Failed to remove cookie:', details);
+          return;
+        }
         resolve(cookie_details);
       });
     });

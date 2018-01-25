@@ -30,8 +30,10 @@ const privacy = {
     set: (value) => {
       return new Promise((resolve, reject) => {
         browser.privacy.services.autofillEnabled.set({value: value}, () => {
-          if (!!browser.runtime.lastError)
+          if (!!browser.runtime.lastError) {
             reject(browser.runtime.lastError.message);
+            return;
+          }
           resolve();
         });
       });

@@ -141,6 +141,42 @@ const tabs = {
       const listenerComplete = (tabid, info, tab) => {
         if (tabid === tabId && info.status === 'complete'){
           browser.tabs.onUpdated.removeListener(listenerComplete);
+          browser.webNavigation.onErrorOccurred.removeListener(listenerError);
+          setTimeout(() => {resolve(tab)}, 100);
+        }
+      };
+      const listenerError = (details) => {
+        if (details.tabId === tabId && details.frameId === 0){
+          browser.tabs.onUpdated.removeListener(listenerComplete);
+          browser.webNavigation.onErrorOccurred.removeListener(listenerError);
+          reject(details.error);
+        }
+      };
+      browser.tabs.onUpdated.addListener(listenerComplete);
+      browser.webNavigation.onErrorOccurred.addListener(listenerError);
+      setTimeout(async () => {
+
+        const tabResult = await reflect(tabs.get(tabId));
+        if (tabResult.error){
+          browser.tabs.onUpdated.removeListener(listenerComplete);
+          browser.webNavigation.onErrorOccurred.removeListener(listenerError);
+          reject(tabResult.data);
+          return;
+        }
+        const tab = tabResult.data;
+        if (tab.status === 'complete'){
+          browser.tabs.onUpdated.removeListener(listenerComplete);
+          browser.webNavigation.onErrorOccurred.removeListener(listenerError);
+          resolve(tab);
+        }
+      }, 300);
+    });
+  },
+  waitLoadingOld: (tabId) => {
+    return new Promise(async (resolve, reject) => {
+      const listenerComplete = (tabid, info, tab) => {
+        if (tabid === tabId && info.status === 'complete'){
+          browser.tabs.onUpdated.removeListener(listenerComplete);
           browser.tabs.onRemoved.removeListener(listenerRemoved);
           setTimeout(() => {resolve(tab)}, 100);
         }
@@ -155,6 +191,7 @@ const tabs = {
       browser.tabs.onUpdated.addListener(listenerComplete);
       browser.tabs.onRemoved.addListener(listenerRemoved);
       setTimeout(async () => {
+
         const tabResult = await reflect(tabs.get(tabId));
         if (tabResult.error){
           browser.tabs.onUpdated.removeListener(listenerComplete);
@@ -169,6 +206,26 @@ const tabs = {
           resolve(tab);
         }
       }, 300);
+    });
+  },
+  waitReload: (tabId) => {
+    return new Promise(async (resolve, reject) => {
+      const listenerComplete = (tabid, info, tab) => {
+        if (tabid === tabId && info.status === 'complete'){
+          browser.tabs.onUpdated.removeListener(listenerComplete);
+          browser.webNavigation.onErrorOccurred.removeListener(listenerError);
+          setTimeout(() => {resolve(tab)}, 100);
+        }
+      };
+      const listenerError = (details) => {
+        if (details.tabId === tabId && details.frameId === 0){
+          browser.tabs.onUpdated.removeListener(listenerComplete);
+          browser.webNavigation.onErrorOccurred.removeListener(listenerError);
+          reject(details.error);
+        }
+      };
+      browser.tabs.onUpdated.addListener(listenerComplete);
+      browser.webNavigation.onErrorOccurred.addListener(listenerError);
     });
   }
 };

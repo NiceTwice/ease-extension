@@ -8,16 +8,17 @@ const actions = {
     let lastResponse;
     for (let i = 0; i < 50; i++){
       lastResponse = await reflect(Tabs.sendMessage(tabId, {type: 'search', data: {selector: search}}, {frameId}));
-      if (!lastResponse.error)
+      if (!lastResponse.error) {
+        await asyncWait(50);
         return lastResponse.data;
+      }
       await asyncWait(200);
     }
     if (lastResponse.error)
       throw lastResponse.data;
     return lastResponse.data;
   },
-  fill: async ({tabId, frameId}, {search, what}, values) => {
-    await asyncWait(50);
+  fill:  ({tabId, frameId}, {search, what}, values) => {
     return Tabs.sendMessage(tabId, {type: 'fill', data: {selector: search, value: values[what]}}, {frameId});
   },
   val: ({tabId, frameId}, {search, what}, values) => {
