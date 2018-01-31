@@ -1,7 +1,6 @@
 @import "../common/variables";
 @import "../common/mixins";
 @import "../common/common_lib";
-@import "./chromeScraping";
 
 #new_ease_extension {
   all: initial !important;
@@ -26,7 +25,7 @@
       transition: width .2s;
     }
   }
-  #connection-modal {
+  .connection_modal {
     @include display-flex();
     @include align-items(center);
     @include justify-content(center);
@@ -47,7 +46,8 @@
       background-color: white;
       box-shadow: -5px 5px 10px 0 rgba(0, 0, 0, 0.15);
       width: 35vh;
-      height: 35vh;
+      min-height: 35vh;
+      height: auto;
       padding: 5.8vh 3.5vh 4.1vh 3.5vh;
       .ease-progress-bar {
         @include flex-shrink(0);
@@ -73,7 +73,33 @@
         text-align: center;
         font-size: 2vh;
         color:$themeColor;
+        &.first_connection {
+          color: $themeGreenColor;
+        }
       }
     }
+  }
+  #chrome_scrapping_overlay {
+    color: $themeColor;
+    .content-box {
+      padding: 3.5vh;
+    }
+    .loader {
+      border: 1vh solid #f0f0f0;
+      border-top: 1vh solid #373b60;
+      border-radius: 50%;
+      width: 6vh;
+      height: 6vh;
+      animation: spinEase 1s linear infinite;
+    }
+  }
+}
+
+@keyframes spinEase {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }

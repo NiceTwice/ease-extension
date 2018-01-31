@@ -6,7 +6,7 @@ const basic_get = (url, params) => {
         return response.data;
       })
       .catch(err => {
-        throw err.response.data;
+        throw err;
       });
 };
 
@@ -25,6 +25,11 @@ const api = {
   catalog: {
     getWebsites: () => {
       return basic_get('/api/v1/catalog/GetWebsites');
+    },
+    getWebsiteConnection: ({website_id}) => {
+      return basic_get('/api/v1/catalog/GetWebsiteConnection', {
+        website_id: website_id
+      });
     }
   }
 };

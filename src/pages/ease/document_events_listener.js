@@ -11,30 +11,6 @@ document.addEventListener("NewConnection", (event) => {
   }, null);
 }, false);
 
-document.addEventListener('GetSettings', (event) => {
-  console.log('get homepage');
-  Runtime.sendMessage(null, {
-    type: 'getHomePage'
-  }, null).then(response => {
-    document.dispatchEvent(new CustomEvent("GetSettingsDone", {"detail": response}));
-  }).catch(err => {
-    document.dispatchEvent(new CustomEvent("GetSettingsDone", {"detail": false}));
-  });
-});
-
-document.addEventListener('SetHompage', (event) => {
-  Runtime.sendMessage(null, {
-    type: 'setHomePage',
-    data: event.detail
-  }, null);
-});
-
-document.addEventListener('Logout', (event) => {
-  Runtime.sendMessage(null, {
-    type: 'generalLogout'
-  }, null);
-});
-
 document.addEventListener('ScrapChrome', (event) => {
   const detail = event.detail;
   Runtime.sendMessage(null, {

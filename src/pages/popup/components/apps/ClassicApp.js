@@ -16,10 +16,10 @@ class ClassicApp extends Component {
   connect = () => {
     const {app, tab} = this.props;
     this.setState({connecting: true});
-    BackgroundMessage('connect_tab', {
+    BackgroundMessage('app_connection', {
       app_id: app.id,
-      account_information: app.account_information,
-      tab: tab
+      tab: tab,
+      website: app.website
     }).then(response => {
       this.setState({connecting: false});
     });

@@ -20,14 +20,13 @@ class LogwithApp extends Component {
     }
   }
   connect = () => {
-    const {tab, app, apps} = this.props;
-    const logwithApp = apps[app.logWithApp_id];
+    const {tab, app} = this.props;
 
     this.setState({connecting: true});
-    BackgroundMessage('connect_tab', {
+    BackgroundMessage('app_connection', {
       app_id: app.id,
-      account_information: logwithApp.account_information,
-      tab: tab
+      tab: tab,
+      website: app.website
     }).then(response => {
       this.setState({connecting: false});
     });

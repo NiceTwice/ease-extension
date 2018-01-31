@@ -24,6 +24,16 @@ export const UpdateConnectionOverlay = ({tabId, steps, currentStep}) => {
   };
 };
 
+export const SetFirstConnection = ({tabId, first_connection}) => {
+  return {
+    type: 'SET_FIRST_CONNECTION',
+    payload: {
+      tabId: tabId,
+      first_connection: first_connection
+    }
+  }
+};
+
 export const DeleteConnectionOverlay = ({tabId}) => {
   return {
     type: 'DELETE_CONNECTION_OVERLAY',

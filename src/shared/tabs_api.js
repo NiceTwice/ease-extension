@@ -141,32 +141,63 @@ const tabs = {
       const listenerComplete = (tabid, info, tab) => {
         if (tabid === tabId && info.status === 'complete'){
           browser.tabs.onUpdated.removeListener(listenerComplete);
-          browser.webNavigation.onErrorOccurred.removeListener(listenerError);
+          browser.tabs.onRemoved.removeListener(listenerRemoved);
+          browser.webNavigation.onCommitted.removeListener(listenerCommitted);
+          console.log('waitload finished validated', info);
           setTimeout(() => {resolve(tab)}, 100);
         }
       };
-      const listenerError = (details) => {
+      const listenerCommitted = (details) => {
+        if (details.tabId === tabId && details.frameId === 0) {
+          const {transitionType, transitionQualifiers} = details;
+          console.log('waitload on committed event', details);
+          if (transitionQualifiers.indexOf('forward_back') !== -1 ||
+              transitionQualifiers.indexOf('from_address_bar') !== -1 ||
+              transitionType === 'reload') {
+            browser.tabs.onUpdated.removeListener(listenerComplete);
+            browser.tabs.onRemoved.removeListener(listenerRemoved);
+            browser.webNavigation.onCommitted.removeListener(listenerCommitted);
+            console.log('waitload error, tab redirected', details);
+            reject('tab redirected');
+          }
+        }
+      };
+      const listenerRemoved = (tabid, removeInfo) => {
+        if (tabid === tabId){
+          browser.tabs.onUpdated.removeListener(listenerComplete);
+          browser.tabs.onRemoved.removeListener(listenerRemoved);
+          browser.webNavigation.onCommitted.removeListener(listenerCommitted);
+          console.log('waitload error, tab removed', removeInfo);
+          reject('tab closed');
+        }
+      };
+/*      const listenerError = (details) => {
         if (details.tabId === tabId && details.frameId === 0){
           browser.tabs.onUpdated.removeListener(listenerComplete);
+          browser.tabs.onRemoved.removeListener(listenerRemoved);
           browser.webNavigation.onErrorOccurred.removeListener(listenerError);
           reject(details.error);
         }
-      };
+      };*/
       browser.tabs.onUpdated.addListener(listenerComplete);
-      browser.webNavigation.onErrorOccurred.addListener(listenerError);
+      browser.tabs.onRemoved.addListener(listenerRemoved);
+      browser.webNavigation.onCommitted.addListener(listenerCommitted);
+//      browser.webNavigation.onErrorOccurred.addListener(listenerError);
       setTimeout(async () => {
 
         const tabResult = await reflect(tabs.get(tabId));
         if (tabResult.error){
           browser.tabs.onUpdated.removeListener(listenerComplete);
-          browser.webNavigation.onErrorOccurred.removeListener(listenerError);
+          browser.tabs.onRemoved.removeListener(listenerRemoved);
+          browser.webNavigation.onCommitted.removeListener(listenerCommitted);
           reject(tabResult.data);
           return;
         }
         const tab = tabResult.data;
         if (tab.status === 'complete'){
           browser.tabs.onUpdated.removeListener(listenerComplete);
-          browser.webNavigation.onErrorOccurred.removeListener(listenerError);
+          browser.tabs.onRemoved.removeListener(listenerRemoved);
+          browser.webNavigation.onCommitted.removeListener(listenerCommitted);
           resolve(tab);
         }
       }, 300);
@@ -213,19 +244,47 @@ const tabs = {
       const listenerComplete = (tabid, info, tab) => {
         if (tabid === tabId && info.status === 'complete'){
           browser.tabs.onUpdated.removeListener(listenerComplete);
-          browser.webNavigation.onErrorOccurred.removeListener(listenerError);
+          browser.tabs.onRemoved.removeListener(listenerRemoved);
+          browser.webNavigation.onCommitted.removeListener(listenerCommitted);
+          console.log('waitload finished validated', info);
           setTimeout(() => {resolve(tab)}, 100);
         }
       };
-      const listenerError = (details) => {
-        if (details.tabId === tabId && details.frameId === 0){
-          browser.tabs.onUpdated.removeListener(listenerComplete);
-          browser.webNavigation.onErrorOccurred.removeListener(listenerError);
-          reject(details.error);
+      const listenerCommitted = (details) => {
+        if (details.tabId === tabId && details.frameId === 0) {
+          const {transitionType, transitionQualifiers} = details;
+          console.log('waitload on committed event', details);
+          if (transitionQualifiers.indexOf('forward_back') !== -1 ||
+              transitionQualifiers.indexOf('from_address_bar') !== -1 ||
+              transitionType === 'reload') {
+            browser.tabs.onUpdated.removeListener(listenerComplete);
+            browser.tabs.onRemoved.removeListener(listenerRemoved);
+            browser.webNavigation.onCommitted.removeListener(listenerCommitted);
+            console.log('waitload error, tab redirected', details);
+            reject('tab redirected');
+          }
         }
       };
+      const listenerRemoved = (tabid, removeInfo) => {
+        if (tabid === tabId){
+          browser.tabs.onUpdated.removeListener(listenerComplete);
+          browser.tabs.onRemoved.removeListener(listenerRemoved);
+          browser.webNavigation.onCommitted.removeListener(listenerCommitted);
+          console.log('waitload error, tab removed', removeInfo);
+          reject('tab closed');
+        }
+      };
+      /*      const listenerError = (details) => {
+              if (details.tabId === tabId && details.frameId === 0){
+                browser.tabs.onUpdated.removeListener(listenerComplete);
+                browser.tabs.onRemoved.removeListener(listenerRemoved);
+                browser.webNavigation.onErrorOccurred.removeListener(listenerError);
+                reject(details.error);
+              }
+            };*/
       browser.tabs.onUpdated.addListener(listenerComplete);
-      browser.webNavigation.onErrorOccurred.addListener(listenerError);
+      browser.tabs.onRemoved.addListener(listenerRemoved);
+      browser.webNavigation.onCommitted.addListener(listenerCommitted);
     });
   }
 };

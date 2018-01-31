@@ -33,7 +33,7 @@
       "all_frames": true,
       "js": [ "pages/content.js"],
       "matches": [ "<all_urls>"],
-      "exclude_matches": ["*://*.ease.space/*", "*://localhost/*", "*://192.168.0.20/*"]
+      "exclude_matches": ["*://*.ease.space/*", "*://localhost/*", "*://192.168.0.20/*", "*://192.168.0.19/*", "*://192.168.0.18/*"]
    }, {
       "css": ["assets/css/content.css", "assets/css/loading.css", "assets/fonts/museo-font.css"],
       "matches": [ "<all_urls>"],
@@ -44,10 +44,10 @@
       "matches": ["*://*.facebook.com/*"]
    }, {
       "js": ["pages/ease.js"],
-      "matches": ["*://*.ease.space/*", "*://localhost/*", "*://192.168.0.20/*"]
+      "matches": ["*://*.ease.space/*", "*://localhost/*", "*://192.168.0.20/*","*://192.168.0.19/*", "*://192.168.0.18/*"]
    }],
    "externally_connectable": {
-      "matches": ["*://*.ease.space/*", "https://localhost:8443/*", "*://localhost/*"]
+      "matches": ["*://*.ease.space/*", "https://localhost:8443/*", "*://localhost/*", "*://192.168.0.20/*", "*://192.168.0.19/*", "*://192.168.0.18/*"]
    },
    "description": "Ease extension, log you in and out",
    "icons": {

@@ -59,10 +59,10 @@ chrome.omnibox.onInputEntered.addListener((text, disposition) => {
     active: true
   }).then(tabs => {
       const tab = tabs[0];
-      actions.connect_tab({
+      actions.app_connection({
         app_id: app.id,
-        account_information: app.account_information,
-        tab: tab
+        tab:tab,
+        website: app.website
       }, () => (false));
   });
 });

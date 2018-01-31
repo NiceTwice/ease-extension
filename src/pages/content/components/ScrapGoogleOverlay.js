@@ -12,21 +12,23 @@ class ScrapGoogleOverlay extends Component {
     if (!scrapOverlay)
       return null;
     return (
-        <div id="ease_overlay_scrap" class="overlayScrap">
-          <div class="containerScrap">
-            <img src="chrome-extension://hnacegpfmpknpdjmhdmpkmedplfcmdmp/assets/images/scraping/logo.png" class="logoEase"/>
-            <div class="titleContainer">
-              <p class="title">Importing accounts saved in</p>
+        <div class="connection_modal" id="chrome_scrapping_overlay">
+          <div class="content-box">
+            <div style={{width: '100%'}} class="display_flex align_items_center">
+              <img style={{height: '5vh', marginRight: '1.5vh'}} src={browser.runtime.getURL('/assets/images/scraping/chrome.png')}/>
+              <strong style={{fontSize:'2.9vh'}}>
+                Google Chrome<br/>is being imported
+              </strong>
             </div>
-            <div class="websiteContainer">
-              <img src="chrome-extension://hnacegpfmpknpdjmhdmpkmedplfcmdmp/assets/images/scraping/chrome.png"/>
-              <span>Google Chrome</span>
+            <strong
+                class="text-center"
+                style={{fontSize:'2.3vh', marginTop: '5vh'}}>Stay on this tab until it closes!<br/>(about 45sec)</strong>
+            <div style={{margin:'5vh 0 5vh 0'}}>
+              <div class="loader"/>
             </div>
-            <div class="loader"/>
-            <div class="infoContainer">
-              <p>You’ll select the ones you want to</p>
-              <p>keep right after this.</p>
-            </div>
+            <span
+                class="text-center"
+                style={{fontSize: '2.1vh'}}>You'll select the accounts you want to keep right after this step</span>
           </div>
         </div>
     )

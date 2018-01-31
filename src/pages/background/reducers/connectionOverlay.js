@@ -21,6 +21,17 @@ export const connectionOverlay = createReducer({
       }
     });
   },
+  ['SET_FIRST_CONNECTION'](state, action){
+    const {first_connection, tabId} = action.payload;
+
+    if (!state[tabId])
+      return state;
+    return update(state, {
+      [tabId]: {
+        first_connection: {$set: first_connection}
+      }
+    });
+  },
   ['DELETE_CONNECTION_OVERLAY'](state, action){
     const {tabId} = action.payload;
 

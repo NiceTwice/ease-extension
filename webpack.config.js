@@ -84,11 +84,6 @@ config = {
             to: path.resolve('dist/pages')
           }
         ]
-    ),
-    ...generateHtmlPlugins(
-        [
-          'background'
-        ]
     )
   ]
 };

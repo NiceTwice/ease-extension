@@ -11,7 +11,7 @@ import store from "./store";
 import get_api from "../../shared/ease_get_api";
 import {getUserInformation} from "../../shared/actions/user";
 import {getProfiles} from "../../shared/actions/dashboard";
-import {InitialiseConnectionOverlay, UpdateConnectionOverlay, DeleteConnectionOverlay} from "../../shared/actions/connectionOverlay";
+import {InitialiseConnectionOverlay, UpdateConnectionOverlay, DeleteConnectionOverlay, SetFirstConnection} from "../../shared/actions/connectionOverlay";
 import {setCurrentTab, getCatalogWebsites} from "../../shared/actions/common";
 import {scrapChrome, google_connection_steps} from "./google";
 import {deleteScrapingChromeOverlay, showScrapingChromeOverlay} from "../../shared/actions/scraping";
@@ -113,8 +113,9 @@ const connection = {
   accounts: [{}]
 };
 
-const connectGoogle = async({websiteData, active_tab, current_tab}) => {
+const connectGoogle = async({websiteData, current_tab}) => {
   const websiteName = !!websiteData.website.sso ? websiteData.website.sso : websiteData.website_name;
+  const hostname = getUrl(websiteData.website.loginUrl).hostname;
 
   console.log('google connection');
   let tab = current_tab;
@@ -122,10 +123,7 @@ const connectGoogle = async({websiteData, active_tab, current_tab}) => {
   if (websiteData.website.website_name === 'Youtube')
     redirect_url += '/signin?action_handle_signin=true';
   const url = `https://accounts.google.com/AddSession?continue=${redirect_url}`;
-  if (!tab)
-    tab = await Tabs.create({url: url, active: active_tab});
-  else
-    tab = await TabActions.goto({tabId: tab.id}, {url: url});
+  tab = await TabActions.goto({tabId: tab.id}, {url: url});
   store.dispatch(InitialiseConnectionOverlay({
     tabId: tab.id,
     websiteName: websiteName
@@ -139,15 +137,19 @@ const connectGoogle = async({websiteData, active_tab, current_tab}) => {
     }));
     throw e;
   }
+  await setSimpleAccountConnected({
+    websiteName: hostname,
+    account: websiteData.user,
+    website: websiteData.website
+  });
   console.log('connection worked');
   return tab;
 };
 
-const connectSimpleAccount = async ({websiteData, active_tab, current_tab}) => {
+const connectSimpleAccount = async ({websiteData, current_tab}) => {
   if (websiteData.website.sso === 'Google')
     return connectGoogle({
       websiteData: websiteData,
-      active_tab: active_tab,
       current_tab: current_tab
     });
   let count = 0;
@@ -170,10 +172,7 @@ const connectSimpleAccount = async ({websiteData, active_tab, current_tab}) => {
     url: websiteData.website.loginUrl,
     login: websiteData.user.login
   });
-  if (!tab)
-    tab = await Tabs.create({url: websiteData.website.home, active: active_tab});
-  else
-    tab = await TabActions.goto({tabId: tab.id}, {url: websiteData.website.home});
+  tab = await TabActions.goto({tabId: tab.id}, {url: websiteData.website.home});
   store.dispatch(InitialiseConnectionOverlay({
     tabId: tab.id,
     websiteName: websiteName
@@ -206,19 +205,33 @@ const connectSimpleAccount = async ({websiteData, active_tab, current_tab}) => {
       }
     }*/
   console.log('connection');
-  await execActionList(tab.id, websiteData.website.connect.todo, websiteData.user);
+  try {
+    store.dispatch(SetFirstConnection({
+      tabId: tab.id,
+      first_connection: true
+    }));
+    await execActionList(tab.id, websiteData.website.connect.todo, websiteData.user);
+    console.log('wait loading');
+    await Tabs.waitLoading(tab.id);
+    console.log('wait loading finished');
+  } catch (e){
+    store.dispatch(DeleteConnectionOverlay({
+      tabId: tab.id
+    }));
+    throw e;
+  }
   console.log('connection worked');
   await setSimpleAccountConnected({
     websiteName: hostname,
     account: websiteData.user,
     website: websiteData.website
   });
-  await Tabs.waitLoading(tab.id);
   await saveTabCookies({
     hostname: hostname,
     url: websiteData.website.loginUrl,
     login: websiteData.user.login
   });
+  console.log('save tab cookies finished');
   pollingCookies({
     tabId: tab.id,
     url: websiteData.website.loginUrl,
@@ -244,7 +257,7 @@ const pollingCookies = ({tabId, url, hostname, login}) => {
       browser.webNavigation.onBeforeNavigate.removeListener(navigationListener);
       browser.tabs.onRemoved.removeListener(tabRemovedListener);
     }
-  }, 500);
+  }, 300);
   const navigationListener = (details) => {
     if (details.tabId === tabId && details.frameId === 0){
       console.log('stop polling cookies');
@@ -265,7 +278,7 @@ const pollingCookies = ({tabId, url, hostname, login}) => {
   browser.webNavigation.onBeforeNavigate.addListener(navigationListener);
 };
 
-const connectLogWithAccount = async ({details, active_tab, current_tab}) => {
+const connectLogWithAccount = async ({details, current_tab}) => {
   console.log('start logwith connect');
   const logwith = details[1];
   const primaryAccount = details[0];
@@ -298,10 +311,7 @@ const connectLogWithAccount = async ({details, active_tab, current_tab}) => {
   });
   console.log('finish setting cookies');
   console.log('finish setting overlay');
-  if (!tab)
-    tab = await Tabs.create({url: logwith.website.home});
-  else
-    tab = await TabActions.goto({tabId: tab.id}, {url: logwith.website.home});
+  tab = await TabActions.goto({tabId: tab.id}, {url: logwith.website.home});
   store.dispatch(InitialiseConnectionOverlay({
     tabId: tab.id,
     websiteName: logwith.website_name
@@ -324,6 +334,10 @@ const connectLogWithAccount = async ({details, active_tab, current_tab}) => {
   }
   else if (isPrimaryAccountConnected){
     try {
+      store.dispatch(SetFirstConnection({
+        tabId: tab.id,
+        first_connection: true
+      }));
       await execActionList(tab.id, logwith.website[logwith.logWith].todo);
     } catch (e) {
       store.dispatch(DeleteConnectionOverlay({
@@ -334,11 +348,15 @@ const connectLogWithAccount = async ({details, active_tab, current_tab}) => {
   }
   else if (!isPrimaryAccountConnected){
     console.log('account not connected');
-    tab = await connectSimpleAccount({websiteData: details[0], active_tab: active_tab, current_tab: tab});
+    tab = await connectSimpleAccount({websiteData: details[0], current_tab: tab});
     console.log('account connction finished');
     tab = await TabActions['goto']({tabId: tab.id}, {url: logwith.website.home});
     console.log('goto finished');
     try {
+      store.dispatch(SetFirstConnection({
+        tabId: tab.id,
+        first_connection: true
+      }));
       await execActionList(tab.id, logwith.website[logwith.logWith].todo);
       console.log('exec action for connection finished');
     } catch (e) {
@@ -383,57 +401,67 @@ const checkForVariableHomeSubdomains = (details) => {
   });
 };
 
-const test_connection = async ({websiteData}) => {
+const test_connection = async ({websiteData, current_tab}) => {
   const websiteName = !!websiteData.website.sso ? websiteData.website.sso : websiteData.website_name;
   const hostname = getUrl(websiteData.website.home).hostname;
 
   if (websiteData.website.sso === 'Google')
     return connectGoogle({
-      websiteData: websiteData
+      websiteData: websiteData,
+      current_tab: current_tab
     });
-  let checkAlreadyLogged;
-  let tab = await Tabs.create({url: websiteData.website.home});
+//  let checkAlreadyLogged;
+  let tab = current_tab;
+  await removeHostnameCookies({
+    url: websiteData.website.loginUrl
+  });
+  tab = await TabActions.goto({tabId: tab.id}, {url: websiteData.website.home});
   store.dispatch(InitialiseConnectionOverlay({
     tabId: tab.id,
     websiteName: websiteName
   }));
-  console.log('checkAlreadyLogged');
-  const checkLogged = await reflect(execActionList(tab.id, websiteData.website.checkAlreadyLogged, websiteData.user));
-  checkAlreadyLogged = !checkLogged.error;
-  if (checkAlreadyLogged) {
-    console.log('deconnection');
-    try {
-      await execActionList(tab.id, websiteData.website.logout.todo, websiteData.user);
-      tab = await TabActions.goto({tabId: tab.id}, {url: websiteData.website.home});
-    } catch (e) {
-      store.dispatch(DeleteConnectionOverlay({
-        tabId: tab.id
-      }));
-      throw e;
-    }
-  }
+  /*  console.log('checkAlreadyLogged');
+      const checkLogged = await reflect(execActionList(tab.id, websiteData.website.checkAlreadyLogged, websiteData.user));
+    checkAlreadyLogged = !checkLogged.error;
+    if (checkAlreadyLogged) {
+      console.log('deconnection');
+      try {
+        await execActionList(tab.id, websiteData.website.logout.todo, websiteData.user);
+        tab = await TabActions.goto({tabId: tab.id}, {url: websiteData.website.home});
+      } catch (e) {
+        store.dispatch(DeleteConnectionOverlay({
+          tabId: tab.id
+        }));
+        throw e;
+      }
+    }*/
   console.log('connection');
   try {
     await execActionList(tab.id, websiteData.website.connect.todo, websiteData.user);
+    await Tabs.waitLoading(tab.id);
   } catch (e){
     store.dispatch(DeleteConnectionOverlay({
       tabId: tab.id
     }));
     throw e;
   }
+  await saveTabCookies({
+    hostname: hostname,
+    url: websiteData.website.loginUrl,
+    login: websiteData.user.login
+  });
   console.log('connection worked');
-  await setSimpleAccountConnected({websiteName: hostname, account: websiteData.user, website: websiteData.website});
+  await setSimpleAccountConnected({
+    websiteName: hostname,
+    account: websiteData.user,
+    website: websiteData.website});
   return tab;
 };
 
 const disconnect_account = async ({website, hostname}) => {
-  const tab = await Tabs.create({
-    url: website.home,
-    active: false
+  await removeHostnameCookies({
+    url: website.loginUrl
   });
-  const checkLogged = await reflect(execActionList(tab.id, website.checkAlreadyLogged, null, true));
-  if (!checkLogged.error)
-    await execActionList(tab.id, website.logout.todo, null, true);
   await setAccountDisconnected({
     websiteName: hostname
   });
@@ -442,7 +470,7 @@ const disconnect_account = async ({website, hostname}) => {
 let current_connections = [];
 
 export const actions = {
-  website_connection: async (data, sendResponse) => {
+  /**  website_connection: async (data, sendResponse) => {
     await Promise.all([
       Privacy.passwordSaving.set(false),
       Privacy.autofill.set(false)
@@ -484,11 +512,108 @@ export const actions = {
         Privacy.autofill.set(true);
       }, 1000);
     sendResponse(MessageResponse(false, 'connection finished'));
+  },*/
+  app_connection: async (data, sendResponse) => {
+    const {app_id, active_tab, website} = data;
+    console.log('app connection !');
+    if (!website.sso_id && !!current_connections.find(item => (website.name === item))){
+      sendResponse(MessageResponse(true, 'there is already pending connection on this website'));
+      return;
+    }
+    current_connections.push(website.name);
+    let tab;
+    if (!!data.tab)
+      tab = data.tab;
+    else
+      tab = await Tabs.create({
+        url: 'chrome-extension://hnacegpfmpknpdjmhdmpkmedplfcmdmp/pages/connection_transition.html',
+        active: active_tab
+      });
+    console.log('tab creation');
+    await Promise.all([
+      Privacy.passwordSaving.set(false),
+      Privacy.autofill.set(false)
+    ]);
+    const connection_info = await get_api.getAppConnectionInformation({
+      app_id: app_id
+    });
+    let json = {};
+    json.tab = tab;
+    json.detail = connection_info.map(item => {
+      if (!!item.user)
+        Object.keys(item.user).map(id => {
+          item.user[id] = decipher(item.user[id]);
+        });
+      return item;
+    });
+    const details = checkForVariableHomeSubdomains(json.detail);
+    console.log('current connections before', current_connections);
+    console.log('current connections after', current_connections);
+    let connectionResponse = null;
+    console.log('start website connection', data);
+    if (details.length > 1)
+      connectionResponse = await reflect(connectLogWithAccount({
+        details: details,
+        active_tab: json.highlight,
+        current_tab: json.tab}));
+    else
+      connectionResponse = await reflect(connectSimpleAccount({
+        websiteData: details[0],
+        active_tab: json.highlight,
+        current_tab: json.tab}));
+    console.log('connection finished', connectionResponse);
+    current_connections.splice(current_connections.indexOf(website.name), 1);
+    if (!connectionResponse.error){
+      store.dispatch(DeleteConnectionOverlay({
+        tabId: connectionResponse.data.id
+      }));
+    }
+    if (!current_connections.length)
+      setTimeout(() => {
+        Privacy.passwordSaving.set(true);
+        Privacy.autofill.set(true);
+      }, 1000);
+    sendResponse(MessageResponse(false, 'connection finished'));
+  },
+  test_website_connection: async (data, sendResponse) => {
+    const {website_id, account_information} = data;
+    const tab = await Tabs.create({
+      url: 'chrome-extension://hnacegpfmpknpdjmhdmpkmedplfcmdmp/pages/connection_transition.html'
+    });
+    await Promise.all([
+      Privacy.passwordSaving.set(false),
+      Privacy.autofill.set(false)
+    ]);
+    let connectionData = await get_api.catalog.getWebsiteConnection({
+      website_id: website_id
+    });
+    connectionData.map(item => {
+      current_connections.push(item.website.website_name)
+    });
+    connectionData[0].user = account_information;
+    connectionData = checkForVariableHomeSubdomains(connectionData);
+    const connectionResponse = await reflect(test_connection({
+      websiteData: connectionData[0],
+      current_tab: tab
+    }));
+    connectionData.map(item => {
+      current_connections.splice(current_connections.indexOf(item.website.website_name), 1);
+    });
+    if (!connectionResponse.error){
+      store.dispatch(DeleteConnectionOverlay({
+        tabId: connectionResponse.data.id
+      }));
+    }
+    if (!current_connections.length)
+      setTimeout(() => {
+        Privacy.passwordSaving.set(true);
+        Privacy.autofill.set(true);
+      }, 1000);
+    sendResponse(MessageResponse(false, 'connection finished'));
   },
   generalLogout: async (data, sendResponse) => {
     const storage = await Storage.local.get(null);
     const accounts = storage.connectedAccounts;
-
     const calls = Object.keys(accounts).map(hostname => {
       return disconnect_account({
         hostname: hostname,
@@ -501,6 +626,7 @@ export const actions = {
   getHomePage: async (data, sendResponse) => {
     const store = await Storage.local.get(null);
     const homepage = store.settings.homepage;
+    console.log('homepage',homepage);
     sendResponse(MessageResponse(false, homepage));
   },
   setHomePage: async (data, sendResponse) => {
@@ -579,20 +705,21 @@ export const actions = {
     json.detail[0].user = account_information;
     actions.website_connection(json, sendResponse);
   },
-  scrapChrome: async (data, sendResponse) => {
+  scrapChrome: async (data, sendResponse, senderTab) => {
     console.log('start scrapping chrome');
+    console.log('senderTab', senderTab);
     console.log('values are:', data);
     await Privacy.passwordSaving.set(false);
     await Privacy.autofill.set(false);
     await asyncWait(100);
     let tab = await Tabs.create({
-      url: 'https://accounts.google.com/Logout',
-      active: false
+      url: 'https://accounts.google.com/AddSession?continue=https://passwords.google.com'
     });
     store.dispatch(showScrapingChromeOverlay({
       tabId: tab.id
     }));
     const response = await reflect(scrapChrome(data, tab));
+    await Tabs.update(senderTab.id, {active: true});
     await Tabs.remove(tab.id);
     store.dispatch(deleteScrapingChromeOverlay({
       tabId: tab.id
@@ -612,7 +739,7 @@ browser.runtime.onMessageExternal.addListener(
     (request, sender, sendResponse) => {
       if (!!actions[request.type]){
         console.log(request);
-        actions[request.type](request.data, sendResponse);
+        actions[request.type](request.data, sendResponse, sender.tab);
         return true;
       }
     }
@@ -622,7 +749,7 @@ browser.runtime.onMessage.addListener(
     (request, sender, sendResponse) => {
       if (!!actions[request.type]){
         console.log(request);
-        actions[request.type](request.data, sendResponse);
+        actions[request.type](request.data, sendResponse, sender.tab);
         return true;
       } else if (request.type === 'getTabId') {
         sendResponse(MessageResponse(false, sender.tab.id));

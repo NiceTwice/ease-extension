@@ -18,4 +18,5 @@ window.storage = () => {
 };
 
 //axios.defaults.baseURL = 'https://localhost:8443/';
+//axios.defaults.baseURL = 'https://192.168.0.19:8443/';
 axios.defaults.baseURL = 'https://ease.space/';

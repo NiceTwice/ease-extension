@@ -30,6 +30,10 @@ browser.runtime.onInstalled.addListener(async (details) => {
 
 /*chrome.webNavigation.onBeforeNavigate.addListener(details => {
   console.log('before navigation event', details);
+});
+
+chrome.webNavigation.onCommitted.addListener(details => {
+  console.log('on commited event fired', details);
 });*/
 
 /*chrome.tabs.onUpdated.addListener((tabid, info, tab) => {
