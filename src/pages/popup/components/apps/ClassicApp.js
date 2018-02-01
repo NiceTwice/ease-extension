@@ -13,6 +13,7 @@ class ClassicApp extends Component {
       connecting: false
     }
   }
+
   connect = () => {
     const {app, tab} = this.props;
     this.setState({connecting: true});
