@@ -260,10 +260,10 @@ const connectLogWithAccount = async ({details, current_tab}) => {
     account: primaryAccount.user
   });
   console.log('primary account connected ?', isPrimaryAccountConnected);
-  await ContentSettings.popups.set({
+  await reflect(ContentSettings.popups.set({
     primaryPattern: `${url.protocol}//${url.hostname}/*`,
     setting: "allow"
-  });
+  }));
   let tab = current_tab;
   if (isPrimaryAccountConnected)
   /*    if (!tab)
@@ -463,8 +463,8 @@ export const actions = {
       });
     console.log('tab creation');
     await Promise.all([
-      Privacy.passwordSaving.set(false),
-      Privacy.autofill.set(false)
+      reflect(Privacy.passwordSaving.set(false)),
+      reflect(Privacy.autofill.set(false))
     ]);
     const connection_info = await get_api.getAppConnectionInformation({
       app_id: app_id
@@ -502,8 +502,8 @@ export const actions = {
     }
     if (!current_connections.length)
       setTimeout(() => {
-        Privacy.passwordSaving.set(true);
-        Privacy.autofill.set(true);
+        reflect(Privacy.passwordSaving.set(true));
+        reflect(Privacy.autofill.set(true));
       }, 1000);
     sendResponse(MessageResponse(false, 'connection finished'));
   },
@@ -513,8 +513,8 @@ export const actions = {
       url: 'chrome-extension://hnacegpfmpknpdjmhdmpkmedplfcmdmp/pages/connection_transition.html'
     });
     await Promise.all([
-      Privacy.passwordSaving.set(false),
-      Privacy.autofill.set(false)
+      reflect(Privacy.passwordSaving.set(false)),
+      reflect(Privacy.autofill.set(false))
     ]);
     let connectionData = await get_api.catalog.getWebsiteConnection({
       website_id: website_id
@@ -538,8 +538,8 @@ export const actions = {
     }
     if (!current_connections.length)
       setTimeout(() => {
-        Privacy.passwordSaving.set(true);
-        Privacy.autofill.set(true);
+        reflect(Privacy.passwordSaving.set(true));
+        reflect(Privacy.autofill.set(true));
       }, 1000);
     sendResponse(MessageResponse(false, 'connection finished'));
   },
@@ -641,8 +641,8 @@ export const actions = {
     console.log('start scrapping chrome');
     console.log('senderTab', senderTab);
     console.log('values are:', data);
-    await Privacy.passwordSaving.set(false);
-    await Privacy.autofill.set(false);
+    await reflect(Privacy.passwordSaving.set(false));
+    await reflect(Privacy.autofill.set(false));
     await asyncWait(100);
     let tab = await Tabs.create({
       url: 'https://accounts.google.com/AddSession?continue=https://passwords.google.com'
@@ -657,8 +657,8 @@ export const actions = {
       tabId: tab.id
     }));
     setTimeout(() => {
-      Privacy.passwordSaving.set(true);
-      Privacy.autofill.set(true);
+      reflect(Privacy.passwordSaving.set(true));
+      reflect(Privacy.autofill.set(true));
     }, 2000);
     console.log('scrapping result:', response);
     if (response.error && response.data.indexOf('Wrong') === -1)

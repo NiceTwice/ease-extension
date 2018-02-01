@@ -1,4 +1,5 @@
 {
+   "incognito": "split",
    "background": {
       "page": "pages/background.html",
       "persistent": false
