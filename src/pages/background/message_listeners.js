@@ -185,7 +185,12 @@ const connectSimpleAccount = async ({websiteData, current_tab}) => {
   if (checkAlreadyLogged) {
     console.log('deconnection');
     try {
+      store.dispatch(SetFirstConnection({
+        tabId: tab.id,
+        first_connection: true
+      }));
       await execActionList(tab.id, websiteData.website.logout.todo, websiteData.user);
+      await Tabs.waitLoading(tab.id);
       tab = await TabActions.goto({tabId: tab.id}, {url: websiteData.website.home});
     } catch (e) {
       store.dispatch(DeleteConnectionOverlay({
@@ -303,7 +308,13 @@ const connectLogWithAccount = async ({details, current_tab}) => {
   if (checkAlreadyLogged) {
     console.log('deconnection');
     try {
+      store.dispatch(SetFirstConnection({
+        tabId: tab.id,
+        first_connection: true
+      }));
       await execActionList(tab.id, logwith.website.logout.todo);
+      await Tabs.waitLoading(tab.id);
+      tab = await TabActions.goto({tabId: tab.id}, {url: logwith.website.home});
     } catch (e) {
       store.dispatch(DeleteConnectionOverlay({
         tabId: tab.id
@@ -364,6 +375,7 @@ const test_connection = async ({websiteData, current_tab}) => {
     console.log('deconnection');
     try {
       await execActionList(tab.id, websiteData.website.logout.todo, websiteData.user);
+      await Tabs.waitLoading(tab.id);
       tab = await TabActions.goto({tabId: tab.id}, {url: websiteData.website.home});
     } catch (e) {
       store.dispatch(DeleteConnectionOverlay({
