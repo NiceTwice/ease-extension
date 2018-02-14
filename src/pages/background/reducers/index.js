@@ -6,6 +6,7 @@ import * as dashboard from "./dashboard";
 import * as common from "./common";
 import * as catalog from "./catalog";
 import * as scraping from "./scraping";
+import * as backgroundUi from "./background-ui";
 
 const reducers = Object.assign(
     connectionOverlay,
@@ -13,7 +14,8 @@ const reducers = Object.assign(
     dashboard,
     common,
     catalog,
-    scraping
+    scraping,
+    backgroundUi
 );
 
 export default combineReducers({

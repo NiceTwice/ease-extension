@@ -6,7 +6,7 @@ import Privacy from "../../shared/privacy_api";
 import Cookies from "../../shared/cookies_api";
 import WebNavigation from "../../shared/webNavigation_api";
 import ContentSettings from "../../shared/contentSettings_api";
-import {reflect, MessageResponse, getUrl, asyncWait} from "../../shared/utils";
+import {reflect, extractRootDomain, extractHostname, MessageResponse, getUrl, asyncWait} from "../../shared/utils";
 import store from "./store";
 import get_api from "../../shared/ease_get_api";
 import {getUserInformation} from "../../shared/actions/user";
@@ -15,7 +15,9 @@ import {InitialiseConnectionOverlay, UpdateConnectionOverlay, DeleteConnectionOv
 import {setCurrentTab, getCatalogWebsites} from "../../shared/actions/common";
 import {scrapChrome, google_connection_steps} from "./google";
 import {deleteScrapingChromeOverlay, showScrapingChromeOverlay} from "../../shared/actions/scraping";
+import {showSavedUpdatePopup, closeSavedUpdatePopup} from "../../shared/actions/background-ui";
 import {saveLogwithTabCookies, setLogwithHostnameCookies, saveTabCookies, setHostnameCookies, removeHostnameCookies} from "./cookies_management";
+import {serverUrl} from "../../shared/strings";
 
 const execActionList = async (tabId, actions, values, noOverlay) => {
   let frameId = 0;
@@ -580,10 +582,41 @@ export const actions = {
     await Storage.local.set(store);
     sendResponse(MessageResponse(false, 'Homepage setting changed'));
   },
-  formSubmission: async (data, sendResponse) => {
-    const {account, websiteName} = data;
-    //console.log('update detected !');
-    //console.log('account:', account, 'website:', websiteName);
+  formSubmission: async (data, sendResponse, senderTab) => {
+    const {account, hostname, url, origin} = data;
+    const requestResponse = await reflect(get_api.updates.send({
+      url: url,
+      account_information: account
+    }));
+    if (requestResponse.error || !requestResponse.data.length){
+      sendResponse(MessageResponse(true, 'no updates detected'));
+      return;
+    }
+    let logo_url = null;
+    const storeState = store.getState();
+    const websites = storeState.catalog.websites;
+    const host = extractRootDomain(url);
+    const website = websites.find(item => (item.login_url.indexOf(host)));
+    if (!!website)
+      logo_url = serverUrl + website.logo;
+    if (!logo_url){
+      const clearbitLogo = await reflect(get_api.getClearbitLogo({
+        hostname: hostname
+      }));
+      if (!clearbitLogo.error)
+        logo_url = clearbitLogo.data;
+    }
+    if (!logo_url)
+      logo_url = `http://via.placeholder.com/100x100/373b60/ffffff?text=${host[0].toUpperCase()}`;
+    await reflect(Tabs.waitLoading(senderTab.id));
+    store.dispatch(showSavedUpdatePopup({
+      tabId: senderTab.id,
+      url: url,
+      logo_url: logo_url,
+      account_information: account,
+      origin: origin
+    }));
+    console.log('update detected !');
     sendResponse(MessageResponse(false, 'form received'));
   },
   setAccountDisconnected: async (data, sendResponse) => {
@@ -657,7 +690,7 @@ export const actions = {
     await reflect(Privacy.autofill.set(false));
     await asyncWait(100);
     let tab = await Tabs.create({
-      url: 'https://accounts.google.com/AddSession?continue=https://passwords.google.com'
+      url: 'https://passwords.google.com'
     });
     store.dispatch(showScrapingChromeOverlay({
       tabId: tab.id

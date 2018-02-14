@@ -10,6 +10,16 @@ const basic_get = (url, params) => {
       });
 };
 
+const basic_post = (url, params) => {
+  return axios.post(url, params)
+      .then(response => {
+        return response.data;
+      })
+      .catch(err => {
+        throw err.response.data;
+      });
+};
+
 const api = {
   getUserInformation: () => {
     return basic_get('/api/v1/common/GetMyInformation');
@@ -22,6 +32,14 @@ const api = {
       app_id: app_id
     });
   },
+  getClearbitLogo: ({hostname}) => {
+    const src = "https://logo.clearbit.com/" + hostname;
+    return axios.get(src).then(response => {
+      return src;
+    }).catch(err => {
+      throw err.response.data;
+    })
+  },
   catalog: {
     getWebsites: () => {
       return basic_get('/api/v1/catalog/GetWebsites');
@@ -29,6 +47,14 @@ const api = {
     getWebsiteConnection: ({website_id}) => {
       return basic_get('/api/v1/catalog/GetWebsiteConnection', {
         website_id: website_id
+      });
+    }
+  },
+  updates: {
+    send: ({url, account_information}) => {
+      return basic_post('/api/v1/updates', {
+        url: url,
+        account_information: account_information
       });
     }
   }

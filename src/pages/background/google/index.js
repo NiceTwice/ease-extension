@@ -120,17 +120,13 @@ export const googleExecActions = async (tabId, actions, values) => {
 
 export const scrapChrome = async (values, currentTab) => {
   let tab = currentTab;
-  tab = await TabActions.goto({
-    tabId: tab.id
-  },{
-    url: 'https://passwords.google.com'
-  });
   console.log('connection steps');
   await googleExecActions(tab.id, google_connection_steps,values);
   console.log('check logged steps');
   await asyncWait(3000);
   await Tabs.waitLoading(tab.id);
   const checkLogged = await reflect(googleExecActions(tab.id, google_checkAlreadyLogged_steps, values));
+  console.log('check logged', checkLogged);
   if (checkLogged.error)
     throw 'Wrong login or password. Please try again.';
   console.log('start scrapping...');
