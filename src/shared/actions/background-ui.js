@@ -10,11 +10,11 @@ export function showSavedUpdatePopup({tabId, url, account_information, origin, l
         logo_url: logo_url
       }
     });
-/*    setTimeout(() => {
+    setTimeout(() => {
       dispatch(closeSavedUpdatePopup({
         tabId: tabId
       }))
-    }, 5000);*/
+    }, 5000);
   }
 }
 
