@@ -9,6 +9,8 @@ import store from "./store";
 import Cookies from "../../shared/cookies_api";
 import Runtime from "../../shared/runtime_api";
 import axios from "axios";
+import {serverUrl} from "../../shared/strings";
+console.log('initializing background');
 
 window.store = store;
 window.storage = () => {
@@ -17,6 +19,4 @@ window.storage = () => {
   });
 };
 
-//axios.defaults.baseURL = 'https://localhost:8443/';
-//axios.defaults.baseURL = 'https://192.168.0.19:8443/';
-axios.defaults.baseURL = 'https://ease.space/';
+axios.defaults.baseURL = serverUrl;

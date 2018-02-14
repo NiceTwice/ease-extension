@@ -61,6 +61,7 @@
    "update_url": "https://clients2.google.com/service/update2/crx",
    "version": "1.6.6",
    "web_accessible_resources": [
-      "assets/*"
+      "assets/*",
+      "pages/*"
    ]
 }

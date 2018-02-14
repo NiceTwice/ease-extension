@@ -41,6 +41,9 @@ config = {
     ],
     ease: [
       `${PAGES_PATH}/ease`
+    ],
+    "background-ui": [
+      `${PAGES_PATH}/background-ui`
     ]
   },
   output: {

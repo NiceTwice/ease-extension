@@ -139,6 +139,8 @@ const tabs = {
   waitLoading: (tabId) => {
     return new Promise(async (resolve, reject) => {
       const listenerComplete = (tabid, info, tab) => {
+        if (tabid === tabId)
+          console.log('on updated tab event fired', info, tab);
         if (tabid === tabId && info.status === 'complete'){
           browser.tabs.onUpdated.removeListener(listenerComplete);
           browser.tabs.onRemoved.removeListener(listenerRemoved);
@@ -184,8 +186,8 @@ const tabs = {
       browser.webNavigation.onCommitted.addListener(listenerCommitted);
 //      browser.webNavigation.onErrorOccurred.addListener(listenerError);
       setTimeout(async () => {
-
         const tabResult = await reflect(tabs.get(tabId));
+        console.log('tab result wait load', tabResult);
         if (tabResult.error){
           browser.tabs.onUpdated.removeListener(listenerComplete);
           browser.tabs.onRemoved.removeListener(listenerRemoved);

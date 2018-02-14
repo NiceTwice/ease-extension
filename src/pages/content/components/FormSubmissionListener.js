@@ -40,7 +40,16 @@ class FormSubmissionListener extends Component {
       account.login = inputs[pwdIndex - 1].value;
       if (!account.password || !account.login)
         return;
-      Runtime.sendMessage(null, {type: 'formSubmission', data: {account: account, websiteName: document.location.hostname}}, null);
+      Runtime.sendMessage(null,
+          {
+            type: 'formSubmission',
+            data: {
+              account: account,
+              origin: document.location.origin,
+              hostname: document.location.hostname,
+              url: document.location.href
+            }
+          }, null);
     });
   }
   render(){
