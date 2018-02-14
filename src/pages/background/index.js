@@ -19,4 +19,8 @@ window.storage = () => {
   });
 };
 
+window.setOrigin = (url) => {
+  axios.defaults.baseURL = url;
+};
+
 axios.defaults.baseURL = serverUrl;
