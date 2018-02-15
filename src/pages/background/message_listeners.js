@@ -1,3 +1,4 @@
+import queryString from "query-string";
 import "../../shared/browser";
 import TabActions from "./tab_actions";
 import Tabs from "../../shared/tabs_api";
@@ -583,7 +584,16 @@ export const actions = {
     sendResponse(MessageResponse(false, 'Homepage setting changed'));
   },
   formSubmission: async (data, sendResponse, senderTab) => {
-    const {account, hostname, url, origin} = data;
+    let {account, hostname, url, origin} = data;
+    let isGoogle = false;
+    if (url.indexOf('google.com') !== -1){
+      isGoogle = true;
+      const query = queryString.parseUrl(url);
+      console.log('query is', query);
+      if (!!query.query.continue)
+        url = query.query.continue;
+    }
+    console.log('form submission detected', url, account);
     const requestResponse = await reflect(get_api.updates.send({
       url: url,
       account_information: account
@@ -595,19 +605,28 @@ export const actions = {
     let logo_url = null;
     const storeState = store.getState();
     const websites = storeState.catalog.websites;
-    const host = extractRootDomain(url);
-    const website = websites.find(item => (item.login_url.indexOf(host)));
-    if (!!website)
+    const host = hostname;
+    let website = null;
+    console.log('hostname is:', hostname);
+    if (!!requestResponse.data.length && requestResponse.data[0].website_id > 0)
+      website = websites.find(item => (item.id === requestResponse.data[0].website_id));
+    if (!!website) {
       logo_url = serverUrl + website.logo;
+      console.log('website found for logo image', website);
+    }
     if (!logo_url){
+      console.log('searching logo on clearbit');
       const clearbitLogo = await reflect(get_api.getClearbitLogo({
-        hostname: hostname
+        hostname: host
       }));
+      console.log('clearbit response', clearbitLogo);
       if (!clearbitLogo.error)
         logo_url = clearbitLogo.data;
     }
-    if (!logo_url)
+    if (!logo_url) {
       logo_url = `http://via.placeholder.com/100x100/373b60/ffffff?text=${host[0].toUpperCase()}`;
+      console.log('using placeholder for logo', logo_url);
+    }
     await reflect(Tabs.waitLoading(senderTab.id));
     store.dispatch(showSavedUpdatePopup({
       tabId: senderTab.id,

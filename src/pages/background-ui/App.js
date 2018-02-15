@@ -1,6 +1,7 @@
 import React, {Component, Fragment} from "react";
 import {HashRouter, Layout, Route, IndexRoute, HashHistory} from 'react-router-dom';
 import SavedUpdatePopup from "./components/SavedUpdatePopup";
+import FillInPopup from "./components/fillInPopup";
 import Tabs from "../../shared/tabs_api";
 import {connect} from "react-redux";
 
@@ -11,12 +12,13 @@ class App extends Component {
   constructor(props){
     super(props);
     this.state = {
-      tabId: -1
+      tabId: -1,
+      tab: null
     }
   }
   componentWillMount(){
     Tabs.getCurrent().then(tab => {
-      this.setState({tabId: tab.id});
+      this.setState({tabId: tab.id, tab: tab});
     });
   }
   render(){
@@ -26,6 +28,7 @@ class App extends Component {
         <HashRouter>
           <React.Fragment>
             <Route path="/savedUpdatePopup" render={(props) => <SavedUpdatePopup {...props}{...this.state}/>}/>
+            <Route path="/fillInPopup" render={(props) => <FillInPopup {...props}{...this.state}/>}/>
           </React.Fragment>
         </HashRouter>
     )

@@ -34,6 +34,7 @@ const api = {
   },
   getClearbitLogo: ({hostname}) => {
     const src = "https://logo.clearbit.com/" + hostname;
+    console.log('clearbit call', src);
     return axios.get(src).then(response => {
       return src;
     }).catch(err => {

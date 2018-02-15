@@ -2,11 +2,13 @@ import createReducer from  "./createReducer";
 
 export const user = createReducer({
   fetching: true,
+  fetched: false,
   information: null
 }, {
   ['GET_USER_INFORMATION_PENDING'](state, action){
     return {
       fetching: true,
+      fetched: false,
       information: null
     }
   },
@@ -15,12 +17,14 @@ export const user = createReducer({
 
     return {
       fetching: false,
+      fetched: true,
       information:user
     }
   },
   ['GET_USER_INFORMATION_REJECTED'](state, action){
     return {
       fetching: false,
+      fetched: true,
       information: null
     }
   }
