@@ -1,11 +1,14 @@
 import React, {Component, Fragment} from "react";
-import {Icon,Transition, Menu, List} from 'semantic-ui-react';
+import {Checkbox, Button, Input, Icon,Transition, Menu, List, Dropdown} from 'semantic-ui-react';
 import {NavLink, withRouter, Route, Switch} from "react-router-dom";
 import Cookies from "../../../../shared/cookies_api";
 import Tabs from "../../../../shared/tabs_api";
-import {extractRootDomain, resolveImageURL} from "../../../../shared/utils";
+import {handleSemanticInput,
+  extractRootDomain,
+  resolveImageURL,
+  copyTextToClipboard} from "../../../../shared/utils";
 import {connect} from "react-redux";
-
+import passwordGenerator from "generate-password";
 const isAccountLinkActive = (match, location) => {
   return location.pathname === '/fillInPopup/Accounts' || location.pathname === '/fillInPopup';
 };
@@ -34,6 +37,35 @@ class LoginView extends Component {
           Hello {this.state.username}!<br/>
           Please <a target="_blank" href="https://ease.space/#/login">login</a> <Icon fitted name="smile"/>
         </div>
+    )
+  }
+}
+
+class CopyCredentialsDropdown extends Component {
+  constructor(props){
+    super(props);
+  }
+  render(){
+    const {account_information} = this.props;
+
+    return (
+        <Dropdown icon={null} trigger={
+          <div class="actions">
+            <Icon name="ellipsis vertical" fitted/>
+          </div>
+        }>
+          <Dropdown.Menu class="left">
+            {Object.keys(account_information).map(name => {
+              const value = account_information[name];
+              return (
+                  <Dropdown.Item
+                      key={name}
+                      text={`Copy ${name}`}
+                      onClick={copyTextToClipboard.bind(null, value)}/>
+              )
+            })}
+          </Dropdown.Menu>
+        </Dropdown>
     )
   }
 }
@@ -82,19 +114,19 @@ class Accounts extends Component {
       return <div class="text-content">You can fill your connection info on this website in order to save them.</div>;
     return (
         <div>
-          <span>Select account</span>
-          <List verticalAlign="middle">
+          <span style={{fontStyle:'italic', paddingLeft: '10px',fontSize:'16px'}}>Select account</span>
+          <List verticalAlign="middle" class="app_list">
             {apps.map(app => {
               return (
-                  <List.Item key={app.id} class="display_flex flex_direction_column">
-                    <div>
-                      <img src={resolveImageURL(app.website.logo)}/>
+                  <List.Item key={app.id} class="display_flex align_items_center">
+                    <div class="logo_handler">
+                      <img class="logo" src={resolveImageURL(app.website.logo)}/>
                     </div>
-                    <div>
-                      <span>{app.login}</span>
-                      <strong>{app.account_information.login}</strong>
+                    <div class="info">
+                      <span class="overflow-ellipsis">{app.name}</span>
+                      <strong class="overflow-ellipsis">{app.account_information.login}</strong>
                     </div>
-                    <div></div>
+                    <CopyCredentialsDropdown account_information={app.account_information}/>
                   </List.Item>
               )
             })}
@@ -107,10 +139,104 @@ class Accounts extends Component {
 class PasswordGenerator extends Component {
   constructor(props){
     super(props);
+    this.state = {
+      password: '',
+      lowercases: true,
+      uppercases: true,
+      numbers: true,
+      specials: false,
+      length: 18,
+      advanced: false,
+      copied: false
+    }
   }
+  copy = () => {
+    copyTextToClipboard(this.state.password);
+    this.setState({copied: true});
+    setTimeout(() => {
+      this.setState({copied: false})
+    }, 2000);
+  };
+  refresh = () => {
+    this.setState({
+      password: passwordGenerator.generate({
+        length: this.state.length,
+        numbers:this.state.numbers,
+        symbols: this.state.specials,
+        uppercase: this.state.uppercases,
+        strict: true
+      })});
+  };
+  toggleAdvanceOptions = () => {
+    this.setState({
+      lowercases: true,
+      uppercases: true,
+      numbers: true,
+      specials: false,
+      length: 18,
+      advanced: !this.state.advanced
+    });
+  };
+  componentWillMount(){
+    this.refresh();
+  }
+  handleInput = handleSemanticInput.bind(this);
   render(){
     return (
-        <div>Generate strong password</div>
+        <div id="passwordGenerator">
+          <Input value={this.state.password}
+                 id="passwordInput"
+                 readOnly
+                 fluid
+                 action={<Button content="Fill"/>}
+                 placeholder="Your password"/>
+          <div class="display_flex controls">
+              <span onClick={this.toggleAdvanceOptions} class="full_flex display_flex align_items_center">
+                <a>Password options</a>
+                {this.state.advanced ?
+                    <Icon name="chevron down"/> :
+                    <Icon name="chevron right"/>}
+              </span>
+            <Icon name="refresh" link onClick={this.refresh}/>
+            {this.state.copied ?
+                <Icon name="check" color="green"/> :
+                <Icon name="copy" link onClick={this.copy}/>}
+          </div>
+          {this.state.advanced &&
+          <div class="advancedOptions">
+            <div class="display_flex">
+              <span class="full_flex">Number of characters:</span>
+              <span>{this.state.length}</span>
+            </div>
+            <input class="lengthInput"
+                   name="length"
+                   min="6"
+                   max="100"
+                   type="range"
+                   onChange={(e) => {this.setState({length: e.target.value})}}
+                   value={this.state.length}/>
+            <div class="display_flex flex_direction_column">
+              <div class="display_flex checkboxSet">
+                <Checkbox label="Lowercases"
+                          checked={this.state.lowercases}/>
+                <Checkbox label="Numbers"
+                          name="numbers"
+                          checked={this.state.numbers}
+                          onChange={this.handleInput}/>
+              </div>
+              <div class="display_flex checkboxSet">
+                <Checkbox label="Uppercases"
+                          name="uppercases"
+                          checked={this.state.uppercases}
+                          onChange={this.handleInput}/>
+                <Checkbox label="!@&%#?)<$"
+                          name="specials"
+                          checked={this.state.specials}
+                          onChange={this.handleInput}/>
+              </div>
+            </div>
+          </div>}
+        </div>
     )
   }
 }
@@ -129,8 +255,13 @@ class FillInPopup extends Component {
                 name="close"
                 link/>
           <Menu tabular id="fillInPopupMenu">
-            <Menu.Item as={NavLink} isActive={isAccountLinkActive} to={'/fillInPopup/Accounts'} name="My accounts"/>
-            <Menu.Item as={NavLink} to={'/fillInPopup/PasswordGenerator'} name="Generate strong password"/>
+            <Menu.Item as={NavLink}
+                       isActive={isAccountLinkActive}
+                       to={'/fillInPopup/Accounts'}
+                       name="My accounts"/>
+            <Menu.Item as={NavLink}
+                       to={'/fillInPopup/PasswordGenerator'}
+                       name="Generate strong password"/>
           </Menu>
           <div class="fillInPopupContent">
             <Switch>

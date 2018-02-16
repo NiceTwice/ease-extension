@@ -1,5 +1,4 @@
 import React, {Component, Fragment} from "react";
-import $ from "jquery";
 import Runtime from "../../../shared/runtime_api";
 
 const getVisibleInputs = ({form}) => {
@@ -65,13 +64,11 @@ const checkForm = (form) => {
   let inputs = getInputs({
     form: form
   });
-  let passwordInput = null;
-  let loginInput = null;
   let passwordInputIndex = getLastPasswordInput(inputs);
   if (passwordInputIndex < 1)
     return;
-  passwordInput = inputs[passwordInputIndex];
-  loginInput = getLoginInputFromPasswordIndex(inputs, passwordInputIndex);
+  let passwordInput = inputs[passwordInputIndex];
+  let loginInput = getLoginInputFromPasswordIndex(inputs, passwordInputIndex);
   if (!loginInput)
     return;
   account.password = passwordInput.value;
@@ -90,20 +87,37 @@ const checkForm = (form) => {
       }, null);
 };
 
+let lastSubmit = -1;
+
 class FormSubmissionListener extends Component {
   constructor(props){
     super(props);
   }
   componentDidMount(){
     console.log('mounted');
+
     $(document).on('click', '#passwordNext', (e) => {
       let button = e.target;
       let form = $(button).closest('form');
-      if (!!form.length)
+      if (!!form.length) {
         checkForm(form[0]);
+      }
     });
-    $(document).on('submit', 'form', (e) => {
-      checkForm(e.target);
+    $(document).on('submit keypress', 'form,input[type=password]', (e) => {
+      if (new Date().getTime() - lastSubmit < 100)
+        return;
+      if (e.type === 'keypress' && $(e.target).is('input[type=password]')){
+        if (e.keyCode === 13 && e.target === e.currentTarget){
+          const form = $(e.target).closest('form');
+          if (!!form.length) {
+            checkForm(form[0]);
+            lastSubmit = new Date().getTime();
+          }
+        }
+      }else if (e.type === 'submit'){
+        checkForm(e.target);
+        lastSubmit = new Date().getTime();
+      }
     });
   }
   render(){

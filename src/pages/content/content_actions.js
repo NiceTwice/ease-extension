@@ -1,4 +1,3 @@
-import $ from "jquery";
 import {MessageResponse, reflect} from "../../shared/utils";
 
 const WAIT_CHECK_INTERVAL = 100;

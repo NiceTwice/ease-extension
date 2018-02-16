@@ -1,6 +1,7 @@
 @import "../common/variables";
 @import "../common/mixins";
 @import "../common/common_lib";
+@import "../common/rangeInputStyles";
 
 #new_ease_extension {
   all: initial !important;
@@ -95,8 +96,9 @@
   }
 }
 
-.fillInPopup {
-  margin: 14px 4px 4px 4px;
+#app-root .fillInPopup {
+  display: flex !important;
+  margin: 14px 8px 9px 9px;
   background-color: $themeColor;
   position: relative;
   padding-top: 10px;
@@ -115,6 +117,7 @@
       color: white;
       border-top-right-radius: 5px;
       border-top-left-radius: 5px;
+      padding: 10px;
       &.active {
         color: $themeBlue2Color;
       }
@@ -126,6 +129,69 @@
     border-bottom-right-radius: 5px;
     border-bottom-left-radius: 5px;
     color: $themeBlue2Color;
+    overflow-y: auto;
+    overflow-x: hidden;
+    &::-webkit-scrollbar-track {
+      border-bottom-right-radius: 5px;
+    }
+    &::-webkit-scrollbar-thumb {
+      border-bottom-right-radius: 5px;
+    }
+    #passwordGenerator {
+      padding:10px;
+      & > .ui.input {
+        border-radius: 5px;
+        box-shadow: -2px 2px 10px 0 rgba(0, 0, 0, 0.2);
+        margin-bottom: 10px;
+        input {
+          color: $themeColor;
+        }
+        button {
+          background-color: $themeLightBlueColor;
+          color: white;
+          &:hover {
+            background-color: darken($themeLightBlueColor, 10%);
+          }
+        }
+      }
+      .controls {
+        font-size: 15px;
+        & > span {
+          cursor: pointer;
+        }
+        & > i {
+          margin-right: 10px;
+        }
+      }
+      .lengthInput {
+        width: 100%;
+      }
+      .advancedOptions {
+        color: $themeColor;
+        margin-top: 10px;
+        .checkboxSet {
+          margin-top: 10px;
+          .checkbox {
+            width: 50%;
+            &.checked {
+              label {
+                &:after {
+                  display: none;
+                }
+                &:before {
+                  background-color: $themeColor;
+                }
+              }
+            }
+            label {
+              &:before {
+                border-color: $themeColor;
+              }
+            }
+          }
+        }
+      }
+    }
     .text-content {
       font-weight: bold;
       padding: 10px;
@@ -133,6 +199,72 @@
     a {
       color: inherit;
       text-decoration: underline;
+    }
+    .app_list {
+      font-size: 16px;
+      margin-top: 10px;
+      & > .item {
+        height: 60px;
+        border-radius: 5px;
+        box-shadow: none;
+        padding: 0;
+        cursor: pointer;
+        &:hover {
+          box-shadow: -2px 2px 10px 0 rgba(0, 0, 0, 0.2);
+          .dropdown {
+            display: flex;
+          }
+        }
+        .logo_handler {
+          padding-left: 10px;
+          padding-right: 10px;
+          height: 40px;
+        }
+        .info {
+          @include display-flex();
+          @include flex-direction(column);
+          @include flex(1);
+          overflow: hidden;
+          & > span {
+            margin-bottom: 3px;
+          }
+        }
+        .dropdown {
+          height: 100%;
+          display: none;
+          .menu {
+            color: $themeBlue2Color;
+            right: 102% !important;
+            top: 0 !important;
+          }
+        }
+        .actions {
+          cursor: pointer;
+          @include align-items(center);
+          @include justify-content(center);
+          border-top-right-radius: 5px;
+          border-bottom-right-radius: 5px;
+          display: flex;
+          width: 30px;
+          background-color: $themeLightBlueColor;
+          height: 100%;
+          i {
+            opacity: .7;
+            color: white;
+            margin: 0;
+          }
+          &:hover {
+            i {
+              opacity: 1;
+            }
+          }
+        }
+        .logo {
+          width: 40px;
+          height: 40px;
+          border-radius: 5px;
+        }
+      }
     }
   }
   .arrow {
@@ -179,8 +311,9 @@
   .img_holder {
     margin-right: 10px;
     img {
-      width: 60px;
-      height: 60px;
+      width: 70px;
+      height: 70px;
+      box-shadow: -2px 2px 10px 0 rgba(0, 0, 0, 0.2);
       border-radius: 5px;
     }
   }
@@ -210,7 +343,7 @@
     }
     & > * {
       font-size: 12px;
-      margin-bottom: 5px;
+      margin-bottom: 2px;
       &:last-child {
         margin-bottom: 0;
       }

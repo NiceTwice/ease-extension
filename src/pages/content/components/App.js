@@ -33,9 +33,9 @@ class App extends Component {
           <ConnectionOverlay tabId={this.state.tabId}/>
           <ScrapGoogleOverlay tabId={this.state.tabId}/>
           <FormSubmissionListener tabId={this.state.tabId}/>
-          <ConnectionInputsListener tabId={this.state.tabId}/>
+          {/*<ConnectionInputsListener tabId={this.state.tabId}/>
+          <FillInPopup tabId={this.state.tabId}/>*/}
           <SavedUpdatePopup tabId={this.state.tabId}/>
-          {/*<FillInPopup tabId={this.state.tabId}/>*/}
         </Fragment>
     )
   }

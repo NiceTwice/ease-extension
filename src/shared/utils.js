@@ -14,6 +14,14 @@ export const BackgroundMessage = (type, data) => {
   }, null);
 };
 
+export function handleSemanticInput(e, {name, value, checked}){
+  if (checked !== undefined){
+    this.setState({[name]: checked});
+    return;
+  }
+  this.setState({[name]: value});
+}
+
 export const resolveImageURL = (url) => {
   if (url[0] === '/')
     return "https://ease.space" + url;

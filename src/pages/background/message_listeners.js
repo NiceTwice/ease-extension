@@ -585,9 +585,7 @@ export const actions = {
   },
   formSubmission: async (data, sendResponse, senderTab) => {
     let {account, hostname, url, origin} = data;
-    let isGoogle = false;
     if (url.indexOf('google.com') !== -1){
-      isGoogle = true;
       const query = queryString.parseUrl(url);
       console.log('query is', query);
       if (!!query.query.continue)
@@ -612,6 +610,13 @@ export const actions = {
       website = websites.find(item => (item.id === requestResponse.data[0].website_id));
     if (!!website) {
       logo_url = serverUrl + website.logo;
+      if (!!website.sso) {
+        const clearbitLogo = await reflect(get_api.getClearbitLogo({
+          hostname: extractRootDomain(url)
+        }));
+        if (!clearbitLogo.error)
+          logo_url = clearbitLogo.data;
+      }
       console.log('website found for logo image', website);
     }
     if (!logo_url){

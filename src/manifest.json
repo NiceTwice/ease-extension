@@ -32,7 +32,7 @@
    },
    "content_scripts": [ {
       "all_frames": true,
-      "js": [ "pages/content.js"],
+      "js": [ "resources/js/jquery-3.3.1.min.js","resources/js/jquery-ui.min.js", "pages/content.js"],
       "matches": [ "<all_urls>"],
       "exclude_matches": ["*://*.ease.space/*", "*://localhost/*", "*://192.168.0.20/*", "*://192.168.0.19/*", "*://192.168.0.18/*"]
    }, {
