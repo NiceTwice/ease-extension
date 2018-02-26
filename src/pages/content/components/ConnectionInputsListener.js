@@ -22,22 +22,48 @@ const connectionInputStyles = {
   cursor: 'auto'
 };
 
-function getAllFormsWithPasswords(){
-  let inputPasswords = $('input[type=password]');
+const getVisibleInputs = (form) => {
+  const inputs = form.getElementsByTagName('input');
+  let ret = [];
+
+  for (let i = 0; i < inputs.length; i++){
+    const input = inputs[i];
+    if ($(input).is(':visible') && input.type !== 'checkbox')
+      ret.push(input);
+  }
+  return ret;
+};
+
+const getPasswordInputIndex = (inputs) => {
+  for (let i = 0;i < inputs.length; i++){
+    if (inputs[i].type === 'password')
+      return i;
+  }
+  return -1;
+};
+
+
+function checkDocumentForms(){
   let forms = [];
+  let docForms = document.querySelectorAll('form');
 
-  inputPasswords.each(function(index) {
-    let obj = {
-      formEl: null,
-      passwordEl: null,
-      loginEl: null
-    };
-    let input = $(this)[0];
-    let form = input.closest('form');
-
-    if (!!form.length)
-      obj.formEl = form[0];
-  });
+  for (let form of docForms){
+    let inputs = getVisibleInputs(form);
+    let loginEl = null;
+    let passwordEl = null;
+    let passwordIndex = getPasswordInputIndex(inputs);
+    if (passwordIndex >= 0)
+      passwordEl = inputs[passwordIndex];
+    if (passwordIndex > 0){
+      loginEl = inputs[passwordIndex - 1];
+    }
+    forms.push({
+      formEl: form,
+      loginEl: loginEl,
+      passwordEl: passwordEl
+    });
+  }
+  return forms;
 }
 
 class ConnectionInputsListener extends Component {
@@ -45,9 +71,7 @@ class ConnectionInputsListener extends Component {
     super(props);
   }
   componentDidMount(){
-    let input = document.querySelector('.email-input');
-
-    let forms = document.querySelectorAll('form');
+    let forms = checkDocumentForms();
 
     console.log('connection input listener did mount');
     let inputs = document.querySelectorAll('input');
