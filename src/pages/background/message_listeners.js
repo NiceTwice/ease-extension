@@ -591,7 +591,7 @@ export const actions = {
       if (!!query.query.continue)
         url = query.query.continue;
     }
-    console.log('form submission detected', url, account);
+    console.log('form submission detected');
     const requestResponse = await reflect(get_api.updates.send({
       url: url,
       account_information: account

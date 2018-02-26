@@ -141,9 +141,8 @@ class FormSubmissionListener extends Component {
           lastSubmit = new Date().getTime();
           checkForm(form[0]);
         }
-        return;
       }
-      if (jButton.is('a, span, button[type="button"], input[type="button"]')){
+      else if (jButton.is('a, span, button[type="button"], input[type="button"]')){
         let button = e.target;
         let buttonText = '';
         if (button.tagName.toLowerCase() === 'input')

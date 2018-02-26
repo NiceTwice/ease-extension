@@ -26,6 +26,7 @@ function getAllFormsWithPasswords(){
   let inputPasswords = $('input[type=password]');
   let forms = [];
 
+
   inputPasswords.each(function(index) {
     let obj = {
       formEl: null,
