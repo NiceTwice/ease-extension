@@ -1,6 +1,8 @@
 import React, {Component, Fragment} from "react";
 import Runtime from "../../../shared/runtime_api";
 
+const submitButtonNames = ['log in', 'sign in','signin', 'login', 'go', 'submit', 'continue', 'next'];
+
 const getVisibleInputs = ({form}) => {
   const inputs = form.getElementsByTagName('input');
   let ret = [];
@@ -96,27 +98,66 @@ class FormSubmissionListener extends Component {
   componentDidMount(){
     console.log('mounted');
 
-    $(document).on('click', '#passwordNext', (e) => {
-      let button = e.target;
-      let form = $(button).closest('form');
+    document.addEventListener('submit', (e) => {
+      if (new Date().getTime() - lastSubmit < 200)
+        return;
+      console.log('document submit detected', e.target);
+      lastSubmit = new Date().getTime();
+      checkForm(e.target);
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.keyCode !== 13 || (new Date().getTime() - lastSubmit) < 200) {
+        return;
+      }
+      const target = $(e.target);
+      if (!target.is('input[type=password]')) {
+        return;
+      }
+      console.log('document keypress detected', e.target);
+      const form = target.closest('form');
+      console.log('closest form found', form);
       if (!!form.length) {
+        lastSubmit = new Date().getTime();
         checkForm(form[0]);
       }
     });
-    $(document).on('submit keypress', 'form,input[type=password]', (e) => {
-      if (new Date().getTime() - lastSubmit < 100)
+    $(document).on('click', '#passwordNext', (e) => {
+      let form = $('.IBs8e.PIboA');
+      if (new Date().getTime() - lastSubmit < 200)
         return;
-      if (e.type === 'keypress' && $(e.target).is('input[type=password]')){
-        if (e.keyCode === 13 && e.target === e.currentTarget){
-          const form = $(e.target).closest('form');
+      if (!!form.length) {
+        lastSubmit = new Date().getTime();
+        checkForm(form[0]);
+      }
+    });
+    document.addEventListener('click', (e) => {
+      const jButton = $(e.target);
+      if (new Date().getTime() - lastSubmit < 200)
+        return;
+      if (jButton.attr('type') === 'submit'){
+        console.log('document click detected', e.target);
+        let form = jButton.closest('form');
+        if (!!form.length) {
+          lastSubmit = new Date().getTime();
+          checkForm(form[0]);
+        }
+        return;
+      }
+      if (jButton.is('a, span, button[type="button"], input[type="button"]')){
+        let button = e.target;
+        let buttonText = '';
+        if (button.tagName.toLowerCase() === 'input')
+          buttonText = button.value;
+        else
+          buttonText = button.innerText;
+        buttonText = buttonText.trim().toLowerCase();
+        if (submitButtonNames.indexOf(buttonText) !== -1){
+          let form = jButton.closest('form');
           if (!!form.length) {
-            checkForm(form[0]);
             lastSubmit = new Date().getTime();
+            checkForm(form[0]);
           }
         }
-      }else if (e.type === 'submit'){
-        checkForm(e.target);
-        lastSubmit = new Date().getTime();
       }
     });
   }

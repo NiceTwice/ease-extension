@@ -600,6 +600,7 @@ export const actions = {
       sendResponse(MessageResponse(true, 'no updates detected'));
       return;
     }
+    console.log('process update', requestResponse.data[0]);
     let logo_url = null;
     const storeState = store.getState();
     const websites = storeState.catalog.websites;
@@ -610,7 +611,7 @@ export const actions = {
       website = websites.find(item => (item.id === requestResponse.data[0].website_id));
     if (!!website) {
       logo_url = serverUrl + website.logo;
-      if (!!website.sso) {
+      if (!!website.sso_id) {
         const clearbitLogo = await reflect(get_api.getClearbitLogo({
           hostname: extractRootDomain(url)
         }));
