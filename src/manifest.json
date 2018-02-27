@@ -50,7 +50,7 @@
    "externally_connectable": {
       "matches": ["*://*.ease.space/*", "https://localhost:8443/*", "*://localhost/*", "*://192.168.0.20/*", "*://192.168.0.19/*", "*://192.168.0.18/*"]
    },
-   "description": "Ease extension, log you in and out",
+   "description": "Password and access manager for teams",
    "icons": {
       "128": "assets/images/logo_128.png"
    },

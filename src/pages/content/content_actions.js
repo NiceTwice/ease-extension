@@ -49,7 +49,7 @@ const content_actions = {
       div[0].blur();
       sendResponse(MessageResponse(false, `"${selector}" successfully filled`));
       console.log(`"${selector}" successfully filled`);
-    }, 300);
+    }, 500);
   },
   click: ({selector}, sendResponse) => {
     console.log(`Start clicking on "${selector}"`);

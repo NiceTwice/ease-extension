@@ -25,6 +25,7 @@ class FillInMenu extends Component {
       left: 0
     };
     this.target = null;
+    this.initialView = 'Accounts';
   }
   placeIt = () => {
     let input = $(this.target);
@@ -33,8 +34,6 @@ class FillInMenu extends Component {
     let inputOffset = input.offset();
     let position = input[0].getBoundingClientRect();
     let documentScrollTop = $(document).scrollTop();
-    console.log('input height', inputHeight);
-    console.log('input offset', inputOffset);
     this.setState({
       ready: true,
       top: position.top + inputHeight,
@@ -59,16 +58,27 @@ class FillInMenu extends Component {
   onScroll = (e) => {
     this.placeIt();
   };
-  componentDidMount(){
-    $('input').click((e) => {
-      this.target = e.target;
+  componentWillReceiveProps(nextProps){
+    if (this.props !== nextProps && this.props.target !== nextProps.target){
+      this.target = nextProps.target;
+      this.initialView = this.target.getAttribute('autocomplete') === 'new-password' ? 'PasswordGenerator' : 'Accounts';
       this.placeIt();
-      document.addEventListener('scroll', this.onScroll, true);
-      window.addEventListener('resize', this.onResize);
-      setTimeout(() => {
-        $(document).on('click', this.listener);
-      }, 300);
-    });
+    }
+  }
+  componentWillUnmount(){
+    document.removeEventListener('scroll', this.onScroll, true);
+    window.removeEventListener('resize', this.onResize);
+  }
+  componentDidMount(){
+    console.log('fill in menu mounted');
+    this.target = this.props.target;
+    this.initialView = this.target.getAttribute('autocomplete') === 'new-password' ? 'PasswordGenerator' : 'Accounts';
+    this.placeIt();
+    document.addEventListener('scroll', this.onScroll, true);
+    window.addEventListener('resize', this.onResize);
+/*    setTimeout(() => {
+      $(document).on('click', this.listener);
+    }, 300);*/
   }
   render(){
     if (!this.state.ready)
@@ -80,7 +90,7 @@ class FillInMenu extends Component {
                top: this.state.top,
                left: this.state.left
              }} ref={(ref) => {this.frame = ref;}}>
-          <iframe src={browser.runtime.getURL('pages/background-ui.html#/fillInPopup')}
+          <iframe src={browser.runtime.getURL(`pages/background-ui.html#/fillInPopup/${this.initialView}`)}
                   style={fillInPopupIframeStyles}/>
         </div>
     )
