@@ -6,7 +6,7 @@ import {Store} from "react-chrome-redux";
 import App from "./components/App";
 import "../../assets/fonts/fontawesome/css/font-awesome.min.css";
 
-if (window.top === window) {
+//if (window.top === window) {
     const anchor = document.createElement('div');
     anchor.id = "new_ease_extension";
     document.body.insertBefore(anchor, document.body.childNodes[0]);
@@ -22,6 +22,5 @@ if (window.top === window) {
         </Provider>,
         document.getElementById('new_ease_extension')
     );
-    console.log('localStorage', localStorage);
     console.log('content script created');
-}
+//}

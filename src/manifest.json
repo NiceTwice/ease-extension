@@ -32,7 +32,7 @@
    },
    "content_scripts": [ {
       "all_frames": true,
-      "js": [ "resources/js/jquery-3.3.1.min.js","resources/js/jquery-ui.min.js", "pages/content.js"],
+      "js": [ "resources/js/jquery-3.3.1.min.js","resources/js/jquery-ui.min.js","resources/js/jquery.appear.js", "pages/content.js"],
       "matches": [ "<all_urls>"],
       "exclude_matches": ["*://*.ease.space/*", "*://localhost/*", "*://192.168.0.20/*", "*://192.168.0.19/*", "*://192.168.0.18/*"]
    }, {
@@ -59,7 +59,7 @@
    "name": "Ease",
    "permissions": [ "tabs", "<all_urls>", "webNavigation", "storage","unlimitedStorage", "identity", "identity.email", "contentSettings", "privacy", "cookies"],
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "1.6.7",
+   "version": "1.6.8",
    "web_accessible_resources": [
       "assets/*",
       "pages/*"

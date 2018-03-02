@@ -7,8 +7,10 @@ import {handleSemanticInput,
   extractRootDomain,
   resolveImageURL,
   copyTextToClipboard} from "../../../../shared/utils";
+import {BackgroundMessage} from "../../../../shared/utils";
 import {connect} from "react-redux";
 import passwordGenerator from "generate-password";
+
 const isAccountLinkActive = (match, location) => {
   return location.pathname === '/fillInPopup/Accounts' || location.pathname === '/fillInPopup';
 };
@@ -268,9 +270,7 @@ class PasswordGenerator extends Component {
   }
 }
 
-@connect(store => ({
-  store: store
-}))
+@connect()
 class FillInPopup extends Component {
   constructor(props){
     super(props);
@@ -282,6 +282,9 @@ class FillInPopup extends Component {
       });
     });
   };
+  componentWillMount(){
+    BackgroundMessage('getProfiles');
+  }
   render(){
     return (
         <div class="display_flex flex_direction_column fillInPopup">

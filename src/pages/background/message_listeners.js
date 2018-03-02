@@ -10,11 +10,11 @@ import ContentSettings from "../../shared/contentSettings_api";
 import {reflect, extractRootDomain, extractHostname, MessageResponse, getUrl, asyncWait} from "../../shared/utils";
 import store from "./store";
 import get_api from "../../shared/ease_get_api";
-import {getUserInformation} from "../../shared/actions/user";
+import {getUserInformation, logout} from "../../shared/actions/user";
 import {getProfiles} from "../../shared/actions/dashboard";
 import {InitialiseConnectionOverlay, UpdateConnectionOverlay, DeleteConnectionOverlay, SetFirstConnection} from "../../shared/actions/connectionOverlay";
 import {setCurrentTab, getCatalogWebsites} from "../../shared/actions/common";
-import {scrapChrome, google_connection_steps} from "./google";
+import {scrapChrome} from "./google";
 import {deleteScrapingChromeOverlay, showScrapingChromeOverlay} from "../../shared/actions/scraping";
 import {showSavedUpdatePopup, closeSavedUpdatePopup} from "../../shared/actions/background-ui";
 import {saveLogwithTabCookies, setLogwithHostnameCookies, saveTabCookies, setHostnameCookies, removeHostnameCookies} from "./cookies_management";
@@ -131,9 +131,10 @@ const connectGoogle = async({websiteData, current_tab}) => {
     tabId: tab.id,
     websiteName: websiteName
   }));
+  const websiteInformation = await get_api.catalog.getWebsiteConnection({website_id: 65});
   console.log('connection');
   try {
-    await execActionList(tab.id, google_connection_steps, websiteData.user);
+    await execActionList(tab.id, websiteInformation[0].website.connect.todo, websiteData.user);
   } catch (e){
     store.dispatch(DeleteConnectionOverlay({
       tabId: tab.id
@@ -568,6 +569,7 @@ export const actions = {
       });
     });
     await Promise.all(calls.map(reflect));
+    store.dispatch(logout());
     sendResponse(MessageResponse(false, 'General logout finished'));
   },
   getHomePage: async (data, sendResponse) => {
@@ -734,6 +736,15 @@ export const actions = {
     if (response.error && response.data.indexOf('Wrong') === -1)
       response.data = 'It seems you closed the tab. Please try again';
     sendResponse(MessageResponse(response.error, response.data));
+  },
+  easeLogin: (data, sendResponse, senderTab) => {
+    store.dispatch(getUserInformation()).then(response => {
+      store.dispatch(getProfiles());
+      store.dispatch(getCatalogWebsites());
+    });
+  },
+  easeLogout: (data, sendResponse, senderTab) => {
+    store.dispatch(logout());
   }
 };
 

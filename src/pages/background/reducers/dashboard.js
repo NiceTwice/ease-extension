@@ -7,6 +7,12 @@ export const dashboard = createReducer({
   apps: {},
   profiles: {}
 }, {
+  ['LOGOUT'](state, action){
+    return update(state, {
+      apps: {$set: {}},
+      profiles: {$set: {}}
+    });
+  },
   ['GET_PROFILES_PENDING'](state, action) {
     return update(state, {
       fetching: {$set: true}

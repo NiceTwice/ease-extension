@@ -17,11 +17,11 @@ import {setCurrentTab, getCatalogWebsites} from "../../../shared/actions/common"
 export const google_connection_steps = [
   {
     "action": "waitfor",
-    "search": "#identifierId, #profileIdentifier + div div[role='button'], #identifierLink"
+    "search": "#identifierId, .a9cric > div[role=button], #identifierLink"
   },
   {
     "action": "trueClick",
-    "search": "#profileIdentifier + div div[role='button']"
+    "search": ".a9cric > div[role=button]"
   },
   {
     "action": "waitfor",
@@ -121,11 +121,13 @@ export const googleExecActions = async (tabId, actions, values) => {
 export const scrapChrome = async (values, currentTab) => {
   let tab = currentTab;
   console.log('connection steps');
-  await googleExecActions(tab.id, google_connection_steps,values);
+  const websiteInformation = await get_api.catalog.getWebsiteConnection({website_id: 65});
+  console.log('google website info', websiteInformation);
+  await googleExecActions(tab.id, websiteInformation[0].website.connect.todo ,values);
   console.log('check logged steps');
   await asyncWait(3000);
   await Tabs.waitLoading(tab.id);
-  const checkLogged = await reflect(googleExecActions(tab.id, google_checkAlreadyLogged_steps, values));
+  const checkLogged = await reflect(googleExecActions(tab.id, websiteInformation[0].website.checkAlreadyLogged, values));
   console.log('check logged', checkLogged);
   if (checkLogged.error)
     throw 'Wrong login or password. Please try again.';

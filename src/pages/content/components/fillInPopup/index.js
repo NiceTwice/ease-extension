@@ -22,7 +22,10 @@ class FillInMenu extends Component {
     this.state = {
       ready: false,
       top: 0,
-      left: 0
+      left: 0,
+      styles: {
+        transition: ''
+      }
     };
     this.target = null;
     this.initialView = 'Accounts';
@@ -43,15 +46,6 @@ class FillInMenu extends Component {
   hide = () => {
     this.setState({ready: false});
   };
-  listener = (e) => {
-    if ($(e.target).closest('#ease-frame').length === 0) {
-      console.log('hiding frame');
-      $(document).off('click', this.listener);
-      this.hide();
-      document.removeEventListener('scroll', this.onScroll, true);
-      window.removeEventListener('resize', this.onResize);
-    }
-  };
   onResize = (e) => {
     this.placeIt();
   };
@@ -62,7 +56,11 @@ class FillInMenu extends Component {
     if (this.props !== nextProps && this.props.target !== nextProps.target){
       this.target = nextProps.target;
       this.initialView = this.target.getAttribute('autocomplete') === 'new-password' ? 'PasswordGenerator' : 'Accounts';
+      this.setState({styles: {transition: 'top .3s, left .3s'}});
       this.placeIt();
+      setTimeout(() => {
+        this.setState({styles: {transition: ''}});
+      }, 300);
     }
   }
   componentWillUnmount(){
@@ -76,9 +74,6 @@ class FillInMenu extends Component {
     this.placeIt();
     document.addEventListener('scroll', this.onScroll, true);
     window.addEventListener('resize', this.onResize);
-/*    setTimeout(() => {
-      $(document).on('click', this.listener);
-    }, 300);*/
   }
   render(){
     if (!this.state.ready)
@@ -87,6 +82,7 @@ class FillInMenu extends Component {
         <div id="ease-frame"
              style={{
                ...fillInPopupStyles,
+               ...this.state.styles,
                top: this.state.top,
                left: this.state.left
              }} ref={(ref) => {this.frame = ref;}}>

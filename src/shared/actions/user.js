@@ -19,3 +19,9 @@ export const getUserInformation = () => {
     });
   }
 };
+
+export const logout = () => {
+  return {
+    type: 'LOGOUT'
+  }
+};

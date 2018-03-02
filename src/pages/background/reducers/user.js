@@ -1,10 +1,16 @@
 import createReducer from  "./createReducer";
+import update from 'immutability-helper';
 
 export const user = createReducer({
   fetching: true,
   fetched: false,
   information: null
 }, {
+  ['LOGOUT'](state, action){
+    return update(state, {
+      information: {$set: null}
+    });
+  },
   ['GET_USER_INFORMATION_PENDING'](state, action){
     return {
       fetching: true,
