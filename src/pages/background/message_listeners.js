@@ -495,8 +495,6 @@ export const actions = {
       return item;
     });
     const details = checkForVariableHomeSubdomains(json.detail);
-    console.log('current connections before', current_connections);
-    console.log('current connections after', current_connections);
     let connectionResponse = null;
     console.log('start website connection', data);
     if (details.length > 1)

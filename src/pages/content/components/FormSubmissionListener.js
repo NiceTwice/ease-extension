@@ -96,12 +96,9 @@ class FormSubmissionListener extends Component {
     super(props);
   }
   componentDidMount(){
-    console.log('mounted');
-
     document.addEventListener('submit', (e) => {
       if (new Date().getTime() - lastSubmit < 200)
         return;
-      console.log('document submit detected', e.target);
       lastSubmit = new Date().getTime();
       checkForm(e.target);
     });
@@ -113,9 +110,7 @@ class FormSubmissionListener extends Component {
       if (!target.is('input[type=password]')) {
         return;
       }
-      console.log('document keypress detected', e.target);
       const form = target.closest('form');
-      console.log('closest form found', form);
       if (!!form.length) {
         lastSubmit = new Date().getTime();
         checkForm(form[0]);
@@ -135,7 +130,6 @@ class FormSubmissionListener extends Component {
       if (new Date().getTime() - lastSubmit < 200)
         return;
       if (jButton.attr('type') === 'submit'){
-        console.log('document click detected', e.target);
         let form = jButton.closest('form');
         if (!!form.length) {
           lastSubmit = new Date().getTime();

@@ -86,6 +86,7 @@ class ConnectionInputsListener extends Component {
       inputs: []
     };
     this.domObservationCollectTimeout = null;
+    this.formObservationInterval = -1;
     this.forms = [];
   }
   openListener = (input) => {
@@ -160,8 +161,8 @@ class ConnectionInputsListener extends Component {
     });
     this.setState({inputs: inputs});
   };
-  checkForm = (form) => {
-    let inputs = getVisibleInputs(form);
+  describeForms = (form) => {
+    let inputs = getVisibleInputs(form.formEl);
     let loginEl = null;
     let passwordEl = null;
     let passwordIndex = getPasswordInputIndex(inputs);
@@ -170,47 +171,61 @@ class ConnectionInputsListener extends Component {
     if (passwordIndex > 0){
       loginEl = inputs[passwordIndex - 1];
     }
-    if (!!passwordEl){
-      this.forms.push({
-        formEl: form,
-        isVisible: false,
-        loginEl: loginEl,
-        passwordEl: passwordEl
-      });
-    }
+    form.loginEl = loginEl;
+    form.passwordEl = passwordEl;
+    if (!!passwordEl)
+      this.setupConnectionInput(passwordEl);
+    if (!!loginEl)
+      this.setupConnectionInput(loginEl);
+  };
+  hideForm = (form) => {
+    const inputs = this.state.inputs.filter(item => {
+      const toRemove = item.input === form.passwordEl || item.input === form.loginEl;
+      return !toRemove;
+    });
+    this.setState({inputs: inputs});
+  };
+  checkForms = () => {
+    this.forms = this.forms.map(form => {
+      const isVisible = $(form.formEl).is(':visible');
+      if (form.isVisible && !isVisible){
+        form.isVisible = isVisible;
+        this.hideForm(form);
+      }else if (!form.isVisible && isVisible){
+        form.isVisible = isVisible;
+        this.describeForms(form);
+      }
+      return form;
+    });
   };
   collectForms = () => {
     let docForms = document.querySelectorAll('form');
     let forms = [];
-
     for (let form of docForms){
       if (!form.dataset || !form.dataset.easeWatching) {
         form.dataset.easeWatching = 'true';
-        this.checkForm(form);
+        if (form.querySelector('input[type=password]')) {
+          forms.push({
+            formEl: form,
+            isVisible: false,
+            loginEl: null,
+            passwordEl: null
+          });
+        }
       }
     }
-    this.forms.map((form) => {
-      if (form.isVisible) {
-        if (!!form.loginEl)
-          this.setupConnectionInput(form.loginEl);
-        this.setupConnectionInput(form.passwordEl);
-      }
-    });
+    this.forms = forms;
   };
   checkRemovedNodes = (removedNodes) => {
-    let inputs = this.state.inputs.slice();
-    let elementsRemoved = false;
     for (let i = 0; i < removedNodes.length; i++){
       let node = removedNodes[i];
-      inputs = inputs.filter((item) => {
-        const toRemove = node === item.input || node.contains(item.input);
+      this.forms = this.forms.filter(item => {
+        const toRemove = node === item.formEl || node.contains(item.formEl);
         if (toRemove)
-          elementsRemoved = true;
+          this.hideForm(item);
         return !toRemove;
       });
     }
-    if (elementsRemoved)
-      this.setState({inputs: inputs});
   };
   domObserverFunction = (mutations) => {
     if (!mutations || !mutations.length)
@@ -258,19 +273,24 @@ class ConnectionInputsListener extends Component {
     this.setState({inputs: inputs});
   };
   componentDidMount(){
-    this.collectForms();
-    let bodies = document.querySelectorAll('body');
-    if (!!bodies.length) {
-      let observer = new window.MutationObserver(this.domObserverFunction);
-      observer.observe(bodies[0], {childList: true, subtree:true});
-    }
-    document.addEventListener('scroll', this.onResize, true);
-    window.addEventListener('resize', this.onResize);
-    console.log('connection input listener did mount');
+    setTimeout(() => {
+      this.collectForms();
+      this.checkForms();
+      this.formObservationInterval = setInterval(this.checkForms, 500);
+      let bodies = document.querySelectorAll('body');
+      if (!!bodies.length) {
+        let observer = new window.MutationObserver(this.domObserverFunction);
+        observer.observe(bodies[0], {childList: true, subtree:true});
+      }
+      document.addEventListener('scroll', this.onResize, true);
+      window.addEventListener('resize', this.onResize);
+      console.log('connection input listener did mount');
+    }, 700);
   }
   componentWillUnmount(){
     document.removeEventListener('scroll', this.onResize, true);
     window.removeEventListener('resize', this.onResize);
+    clearInterval(this.formObservationInterval);
   }
   render(){
     return (
