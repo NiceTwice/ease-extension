@@ -22,9 +22,13 @@ class FillInMenu extends Component {
     this.state = {
       ready: false,
       top: 0,
-      left: 0
+      left: 0,
+      styles: {
+        transition: ''
+      }
     };
     this.target = null;
+    this.initialView = 'Accounts';
   }
   placeIt = () => {
     let input = $(this.target);
@@ -33,8 +37,6 @@ class FillInMenu extends Component {
     let inputOffset = input.offset();
     let position = input[0].getBoundingClientRect();
     let documentScrollTop = $(document).scrollTop();
-    console.log('input height', inputHeight);
-    console.log('input offset', inputOffset);
     this.setState({
       ready: true,
       top: position.top + inputHeight,
@@ -44,31 +46,34 @@ class FillInMenu extends Component {
   hide = () => {
     this.setState({ready: false});
   };
-  listener = (e) => {
-    if ($(e.target).closest('#ease-frame').length === 0) {
-      console.log('hiding frame');
-      $(document).off('click', this.listener);
-      this.hide();
-      document.removeEventListener('scroll', this.onScroll, true);
-      window.removeEventListener('resize', this.onResize);
-    }
-  };
   onResize = (e) => {
     this.placeIt();
   };
   onScroll = (e) => {
     this.placeIt();
   };
-  componentDidMount(){
-    $('input').click((e) => {
-      this.target = e.target;
+  componentWillReceiveProps(nextProps){
+    if (this.props !== nextProps && this.props.target !== nextProps.target){
+      this.target = nextProps.target;
+      this.initialView = this.target.getAttribute('autocomplete') === 'new-password' ? 'PasswordGenerator' : 'Accounts';
+      this.setState({styles: {transition: 'top .3s, left .3s'}});
       this.placeIt();
-      document.addEventListener('scroll', this.onScroll, true);
-      window.addEventListener('resize', this.onResize);
       setTimeout(() => {
-        $(document).on('click', this.listener);
+        this.setState({styles: {transition: ''}});
       }, 300);
-    });
+    }
+  }
+  componentWillUnmount(){
+    document.removeEventListener('scroll', this.onScroll, true);
+    window.removeEventListener('resize', this.onResize);
+  }
+  componentDidMount(){
+    console.log('fill in menu mounted');
+    this.target = this.props.target;
+    this.initialView = this.target.getAttribute('autocomplete') === 'new-password' ? 'PasswordGenerator' : 'Accounts';
+    this.placeIt();
+    document.addEventListener('scroll', this.onScroll, true);
+    window.addEventListener('resize', this.onResize);
   }
   render(){
     if (!this.state.ready)
@@ -77,10 +82,11 @@ class FillInMenu extends Component {
         <div id="ease-frame"
              style={{
                ...fillInPopupStyles,
+               ...this.state.styles,
                top: this.state.top,
                left: this.state.left
              }} ref={(ref) => {this.frame = ref;}}>
-          <iframe src={browser.runtime.getURL('pages/background-ui.html#/fillInPopup')}
+          <iframe src={browser.runtime.getURL(`pages/background-ui.html#/fillInPopup/${this.initialView}`)}
                   style={fillInPopupIframeStyles}/>
         </div>
     )

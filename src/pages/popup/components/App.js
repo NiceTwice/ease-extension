@@ -15,16 +15,17 @@ class App extends Component {
     BackgroundMessage('setCurrentTab');
   }
   render(){
-    const {loading, user} = this.props;
-    if (!!loading || user.fetching)
+    const {loading, user,common} = this.props;
+    if (!!loading || user.fetching || !common.currentTab)
       return (<Loader active size="mini" inline="centered"/>);
     if (!user.information)
       return <LoginView/>;
-    return <ConnectedView/>
+    return <ConnectedView/>;
   }
 }
 
 export default connect(store => ({
   loading: store.loading,
-  user: store.user
+  user: store.user,
+  common: store.common
 }))(App);

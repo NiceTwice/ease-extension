@@ -10,5 +10,10 @@ export const catalog = createReducer({
     return update(state, {
       websites: {$set: websites}
     });
+  },
+  ['LOGOUT'](state, action){
+    return update(state, {
+      websites: {$set: []}
+    });
   }
 });

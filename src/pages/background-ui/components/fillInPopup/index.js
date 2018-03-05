@@ -7,8 +7,10 @@ import {handleSemanticInput,
   extractRootDomain,
   resolveImageURL,
   copyTextToClipboard} from "../../../../shared/utils";
+import {BackgroundMessage} from "../../../../shared/utils";
 import {connect} from "react-redux";
 import passwordGenerator from "generate-password";
+
 const isAccountLinkActive = (match, location) => {
   return location.pathname === '/fillInPopup/Accounts' || location.pathname === '/fillInPopup';
 };
@@ -86,6 +88,21 @@ class Accounts extends Component {
       this.setState({tab: tab});
     });
   }
+  chooseApp(appId){
+    const app = this.props.dashboard.apps[appId];
+    if (!!app){
+      Tabs.sendMessage(
+          this.state.tab.id,
+          {
+            type: 'fillAccountInformation',
+            data: {
+              password: app.account_information.password,
+              login: app.account_information.login
+            }
+          }
+      );
+    }
+  }
   filterApps = () => {
     const apps = this.props.dashboard.apps;
     const domain = extractRootDomain(this.state.tab.url);
@@ -118,7 +135,9 @@ class Accounts extends Component {
           <List verticalAlign="middle" class="app_list">
             {apps.map(app => {
               return (
-                  <List.Item key={app.id} class="display_flex align_items_center">
+                  <List.Item key={app.id}
+                             onClick={e => {this.chooseApp(app.id)}}
+                             class="display_flex align_items_center">
                     <div class="logo_handler">
                       <img class="logo" src={resolveImageURL(app.website.logo)}/>
                     </div>
@@ -180,6 +199,16 @@ class PasswordGenerator extends Component {
   componentWillMount(){
     this.refresh();
   }
+  sendGeneratedPassword = () => {
+    Tabs.getCurrent().then(tab => {
+      Tabs.sendMessage(tab.id, {
+        type: 'fillAccountInformation',
+        data: {
+          password: this.state.password
+        }
+      })
+    });
+  };
   handleInput = handleSemanticInput.bind(this);
   render(){
     return (
@@ -188,7 +217,7 @@ class PasswordGenerator extends Component {
                  id="passwordInput"
                  readOnly
                  fluid
-                 action={<Button content="Fill"/>}
+                 action={<Button content="Fill" onClick={this.sendGeneratedPassword}/>}
                  placeholder="Your password"/>
           <div class="display_flex controls">
               <span onClick={this.toggleAdvanceOptions} class="full_flex display_flex align_items_center">
@@ -241,18 +270,27 @@ class PasswordGenerator extends Component {
   }
 }
 
-@connect(store => ({
-  store: store
-}))
+@connect()
 class FillInPopup extends Component {
   constructor(props){
     super(props);
+  }
+  close = () => {
+    Tabs.getCurrent().then(tab => {
+      Tabs.sendMessage(tab.id, {
+        type: 'closeFillInMenu'
+      });
+    });
+  };
+  componentWillMount(){
+    BackgroundMessage('getProfiles');
   }
   render(){
     return (
         <div class="display_flex flex_direction_column fillInPopup">
           <Icon class="close-popup-button"
                 name="close"
+                onClick={this.close}
                 link/>
           <Menu tabular id="fillInPopupMenu">
             <Menu.Item as={NavLink}
