@@ -7,7 +7,7 @@ import Privacy from "../../shared/privacy_api";
 import Cookies from "../../shared/cookies_api";
 import WebNavigation from "../../shared/webNavigation_api";
 import ContentSettings from "../../shared/contentSettings_api";
-import {reflect, extractRootDomain, extractHostname, MessageResponse, getUrl, asyncWait} from "../../shared/utils";
+import {TabMessage, reflect, extractRootDomain, extractHostname, MessageResponse, getUrl, asyncWait} from "../../shared/utils";
 import store from "./store";
 import get_api from "../../shared/ease_get_api";
 import {getUserInformation, logout} from "../../shared/actions/user";
@@ -557,6 +557,29 @@ export const actions = {
       }, 1000);
     sendResponse(MessageResponse(false, 'connection finished'));
   },
+  fillActiveTab: async (data, sendResponse) => {
+    let {app_id} = data;
+    let app = null;
+    let password = null;
+    const currentTab = (await Tabs.query({
+      currentWindow: true,
+      active: true
+    }))[0];
+    console.log('get current tab response', currentTab);
+    await Promise.all([
+        Tabs.waitLoading(currentTab.id),
+        get_api.dashboard.getApp({app_id : app_id}),
+        get_api.dashboard.getAppPassword({app_id: app_id})
+    ]).then(response => {
+      app = response[1];
+      password = response[2];
+      let account_information = app.account_information;
+      account_information.password = password;
+      TabMessage(currentTab.id, 'fillThisPage',{
+        account_information: account_information
+      });
+    });
+  },
   generalLogout: async (data, sendResponse) => {
     const storage = await Storage.local.get(null);
     const accounts = storage.connectedAccounts;
@@ -749,6 +772,7 @@ export const actions = {
 browser.runtime.onMessageExternal.addListener(
     (request, sender, sendResponse) => {
       if (!!actions[request.type]){
+        console.log('new request', request);
         console.log(request);
         actions[request.type](request.data, sendResponse, sender.tab);
         return true;

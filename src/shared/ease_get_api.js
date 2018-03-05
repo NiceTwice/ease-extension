@@ -41,6 +41,20 @@ const api = {
       throw err.response.data;
     })
   },
+  dashboard: {
+    getApp: ({app_id}) => {
+      return basic_get('/api/v1/dashboard/GetApp', {
+        app_id: app_id
+      });
+    },
+    getAppPassword: ({app_id}) => {
+     return basic_get('/api/v1/dashboard/GetAppPassword', {
+       app_id: app_id
+     }).then(response => {
+       return decipher(response.password);
+     });
+    }
+  },
   catalog: {
     getWebsites: () => {
       return basic_get('/api/v1/catalog/GetWebsites');

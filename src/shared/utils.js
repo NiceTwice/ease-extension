@@ -1,4 +1,5 @@
 import Runtime from "./runtime_api";
+import Tabs from "./tabs_api";
 
 export const MessageResponse = (error, response) => {
   return {
@@ -12,6 +13,13 @@ export const BackgroundMessage = (type, data) => {
     type: type,
     data: data
   }, null);
+};
+
+export const TabMessage = (tabId, type, data, params) => {
+  return Tabs.sendMessage(tabId, {
+    type: type,
+    data: data
+  }, params);
 };
 
 export function handleSemanticInput(e, {name, value, checked}){

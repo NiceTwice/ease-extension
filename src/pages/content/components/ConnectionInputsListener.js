@@ -72,11 +72,37 @@ function checkForm(form){
   }
   return {
     formEl: form,
-    isVisible: $(form).is(':visible'),
     loginEl: loginEl,
     passwordEl: passwordEl
   }
 }
+
+function fillPasswordForms(account_information){
+  const docForms = document.querySelectorAll('form');
+  let forms = [];
+
+  for (let form of docForms){
+    if (form.querySelector('input[type=password')){
+      const descForm = checkForm(form);
+      if (!!descForm.passwordEl)
+        forms.push(descForm);
+    }
+  }
+  if (!!forms.length){
+    forms.forEach((form) => {
+      if (!!form.loginEl)
+        $(form.loginEl).val(account_information.login);
+      $(form.passwordEl).val(account_information.password);
+    });
+  }
+}
+
+browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.type === 'fillThisPage'){
+    fillPasswordForms(request.data.account_information);
+  }
+});
+
 
 class ConnectionInputsListener extends Component {
   constructor(props){

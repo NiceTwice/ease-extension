@@ -13,6 +13,7 @@ import {getUserInformation} from "../../shared/actions/user";
 import {getProfiles} from "../../shared/actions/dashboard";
 import {getCatalogWebsites} from "../../shared/actions/common";
 import {serverUrl} from "../../shared/strings";
+import {actions} from "./message_listeners";
 console.log('initializing background');
 
 window.store = store;
