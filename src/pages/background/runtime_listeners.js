@@ -20,6 +20,9 @@ browser.runtime.onInstalled.addListener(async (details) => {
   Storage.local.set(newStorage);
 });
 
+browser.runtime.onUpdateAvailable.addListener((details) => {
+  browser.runtime.reload();
+});
 /*chrome.webNavigation.onCompleted.addListener((details) => {
   console.log('on completed event fired:', details);
 });*/
