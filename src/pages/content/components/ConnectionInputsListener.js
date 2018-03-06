@@ -4,6 +4,42 @@ import {EaseInputLogoIconActive, EaseInputLogoIcon} from "../../../shared/Images
 import Storage from "../../../shared/storage_api";
 import FillInPopup from "./fillInPopup";
 
+function sendKey(input, key) {
+  var e = input.ownerDocument.createEvent("KeyboardEvent");
+  // FIREFOX : e.initKeyEvent("keydown", 1, 1, null, 0, 0, 0, 0, key, 0)
+  e.initKeyboardEvent("keydown", 1, 1, document.defaultView, 0, 0, 0, 0, key, key);
+  var f = input.dispatchEvent(e);
+  //FIREFOX f && (e = input.ownerDocument.createEvent("KeyboardEvent"), e.initKeyEvent("keypress", 1, 1, null, 0, 0, 0, 0, key, 0), f = input.dispatchEvent(e));
+  e = input.ownerDocument.createEvent("KeyboardEvent");
+  //FIREFOX e.initKeyEvent("keyup", 1, 1, null, 0, 0, 0, 0, key, 0)
+  e.initKeyboardEvent("keyup", 1, 1, null, 0, 0, 0, 0, key, key);
+  input.dispatchEvent(e);
+}
+
+function fire_before_fill(a) {
+  sendKey(a, 16); //shift
+  sendKey(a, 32); //space
+  sendKey(a, 8); //backspace
+}
+
+function fire_onchange(a) {
+  var d = a.ownerDocument.createEvent("Events");
+  d.initEvent("change", !0, !0);
+  a.dispatchEvent(d);
+  d = a.ownerDocument.createEvent("Events");
+  d.initEvent("input", !0, !0);
+  a.dispatchEvent(d);
+}
+
+function fillField(field, value){
+  field.focus();
+  fire_before_fill(field);
+  field.value = value;
+  $(field).val(value);
+  fire_onchange(field);
+  field.blur();
+}
+
 const connectionActiveInputStyles = {
   backgroundImage: EaseInputLogoIconActive,
   backgroundRepeat: 'no-repeat',
@@ -91,8 +127,8 @@ function fillPasswordForms(account_information){
   if (!!forms.length){
     forms.forEach((form) => {
       if (!!form.loginEl)
-        $(form.loginEl).val(account_information.login);
-      $(form.passwordEl).val(account_information.password);
+        fillField(form.loginEl, account_information.login);
+      fillField(form.passwordEl, account_information.password);
     });
   }
 }
@@ -160,9 +196,9 @@ class ConnectionInputsListener extends Component {
       if (!!form.length){
         const formObj = checkForm(form[0]);
         if (!!formObj.loginEl && !!account_information.login)
-          $(formObj.loginEl).val(account_information.login);
+          fillField(formObj.loginEl, account_information.login);
         if (!!formObj.passwordEl && !!account_information.password)
-          $(formObj.passwordEl).val(account_information.password);
+          fillField(formObj.passwordEl, account_information.password);
       }
       this.closeFillInMenu();
     }
