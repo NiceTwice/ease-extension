@@ -315,6 +315,16 @@
   margin: 0 !important;
 }
 
+#websiteIntegrationBar {
+  background-color: white;
+  height: 100%;
+  box-shadow: 0px 0px 5px 3px rgba(55,59,96,0.5);
+  margin-right: 10px;
+  padding: 15px;
+  transition: transform .3s;
+  overflow: auto;
+}
+
 .savedUpdate {
   color: $themeBlue2Color;
   padding: 10px;

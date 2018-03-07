@@ -7,7 +7,7 @@ import ConnectionOverlay from "./ConnectionOverlay";
 import ScrapGoogleOverlay from "./ScrapGoogleOverlay";
 import ConnectionInputsListener from "./ConnectionInputsListener";
 import SavedUpdatePopup from "./SavedUpdatePopup";
-import FillInPopup from "./fillInPopup";
+import WebsiteIntegrationBar from "./websiteIntegrationBar";
 
 @connect(store => ({
   loading: store.loading
@@ -35,6 +35,7 @@ class App extends Component {
             <ScrapGoogleOverlay tabId={this.state.tabId}/>
             <FormSubmissionListener tabId={this.state.tabId}/>
             <ConnectionInputsListener tabId={this.state.tabId}/>
+            <WebsiteIntegrationBar tabId={this.state.tabId}/>
             <SavedUpdatePopup tabId={this.state.tabId}/>
           </Fragment>
       );

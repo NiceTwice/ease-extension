@@ -2,6 +2,7 @@ import React, {Component, Fragment} from "react";
 import {HashRouter, Layout, Route, IndexRoute, HashHistory} from 'react-router-dom';
 import SavedUpdatePopup from "./components/SavedUpdatePopup";
 import FillInPopup from "./components/fillInPopup";
+import WebsiteIntegrationBar from "./components/websiteIntegrationBar";
 import Tabs from "../../shared/tabs_api";
 import {connect} from "react-redux";
 
@@ -29,6 +30,7 @@ class App extends Component {
           <React.Fragment>
             <Route path="/savedUpdatePopup" render={(props) => <SavedUpdatePopup {...props}{...this.state}/>}/>
             <Route path="/fillInPopup" render={(props) => <FillInPopup {...props}{...this.state}/>}/>
+            <Route path="/websiteIntegrationBar" render={(props) => <WebsiteIntegrationBar {...props}{...this.state}/>}/>
           </React.Fragment>
         </HashRouter>
     )

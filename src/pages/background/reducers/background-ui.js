@@ -18,3 +18,45 @@ export const savedUpdatePopup = createReducer({
     });
   }
 });
+
+export const websiteIntegrationBar = createReducer({
+
+}, {
+  ['INIT_WEBSITE_INTEGRATION'](state, action){
+    const {tabId} = action.payload;
+    return update(state, {
+      [tabId]: {$set: {
+        websiteName: '',
+        websiteHome: '',
+        loginSteps: [],
+        logoutSteps: [],
+        checkAlreadyLoggedSteps: []
+      }}
+    });
+  },
+  ['END_WEBSITE_INTEGRATION'](state, action){
+    const {tabId} = action.payload;
+
+    return update(state, {
+      $unset: [tabId]
+    });
+  },
+  ['WEBSITE_NAME_CHANGED'](state, action){
+    const {tabId, name} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        websiteName: {$set: name}
+      }
+    });
+  },
+  ['WEBSITE_HOME_CHANGED'](state, action){
+    const {tabId, home} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        websiteHome: {$set: home}
+      }
+    })
+  }
+});
