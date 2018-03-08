@@ -56,7 +56,7 @@ export function asyncWait(ms){
 }
 
 export function copyTextToClipboard(str){
-  let dummy = document.createElement("input");
+  let dummy = document.createElement("textarea");
   dummy.setAttribute('id', 'copy-password');
   dummy.style.position = 'absolute';
   dummy.style.left = '-150000px';

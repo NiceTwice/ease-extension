@@ -35,3 +35,109 @@ export const websiteHomeChanged = ({tabId, websiteHome}) => {
     }
   }
 };
+
+export const websiteAddLoginStep = ({tabId, step}) => {
+  return {
+    type: 'WEBSITE_ADD_LOGIN_STEP',
+    payload: {
+      tabId: tabId,
+      step: step
+    }
+  }
+};
+
+export const websiteLoginStepChanged = ({tabId, stepIndex, stepParamName, stepParamValue}) => {
+  return {
+    type: 'WEBSITE_LOGIN_STEP_CHANGED',
+    payload: {
+      tabId: tabId,
+      stepIndex: stepIndex,
+      stepParamName: stepParamName,
+      stepParamValue: stepParamValue
+    }
+  }
+};
+
+export const websiteLoginStepRemoved = ({tabId, stepIndex}) => {
+  return {
+    type: 'WEBSITE_LOGIN_STEP_REMOVED',
+    payload: {
+      tabId: tabId,
+      stepIndex: stepIndex
+    }
+  }
+};
+
+export const websiteAddLogoutStep = ({tabId, step}) => {
+  return {
+    type: 'WEBSITE_ADD_LOGOUT_STEP',
+    payload: {
+      tabId: tabId,
+      step: step
+    }
+  }
+};
+
+export const websiteLogoutStepChanged = ({tabId, stepIndex, stepParamName, stepParamValue}) => {
+  return {
+    type: 'WEBSITE_LOGOUT_STEP_CHANGED',
+    payload: {
+      tabId: tabId,
+      stepIndex: stepIndex,
+      stepParamName: stepParamName,
+      stepParamValue: stepParamValue
+    }
+  }
+};
+
+export const websiteLogoutStepRemoved = ({tabId, stepIndex}) => {
+  return {
+    type: 'WEBSITE_LOGOUT_STEP_REMOVED',
+    payload: {
+      tabId: tabId,
+      stepIndex: stepIndex
+    }
+  }
+};
+
+export const websiteAddCheckAlreadyLoggedStep = ({tabId, step}) => {
+  return {
+    type: 'WEBSITE_ADD_CHECKALREADYLOGGED_STEP',
+    payload: {
+      tabId: tabId,
+      step: step
+    }
+  }
+};
+
+export const websiteCheckAlreadyLoggedStepChanged = ({tabId, stepIndex, stepParamName, stepParamValue}) => {
+  return {
+    type: 'WEBSITE_CHECKALREADYLOGGED_STEP_CHANGED',
+    payload: {
+      tabId: tabId,
+      stepIndex: stepIndex,
+      stepParamName: stepParamName,
+      stepParamValue: stepParamValue
+    }
+  }
+};
+
+export const websiteCheckAlreadyLoggedStepRemoved = ({tabId, stepIndex}) => {
+  return {
+    type: 'WEBSITE_CHECKALREADYLOGGED_STEP_REMOVED',
+    payload: {
+      tabId: tabId,
+      stepIndex: stepIndex
+    }
+  }
+};
+
+export const websiteCheckAlreadyLoggedSelectorChanged = ({tabId, selector}) => {
+  return {
+    type: 'WEBSITE_CHECKALREADYLOGGED_SELECTOR_CHANGED',
+    payload: {
+      tabId: tabId,
+      selector: selector
+    }
+  }
+};

@@ -32,8 +32,8 @@
       "website-integration": {
          "description": "Open website integration bar",
          "suggested_key": {
-            "default": "Ctrl+Shift+E",
-            "mac": "Ctrl+Shift+E"
+            "default": "Alt+Shift+E",
+            "mac": "Alt+Shift+E"
          }
       }
    },

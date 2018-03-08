@@ -30,7 +30,8 @@ export const websiteIntegrationBar = createReducer({
         websiteHome: '',
         loginSteps: [],
         logoutSteps: [],
-        checkAlreadyLoggedSteps: []
+        checkAlreadyLoggedSteps: [],
+        checkAlreadyLoggedSelector: ''
       }}
     });
   },
@@ -56,6 +57,108 @@ export const websiteIntegrationBar = createReducer({
     return update(state, {
       [tabId]: {
         websiteHome: {$set: home}
+      }
+    })
+  },
+  ['WEBSITE_ADD_LOGIN_STEP'](state, action){
+    const {tabId, step} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        loginSteps: {$push: [step]}
+      }
+    })
+  },
+  ['WEBSITE_LOGIN_STEP_CHANGED'](state, action){
+    const {tabId, stepIndex, stepParamName, stepParamValue} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        loginSteps:{
+          [stepIndex]: {
+            [stepParamName]: {$set: stepParamValue}
+          }
+        }
+      }
+    });
+  },
+  ['WEBSITE_LOGIN_STEP_REMOVED'](state, action){
+    const {tabId, stepIndex} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        loginSteps: {$splice: [[stepIndex, 1]]}
+      }
+    });
+  },
+  ['WEBSITE_ADD_LOGOUT_STEP'](state, action){
+    const {tabId, step} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        logoutSteps: {$push: [step]}
+      }
+    })
+  },
+  ['WEBSITE_LOGOUT_STEP_CHANGED'](state, action){
+    const {tabId, stepIndex, stepParamName, stepParamValue} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        logoutSteps:{
+          [stepIndex]: {
+            [stepParamName]: {$set: stepParamValue}
+          }
+        }
+      }
+    });
+  },
+  ['WEBSITE_LOGOUT_STEP_REMOVED'](state, action){
+    const {tabId, stepIndex} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        logoutSteps: {$splice: [[stepIndex, 1]]}
+      }
+    });
+  },
+  ['WEBSITE_ADD_CHECKALREADYLOGGED_STEP'](state, action){
+    const {tabId, step} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        checkAlreadyLoggedSteps: {$push: [step]}
+      }
+    })
+  },
+  ['WEBSITE_CHECKALREADYLOGGED_STEP_CHANGED'](state, action){
+    const {tabId, stepIndex, stepParamName, stepParamValue} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        checkAlreadyLoggedSteps:{
+          [stepIndex]: {
+            [stepParamName]: {$set: stepParamValue}
+          }
+        }
+      }
+    });
+  },
+  ['WEBSITE_CHECKALREADYLOGGED_STEP_REMOVED'](state, action){
+    const {tabId, stepIndex} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        checkAlreadyLoggedSteps: {$splice: [[stepIndex, 1]]}
+      }
+    });
+  },
+  ['WEBSITE_CHECKALREADYLOGGED_SELECTOR_CHANGED'](state, action){
+    const {tabId, selector} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        checkAlreadyLoggedSelector: {$set: selector}
       }
     })
   }

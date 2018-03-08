@@ -323,6 +323,38 @@
   padding: 15px;
   transition: transform .3s;
   overflow: auto;
+  .actions_tab {
+    & > .menu {
+      & > .item {
+        margin: 0 2px;
+        padding: 10px 11.4px;
+      }
+    }
+    & > .tab {
+      padding: 0;
+      border: none;
+      .add_new {
+        box-shadow: none !important;
+        text-align: center;
+      }
+    }
+  }
+  .action_list {
+    .action_section {
+      position: relative;
+      &:hover {
+        .delete_button {
+          display: block;
+        }
+      }
+      .delete_button {
+        display:none;
+        position: absolute;
+        top:5px;
+        right: 7px;
+      }
+    }
+  }
 }
 
 .savedUpdate {
