@@ -85,20 +85,24 @@ class WebsiteIntegrationBar extends Component {
   runtimeMessageListener = (request, sender, sendResponse) => {
     switch (request.type){
       case 'pick_fill_element_selector':
-        this.hideWrapper();
         this.pickInputEntrySelector().then(response => {
           sendResponse(MessageResponse(false, response));
         }).catch(err => {
           sendResponse(MessageResponse(true, err));
-        }).finally(() => {this.showWrapper()});
+        });
         break;
       case 'pick_click_element_selector':
-        this.hideWrapper();
         this.pickClickSelector().then(response => {
           sendResponse(MessageResponse(false, response));
         }).catch(err => {
           sendResponse(MessageResponse(true, err));
-        }).finally(() => {this.showWrapper()});
+        });
+        break;
+      case 'websiteIntegrationBar_show':
+        this.showWrapper();
+        break;
+      case 'websiteIntegrationBar_hide':
+        this.hideWrapper();
         break;
       default:
         return;

@@ -1,8 +1,9 @@
 import React, {Component, Fragment} from "react";
 import classnames from "classnames";
-import {Dropdown,Divider,Tab, Icon, Header, Input, Button, Form, Table, Accordion, TextArea, Checkbox} from "semantic-ui-react";
+import Tabs from "../../../../shared/tabs_api";
+import {Label, Dropdown,Divider,Tab, Icon, Header, Input, Button, Form, Table, Accordion, TextArea, Checkbox} from "semantic-ui-react";
 import * as wi from "../../../../shared/actions/websiteIntegration";
-import {copyTextToClipboard, TabMessage} from "../../../../shared/utils";
+import {copyTextToClipboard, TabMessage, extractRootDomain} from "../../../../shared/utils";
 import {connect} from "react-redux";
 
 let tabId = -1;
@@ -12,7 +13,7 @@ function toggleAccordion() {
 };
 
 const actions = {
-  fill: {action: 'fill', what: '', search: '', grave: true},
+  fill: {action: 'fill', what: 'login', search: '', grave: true},
   click: {action: 'click', search: '', grave: true },
   waitfor: {action: 'waitfor', search: ''},
   enterFrame: {action: 'enterFrame', search: ''},
@@ -103,7 +104,7 @@ class LoginSteps extends Component {
     }));
   };
   render(){
-    const {steps} = this.props;
+    const {steps, info} = this.props;
 
     return (
         <Table compact celled color="green">
@@ -121,6 +122,7 @@ class LoginSteps extends Component {
                       {getActionComponent(action.action, {
                         action: action,
                         idx: idx,
+                        info:info,
                         paramChanged: this.stepParamChanged
                       })}
                     </Table.Cell>
@@ -223,11 +225,15 @@ class CheckAlreadyLoggedSteps extends Component {
     }))
   };
   startSelection = () => {
+    TabMessage(tabId, 'websiteIntegrationBar_hide', {}, {frameId: 0});
     TabMessage(tabId, 'pick_click_element_selector').then(selector => {
       this.props.dispatch(wi.websiteCheckAlreadyLoggedSelectorChanged({
         tabId: tabId,
         selector: selector
-      }))
+      }));
+      TabMessage(tabId, 'websiteIntegrationBar_show', {}, {frameId: 0});
+    }).catch(err => {
+      TabMessage(tabId, 'websiteIntegrationBar_show', {}, {frameId: 0});
     });
   };
   render(){
@@ -274,19 +280,23 @@ class FillAction extends Component {
   constructor(props){
     super(props);
     this.state = {
-      active: false
+      active: true
     }
   }
   toggle = toggleAccordion.bind(this);
   startSelection = () => {
     const {idx, paramChanged} = this.props;
-
+    TabMessage(tabId, 'websiteIntegrationBar_hide', {}, {frameId: 0});
     TabMessage(tabId, 'pick_fill_element_selector').then(selector => {
       paramChanged(idx, 'search', selector);
+      TabMessage(tabId, 'websiteIntegrationBar_show', {}, {frameId: 0});
+    }).catch(err => {
+      TabMessage(tabId, 'websiteIntegrationBar_show', {}, {frameId: 0});
     });
   };
   render(){
-    const {action, idx, paramChanged} = this.props;
+    const {action, idx, paramChanged, info} = this.props;
+    const connectionInfoOptions = info.connectionInfo;
 
     return (
         <Accordion>
@@ -302,18 +312,22 @@ class FillAction extends Component {
                                paramChanged(idx, 'search', e.target.value);
                              }}
                              value={action.search}/>
-              <Form.Checkbox label="Critical"
+              <Form.Checkbox label="Mandatory action"
                              onChange={(e, {checked}) => {
                                paramChanged(idx, 'grave', checked);
                              }}
                              checked={action.grave}/>
-              <Form.Input label="Connection info to fill"
-                          placeholder="Connection info name"
-                          fluid
-                          value={action.what}
-                          onChange={(e) => {
-                            paramChanged(idx, 'what', e.target.value);
-                          }}/>
+              <Form.Dropdown label="Connection info to fill"
+                             fluid
+                             selection
+                             scrolling={false}
+                             upward
+                             value={action.what}
+                             onChange={(e, {value}) => {
+                               paramChanged(idx, 'what', value);
+                             }}
+                             options={connectionInfoOptions}
+                             placeholder="Connection info name"/>
             </Form>
           </Accordion.Content>
         </Accordion>
@@ -325,15 +339,18 @@ class ClickAction extends Component {
   constructor(props){
     super(props);
     this.state ={
-      active: false
+      active: true
     }
   }
   toggle = toggleAccordion.bind(this);
   startSelection = () => {
     const {idx, paramChanged} = this.props;
 
+    TabMessage(tabId, 'websiteIntegrationBar_hide', {}, {frameId: 0});
     TabMessage(tabId, 'pick_click_element_selector').then(selector => {
       paramChanged(idx, 'search', selector);
+    }).catch(err => {
+      TabMessage(tabId, 'websiteIntegrationBar_show', {}, {frameId: 0});
     });
   };
   render(){
@@ -353,7 +370,7 @@ class ClickAction extends Component {
                                paramChanged(idx, 'search', e.target.value);
                              }}
                              value={action.search}/>
-              <Form.Checkbox label="Critical"
+              <Form.Checkbox label="Mandatory action"
                              onChange={(e, {checked}) => {
                                paramChanged(idx, 'grave', checked);
                              }}
@@ -369,15 +386,18 @@ class WaitforAction extends Component {
   constructor(props){
     super(props);
     this.state = {
-      active: false
+      active: true
     }
   }
   toggle = toggleAccordion.bind(this);
   startSelection = () => {
     const {idx, paramChanged} = this.props;
 
+    TabMessage(tabId, 'websiteIntegrationBar_hide', {}, {frameId: 0});
     TabMessage(tabId, 'pick_click_element_selector').then(selector => {
       paramChanged(idx, 'search', selector);
+    }).catch(err => {
+      TabMessage(tabId, 'websiteIntegrationBar_show', {}, {frameId: 0});
     });
   };
   render(){
@@ -408,7 +428,7 @@ class EnterFrameAction extends Component {
   constructor(props){
     super(props);
     this.state = {
-      active: false
+      active: true
     }
   }
   toggle = toggleAccordion.bind(this);
@@ -484,7 +504,7 @@ class EraseCookieAction extends Component {
   constructor(props){
     super(props);
     this.state = {
-      active: false
+      active: true
     }
   }
   toggle = toggleAccordion.bind(this);
@@ -517,7 +537,7 @@ class GotoAction extends Component {
   constructor(props){
     super(props);
     this.state = {
-      active: false
+      active: true
     }
   }
   toggle = toggleAccordion.bind(this);
@@ -570,6 +590,54 @@ class SearchAction extends Component {
             </Form>
           </Accordion.Content>
         </Accordion>
+    )
+  }
+}
+
+const renderConnectionInfoLabel = (item, index, defaultProps) => {
+  return <Label>{item.text}{index > 1 && <Icon name="delete" onClick={item.onRemove}/>}</Label>;
+};
+
+@connect()
+class WebsiteConnectionInfoChooser extends Component {
+  constructor(props){
+    super(props);
+  }
+  onAddItem = (e, data) => {
+    this.props.dispatch(wi.websiteAddConnectionInfo({
+      tabId: tabId,
+      connectionInfoName: data.value
+    }));
+  };
+  onRemoveItem = (index) => {
+    this.props.dispatch(wi.websiteRemoveConnectionInfo({
+      tabId: tabId,
+      index: index
+    }))
+  };
+  render(){
+    const {connectionInfo, chosenConnectionInfo} = this.props;
+    const generatedConnectionInfo = connectionInfo.map((item, index) => {
+      return {
+          ...item,
+        onRemove: this.onRemoveItem.bind(null, index)
+      }
+    });
+    return (
+        <Form.Field>
+          <label>Connection information</label>
+          <Dropdown fluid
+                    multiple
+                    selection
+                    allowAdditions
+                    search
+                    noResultsMessage="Type new name to add"
+                    renderLabel={renderConnectionInfoLabel}
+                    onAddItem={this.onAddItem}
+                    value={chosenConnectionInfo}
+                    placeholder="Connection info"
+                    options={generatedConnectionInfo}/>
+        </Form.Field>
     )
   }
 }
@@ -637,6 +705,24 @@ class WebsiteIntegrationBar extends Component {
       this.setState({jsonCopied: false});
     }, 1500);
   };
+  setupTabUrl = () => {
+    Tabs.getCurrent().then(tab => {
+      this.props.dispatch(wi.websiteHomeChanged({
+        tabId: tab.id,
+        websiteHome: tab.url
+      }));
+    });
+  };
+  setupTabName = () => {
+    Tabs.getCurrent().then(tab => {
+      const root = extractRootDomain(tab.url);
+      const name = root.split('.')[0].replace(/\b\w/g, l => l.toUpperCase());
+      this.props.dispatch(wi.websiteNameChanged({
+        tabId: tab.id,
+        websiteName: name
+      }));
+    });
+  };
   render(){
     const {websiteIntegrationBar,tabId} = this.props;
     const info = websiteIntegrationBar[tabId];
@@ -646,6 +732,7 @@ class WebsiteIntegrationBar extends Component {
         menuItem: { key: 'Login', icon: 'sign in', content: 'Login' },
         render: () => (<Tab.Pane>
           <LoginSteps tabId={tabId}
+                      info={info}
                       steps={info.loginSteps}/>
         </Tab.Pane>),
       },
@@ -675,14 +762,23 @@ class WebsiteIntegrationBar extends Component {
             </Header.Content>
           </Header>
           <Form class="full_flex">
-            <Form.Input label="Website name"
-                        value={info.websiteName}
-                        onChange={this.changeWebsiteName}
-                        placeholder="Facebook"/>
-            <Form.Input label="Website login url"
-                        value={info.websiteHome}
-                        onChange={this.changeWebsiteHome}
-                        placeholder="https://facebook.com"/>
+            <Form.Field>
+              <label>Website name <a title="Parse current page's url"
+                                     style={{float: 'right'}}
+                                     onClick={this.setupTabName}>Fill with page info</a></label>
+              <Input value={info.websiteName}
+                     onChange={this.changeWebsiteName}
+                     placeholder="Facebook"/>
+            </Form.Field>
+            <Form.Field>
+              <label>Website login url <a style={{float: 'right'}} title="Fill with url of the current page"
+                                          onClick={this.setupTabUrl}>Fill with page info</a></label>
+              <Form.Input value={info.websiteHome}
+                          onChange={this.changeWebsiteHome}
+                          placeholder="https://facebook.com"/>
+            </Form.Field>
+            <WebsiteConnectionInfoChooser connectionInfo={info.connectionInfo}
+                                          chosenConnectionInfo={info.chosenConnectionInfo}/>
             <Divider hidden />
             <Form.Field class="full_flex">
               <Tab class="actions_tab" menu={{secondary: true}} panes={panes}/>

@@ -23,16 +23,9 @@ export const websiteIntegrationBar = createReducer({
 
 }, {
   ['INIT_WEBSITE_INTEGRATION'](state, action){
-    const {tabId} = action.payload;
+    const {tabId, info} = action.payload;
     return update(state, {
-      [tabId]: {$set: {
-        websiteName: '',
-        websiteHome: '',
-        loginSteps: [],
-        logoutSteps: [],
-        checkAlreadyLoggedSteps: [],
-        checkAlreadyLoggedSelector: ''
-      }}
+      [tabId]: {$set: info}
     });
   },
   ['END_WEBSITE_INTEGRATION'](state, action){
@@ -159,6 +152,26 @@ export const websiteIntegrationBar = createReducer({
     return update(state, {
       [tabId]: {
         checkAlreadyLoggedSelector: {$set: selector}
+      }
+    })
+  },
+  ['WEBSITE_ADD_CONNECTION_INFO'](state, action){
+    const {tabId, connectionInfoName} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        connectionInfo: {$push: [{key: connectionInfoName, text: connectionInfoName, value: connectionInfoName}]},
+        chosenConnectionInfo: {$push: [connectionInfoName]}
+      }
+    });
+  },
+  ['WEBSITE_REMOVE_CONNECION_INFO'](state, action){
+    const {tabId, index} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        connectionInfo: {$splice: [[index, 1]]},
+        chosenConnectionInfo: {$splice: [[index, 1]]}
       }
     })
   }

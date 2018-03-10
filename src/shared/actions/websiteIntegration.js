@@ -2,7 +2,20 @@ export const initWebsiteIntegration = ({tabId}) => {
   return {
     type: 'INIT_WEBSITE_INTEGRATION',
     payload: {
-      tabId: tabId
+      tabId: tabId,
+      info: {
+        websiteName: '',
+        websiteHome: '',
+        loginSteps: [],
+        logoutSteps: [],
+        checkAlreadyLoggedSteps: [],
+        checkAlreadyLoggedSelector: '',
+        connectionInfo: [
+          {key: 'login', text: 'login', value: 'login'},
+          {key: 'password', text: 'password', value: 'password'}
+        ],
+        chosenConnectionInfo: ['login', 'password']
+      }
     }
   }
 };
@@ -138,6 +151,27 @@ export const websiteCheckAlreadyLoggedSelectorChanged = ({tabId, selector}) => {
     payload: {
       tabId: tabId,
       selector: selector
+    }
+  }
+};
+
+//connection info form {name: 'login', removable: false}
+export const websiteAddConnectionInfo = ({tabId, connectionInfoName}) => {
+  return {
+    type: 'WEBSITE_ADD_CONNECTION_INFO',
+    payload: {
+      tabId: tabId,
+      connectionInfoName: connectionInfoName
+    }
+  }
+};
+
+export const websiteRemoveConnectionInfo = ({tabId, index}) => {
+  return {
+    type: 'WEBSITE_REMOVE_CONNECION_INFO',
+    payload: {
+      tabId: tabId,
+      index: index
     }
   }
 };
