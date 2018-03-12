@@ -766,6 +766,13 @@ export const actions = {
   },
   easeLogout: (data, sendResponse, senderTab) => {
     store.dispatch(logout());
+  },
+  executeActionList: async (data, sendResponse, senderTab) => {
+    const {actions, values, home} = data;
+
+    const tab = await Tabs.create({url: home});
+    await execActionList(tab.id, actions, values, true);
+    sendResponse(MessageResponse(false, 'finished'));
   }
 };
 

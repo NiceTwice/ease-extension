@@ -3,7 +3,7 @@ import classnames from "classnames";
 import Tabs from "../../../../shared/tabs_api";
 import {Label, Dropdown,Divider,Tab, Icon, Header, Input, Button, Form, Table, Accordion, TextArea, Checkbox} from "semantic-ui-react";
 import * as wi from "../../../../shared/actions/websiteIntegration";
-import {copyTextToClipboard, TabMessage, extractRootDomain} from "../../../../shared/utils";
+import {copyTextToClipboard, TabMessage, extractRootDomain, BackgroundMessage} from "../../../../shared/utils";
 import {connect} from "react-redux";
 
 let tabId = -1;
@@ -21,6 +21,40 @@ const actions = {
   erasecookies: {action: 'erasecookies', name: ''},
   goto: {action: 'goto', url: ''},
   waitload: {action: 'waitload'}
+};
+
+const initClickActionDetector = () => {
+  TabMessage(tabId, 'websiteIntegrationBar_startSelection', {});
+  return TabMessage(tabId, 'pick_click_element_selector').then(selectorInfo => {
+    const selector = selectorInfo.selector;
+    if (!!selectorInfo.frameSrc){
+      console.log('selected in the frame');
+      TabMessage(tabId, 'getOptimizedSelector', `[src="${selectorInfo.frameSrc}"]`, {frameId: 0}).then(response => {
+        console.log('selected frame unique selector is', response);
+      });
+    }
+    TabMessage(tabId, 'websiteIntegrationBar_endSelection', {});
+    return {action: 'click', grave:true, search: selector};
+  }).catch(err => {
+    TabMessage(tabId, 'websiteIntegrationBar_endSelection', {});
+  });
+};
+
+const initFillInActionDetector = () => {
+  TabMessage(tabId, 'websiteIntegrationBar_startSelection', {});
+  return TabMessage(tabId, 'pick_fill_element_selector').then(selectorInfo => {
+    const selector = selectorInfo.selector;
+    if (!!selectorInfo.frameSrc){
+      console.log('selected in the frame');
+      TabMessage(tabId, 'getOptimizedSelector', `[src="${selectorInfo.frameSrc}"]`, {frameId: 0}).then(response => {
+        console.log('selected frame unique selector is', response);
+      });
+    }
+    TabMessage(tabId, 'websiteIntegrationBar_endSelection', {});
+    return {action: 'fill', grave:true, search: selector, what:'login'};
+  }).catch(err => {
+    TabMessage(tabId, 'websiteIntegrationBar_endSelection', {});
+  });
 };
 
 const StepChooserDropdown = ({chooseStep, color}) => {
@@ -83,11 +117,54 @@ class LoginSteps extends Component {
   constructor(props){
     super(props);
   }
+  testSteps = () => {
+    const {info} = this.props;
+    const connectionInfo = info.chosenConnectionInfo.reduce((acumulator,currentValue) => {
+      acumulator[currentValue] = 'test';
+      return acumulator;
+    }, {});
+    const steps = processStepList(info.loginSteps);
+
+    BackgroundMessage('executeActionsList', {
+      actions: steps,
+      values: connectionInfo,
+      home: info.websiteHome
+    });
+  };
   addStep = (name) => {
-    this.props.dispatch(wi.websiteAddLoginStep({
-      tabId: this.props.tabId,
-      step: actions[name]
-    }));
+    switch (name) {
+      case 'click':
+        initClickActionDetector().then(response => {
+          this.props.dispatch(wi.websiteAddLoginStep({
+            tabId: this.props.tabId,
+            step: response
+          }));
+        }).catch(err => {
+          this.props.dispatch(wi.websiteAddLoginStep({
+            tabId: this.props.tabId,
+            step: actions[name]
+          }));
+        });
+        break;
+      case 'fill':
+        initFillInActionDetector().then(response => {
+          this.props.dispatch(wi.websiteAddLoginStep({
+            tabId: this.props.tabId,
+            step: response
+          }));
+        }).catch(err => {
+          this.props.dispatch(wi.websiteAddLoginStep({
+            tabId: this.props.tabId,
+            step: actions[name]
+          }));
+        });
+        break;
+      default:
+        this.props.dispatch(wi.websiteAddLoginStep({
+          tabId: this.props.tabId,
+          step: actions[name]
+        }));
+    }
   };
   stepParamChanged = (stepIndex, paramName, paramValue) => {
     this.props.dispatch(wi.websiteLoginStepChanged({
@@ -107,31 +184,34 @@ class LoginSteps extends Component {
     const {steps, info} = this.props;
 
     return (
-        <Table compact celled color="green">
-          <Table.Body class="action_list">
-            {steps.map((action, idx) => {
-              return (
-                  <Table.Row key={idx} class="action_section">
-                    <Icon name="trash outline"
-                          fitted
-                          title="remove this action"
-                          class="delete_button"
-                          onClick={this.removeStep.bind(null, idx)}
-                          link/>
-                    <Table.Cell>
-                      {getActionComponent(action.action, {
-                        action: action,
-                        idx: idx,
-                        info:info,
-                        paramChanged: this.stepParamChanged
-                      })}
-                    </Table.Cell>
-                  </Table.Row>
-              )
-            })}
-          </Table.Body>
-          <StepChooserDropdown color="green" chooseStep={this.addStep}/>
-        </Table>
+        <Fragment>
+          <Table compact celled color="green">
+            <Table.Body class="action_list">
+              {steps.map((action, idx) => {
+                return (
+                    <Table.Row key={idx} class="action_section">
+                      <Icon name="trash outline"
+                            fitted
+                            title="remove this action"
+                            class="delete_button"
+                            onClick={this.removeStep.bind(null, idx)}
+                            link/>
+                      <Table.Cell>
+                        {getActionComponent(action.action, {
+                          action: action,
+                          idx: idx,
+                          info:info,
+                          paramChanged: this.stepParamChanged
+                        })}
+                      </Table.Cell>
+                    </Table.Row>
+                )
+              })}
+            </Table.Body>
+            <StepChooserDropdown color="green" chooseStep={this.addStep}/>
+          </Table>
+          <Button basic content="test steps"/>
+        </Fragment>
     )
   }
 }
@@ -225,15 +305,15 @@ class CheckAlreadyLoggedSteps extends Component {
     }))
   };
   startSelection = () => {
-    TabMessage(tabId, 'websiteIntegrationBar_hide', {}, {frameId: 0});
+    TabMessage(tabId, 'websiteIntegrationBar_startSelection', {}, {frameId: 0});
     TabMessage(tabId, 'pick_click_element_selector').then(selector => {
       this.props.dispatch(wi.websiteCheckAlreadyLoggedSelectorChanged({
         tabId: tabId,
         selector: selector
       }));
-      TabMessage(tabId, 'websiteIntegrationBar_show', {}, {frameId: 0});
+      TabMessage(tabId, 'websiteIntegrationBar_endSelection', {}, {frameId: 0});
     }).catch(err => {
-      TabMessage(tabId, 'websiteIntegrationBar_show', {}, {frameId: 0});
+      TabMessage(tabId, 'websiteIntegrationBar_endSelection', {}, {frameId: 0});
     });
   };
   render(){
@@ -286,12 +366,19 @@ class FillAction extends Component {
   toggle = toggleAccordion.bind(this);
   startSelection = () => {
     const {idx, paramChanged} = this.props;
-    TabMessage(tabId, 'websiteIntegrationBar_hide', {}, {frameId: 0});
-    TabMessage(tabId, 'pick_fill_element_selector').then(selector => {
+    TabMessage(tabId, 'websiteIntegrationBar_startSelection', {});
+    TabMessage(tabId, 'pick_fill_element_selector').then(selectorInfo => {
+      const selector = selectorInfo.selector;
+      if (!!selectorInfo.frameSrc){
+        console.log('selected in the frame');
+        TabMessage(tabId, 'getOptimizedSelector', `[src="${selectorInfo.frameSrc}"]`, {frameId: 0}).then(response => {
+          console.log('selected frame unique selector is', response);
+        });
+      }
       paramChanged(idx, 'search', selector);
-      TabMessage(tabId, 'websiteIntegrationBar_show', {}, {frameId: 0});
+      TabMessage(tabId, 'websiteIntegrationBar_endSelection', {});
     }).catch(err => {
-      TabMessage(tabId, 'websiteIntegrationBar_show', {}, {frameId: 0});
+      TabMessage(tabId, 'websiteIntegrationBar_endSelection', {});
     });
   };
   render(){
@@ -306,7 +393,7 @@ class FillAction extends Component {
           </Accordion.Title>
           <Accordion.Content active={this.state.active}>
             <Form as="div">
-              <Form.TextArea label={<label>Selector <Icon name="wizard" link onClick={this.startSelection} title="Pick manually"/></label>}
+              <Form.TextArea label={<label>Selector <a onClick={this.startSelection} title="Pick manually">choose manually</a></label>}
                              placeholder="CSS selector"
                              onChange={(e) => {
                                paramChanged(idx, 'search', e.target.value);
@@ -338,19 +425,26 @@ class FillAction extends Component {
 class ClickAction extends Component {
   constructor(props){
     super(props);
-    this.state ={
+    this.state = {
       active: true
     }
   }
   toggle = toggleAccordion.bind(this);
   startSelection = () => {
     const {idx, paramChanged} = this.props;
-
-    TabMessage(tabId, 'websiteIntegrationBar_hide', {}, {frameId: 0});
-    TabMessage(tabId, 'pick_click_element_selector').then(selector => {
+    TabMessage(tabId, 'websiteIntegrationBar_startSelection', {});
+    TabMessage(tabId, 'pick_click_element_selector').then(selectorInfo => {
+      const selector = selectorInfo.selector;
+      if (!!selectorInfo.frameSrc){
+        console.log('selected in the frame');
+        TabMessage(tabId, 'getOptimizedSelector', `[src="${selectorInfo.frameSrc}"]`, {frameId: 0}).then(response => {
+          console.log('selected frame unique selector is', response);
+        });
+      }
       paramChanged(idx, 'search', selector);
+      TabMessage(tabId, 'websiteIntegrationBar_endSelection', {});
     }).catch(err => {
-      TabMessage(tabId, 'websiteIntegrationBar_show', {}, {frameId: 0});
+      TabMessage(tabId, 'websiteIntegrationBar_endSelection', {});
     });
   };
   render(){
@@ -364,7 +458,7 @@ class ClickAction extends Component {
           </Accordion.Title>
           <Accordion.Content active={this.state.active}>
             <Form as="div">
-              <Form.TextArea label={<label>Selector <Icon name="wizard" link onClick={this.startSelection} title="Pick manually"/></label>}
+              <Form.TextArea label={<label>Selector <a onClick={this.startSelection} title="Pick manually">choose manually</a></label>}
                              placeholder="CSS selector"
                              onChange={(e) => {
                                paramChanged(idx, 'search', e.target.value);
@@ -393,11 +487,12 @@ class WaitforAction extends Component {
   startSelection = () => {
     const {idx, paramChanged} = this.props;
 
-    TabMessage(tabId, 'websiteIntegrationBar_hide', {}, {frameId: 0});
+    TabMessage(tabId, 'websiteIntegrationBar_startSelection', {}, {frameId: 0});
     TabMessage(tabId, 'pick_click_element_selector').then(selector => {
       paramChanged(idx, 'search', selector);
+      TabMessage(tabId, 'websiteIntegrationBar_endSelection', {}, {frameId: 0});
     }).catch(err => {
-      TabMessage(tabId, 'websiteIntegrationBar_show', {}, {frameId: 0});
+      TabMessage(tabId, 'websiteIntegrationBar_endSelection', {}, {frameId: 0});
     });
   };
   render(){
@@ -411,7 +506,7 @@ class WaitforAction extends Component {
           </Accordion.Title>
           <Accordion.Content active={this.state.active}>
             <Form as="div">
-              <Form.TextArea label={<label>Selector <Icon name="wizard" link onClick={this.startSelection} title="Pick manually"/></label>}
+              <Form.TextArea label={<label>Selector <a onClick={this.startSelection} title="Pick manually">choose manually</a></label>}
                              placeholder="CSS selector"
                              onChange={(e) => {
                                paramChanged(idx, 'search', e.target.value);
@@ -566,34 +661,6 @@ class GotoAction extends Component {
   }
 }
 
-class SearchAction extends Component {
-  constructor(props){
-    super(props);
-    this.state = {
-      active: false
-    }
-  }
-  toggle = toggleAccordion.bind(this);
-  render(){
-    return (
-        <Accordion>
-          <Accordion.Title active={this.state.active} onClick={this.toggle}>
-            <Icon name="dropdown"/>
-            Search
-          </Accordion.Title>
-          <Accordion.Content active={this.state.active}>
-            <Form as="div">
-              <Form.TextArea
-                  placeholder="CSS selector"
-                  label="Selector"
-                  value=".bite .pute .pppute"/>
-            </Form>
-          </Accordion.Content>
-        </Accordion>
-    )
-  }
-}
-
 const renderConnectionInfoLabel = (item, index, defaultProps) => {
   return <Label>{item.text}{index > 1 && <Icon name="delete" onClick={item.onRemove}/>}</Label>;
 };
@@ -619,7 +686,7 @@ class WebsiteConnectionInfoChooser extends Component {
     const {connectionInfo, chosenConnectionInfo} = this.props;
     const generatedConnectionInfo = connectionInfo.map((item, index) => {
       return {
-          ...item,
+        ...item,
         onRemove: this.onRemoveItem.bind(null, index)
       }
     });
@@ -641,6 +708,16 @@ class WebsiteConnectionInfoChooser extends Component {
     )
   }
 }
+
+const processStepList = (steps) => {
+  let ret = [];
+  steps.map(step => {
+    if ((step.action === 'click' || step.action === 'fill') && !!step.grave)
+      ret.push({action: 'waitfor', search: step.search});
+    ret.push(step);
+  });
+  return ret;
+};
 
 @connect(store => ({
   websiteIntegrationBar : store.websiteIntegrationBar
@@ -683,17 +760,19 @@ class WebsiteIntegrationBar extends Component {
   generateJson = () => {
     const {websiteIntegrationBar,tabId} = this.props;
     const info = websiteIntegrationBar[tabId];
-    let checkAlreadyLoggedSteps = info.checkAlreadyLoggedSteps.slice();
-    checkAlreadyLoggedSteps.push({search: info.checkAlreadyLoggedSelector});
+    const loginSteps = processStepList(info.loginSteps);
+    const logoutSteps = processStepList(info.logoutSteps);
+    const checkAlreadyLoggedSteps = processStepList(info.checkAlreadyLoggedSteps);
 
+    checkAlreadyLoggedSteps.push({search: info.checkAlreadyLoggedSelector});
     let json = {
       name: info.websiteName,
       home: info.websiteHome,
-      conect: {
-        todo: info.loginSteps
+      connect: {
+        todo: loginSteps
       },
       logout: {
-        todo: info.logoutSteps
+        todo: logoutSteps
       },
       checkAlreadyLogged: checkAlreadyLoggedSteps
     };

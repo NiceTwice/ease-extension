@@ -35,6 +35,10 @@ class WebsiteIntegrationBar extends Component {
       wrapperStyles: null
     }
   };
+  generateOptimizedSelector = (startSelector) => {
+    const elem = document.querySelector(startSelector);
+    return select(elem);
+  };
   showWrapper = () => {
     this.setState({wrapperStyles: null});
   };
@@ -46,38 +50,60 @@ class WebsiteIntegrationBar extends Component {
   };
   pickClickSelector = () => {
     return new Promise((resolve, reject) => {
+      const selectionEndListener = (request) => {
+        if (request.type === 'websiteIntegrationBar_endSelection'){
+          document.removeEventListener('click', clickListener);
+          document.removeEventListener('keydown', escapeListener);
+          browser.runtime.onMessage.removeListener(selectionEndListener);
+          reject();
+        }
+      };
       const clickListener = (e) => {
         const selector = select(e.target);
         document.removeEventListener('click', clickListener);
         document.removeEventListener('keydown', escapeListener);
+        browser.runtime.onMessage.removeListener(selectionEndListener);
         resolve(selector);
       };
       const escapeListener = (e) => {
         if (e.keyCode === 27){
           document.removeEventListener('click', clickListener);
           document.removeEventListener('keydown', escapeListener);
+          browser.runtime.onMessage.removeListener(selectionEndListener);
           reject();
         }
       };
+      browser.runtime.onMessage.addListener(selectionEndListener);
       document.addEventListener('click', clickListener);
       document.addEventListener('keydown', escapeListener);
     });
   };
   pickInputEntrySelector = () => {
     return new Promise((resolve, reject) => {
+      const selectionEndListener = (request) => {
+        if (request.type === 'websiteIntegrationBar_endSelection'){
+          document.removeEventListener('input', inputListener);
+          document.removeEventListener('keydown', escapeListener);
+          browser.runtime.onMessage.removeListener(selectionEndListener);
+          reject();
+        }
+      };
       const inputListener = (e) => {
         const selector = select(e.target);
         document.removeEventListener('input', inputListener);
         document.removeEventListener('keydown', escapeListener);
+        browser.runtime.onMessage.removeListener(selectionEndListener);
         resolve(selector);
       };
       const escapeListener = (e) => {
         if (e.keyCode === 27){
           document.removeEventListener('input', inputListener);
           document.removeEventListener('keydown', escapeListener);
+          browser.runtime.onMessage.removeListener(selectionEndListener);
           reject();
         }
       };
+      browser.runtime.onMessage.addListener(selectionEndListener);
       document.addEventListener('input', inputListener);
       document.addEventListener('keydown', escapeListener);
     });
@@ -85,24 +111,40 @@ class WebsiteIntegrationBar extends Component {
   runtimeMessageListener = (request, sender, sendResponse) => {
     switch (request.type){
       case 'pick_fill_element_selector':
-        this.pickInputEntrySelector().then(response => {
+        this.pickInputEntrySelector().then(selector => {
+          let response = {
+            selector: selector,
+            frameSrc: null
+          };
+          if (window.top !== window)
+            response.frameSrc = document.location.href;
           sendResponse(MessageResponse(false, response));
         }).catch(err => {
           sendResponse(MessageResponse(true, err));
         });
         break;
       case 'pick_click_element_selector':
-        this.pickClickSelector().then(response => {
+        this.pickClickSelector().then(selector => {
+          let response = {
+            selector: selector,
+            frameSrc: null
+          };
+          if (window.top !== window)
+            response.frameSrc = document.location.href;
           sendResponse(MessageResponse(false, response));
         }).catch(err => {
           sendResponse(MessageResponse(true, err));
         });
         break;
-      case 'websiteIntegrationBar_show':
+      case 'websiteIntegrationBar_startSelection':
+        this.hideWrapper();
+        break;
+      case 'websiteIntegrationBar_endSelection':
         this.showWrapper();
         break;
-      case 'websiteIntegrationBar_hide':
-        this.hideWrapper();
+      case 'getOptimizedSelector':
+        const selector = this.generateOptimizedSelector(request.data);
+        sendResponse(MessageResponse(false, selector));
         break;
       default:
         return;
@@ -117,7 +159,7 @@ class WebsiteIntegrationBar extends Component {
   }
   render(){
     const wib = this.props.websiteIntegrationBar[this.props.tabId];
-    if (!wib)
+    if (!wib || window.top !== window)
       return null;
     return (
           <div style={{...websiteIntegrationBarWrapperStyles, ...this.state.wrapperStyles}}>

@@ -41,8 +41,9 @@ class App extends Component {
       );
     return (
         <Fragment>
+          <WebsiteIntegrationBar tabId={this.state.tabId}/>
           <FormSubmissionListener tabId={this.state.tabId}/>
-          {<ConnectionInputsListener tabId={this.state.tabId}/>}
+          <ConnectionInputsListener tabId={this.state.tabId}/>
         </Fragment>
     )
   }
