@@ -7,7 +7,7 @@ import {handleSemanticInput,
   extractRootDomain,
   resolveImageURL,
   copyTextToClipboard} from "../../../../shared/utils";
-import {BackgroundMessage} from "../../../../shared/utils";
+import {BackgroundMessage, extractRootDomainWithoutCountryCode} from "../../../../shared/utils";
 import {connect} from "react-redux";
 import passwordGenerator from "generate-password";
 
@@ -105,7 +105,7 @@ class Accounts extends Component {
   }
   filterApps = () => {
     const apps = this.props.dashboard.apps;
-    const domain = extractRootDomain(this.state.tab.url).split('.')[0];
+    const domain = extractRootDomainWithoutCountryCode(this.state.tab.url);
     const filtered = [];
 
     Object.keys(apps).forEach(app_id => {

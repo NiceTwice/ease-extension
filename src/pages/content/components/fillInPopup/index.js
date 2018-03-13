@@ -68,7 +68,6 @@ class FillInMenu extends Component {
     window.removeEventListener('resize', this.onResize);
   }
   componentDidMount(){
-    console.log('fill in menu mounted');
     this.target = this.props.target;
     this.initialView = this.target.getAttribute('autocomplete') === 'new-password' ? 'PasswordGenerator' : 'Accounts';
     this.placeIt();

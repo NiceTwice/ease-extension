@@ -1,7 +1,7 @@
 import React, {Component, Fragment} from "react";
 import {List, Icon} from "semantic-ui-react";
 import {connect} from "react-redux";
-import {getUrl, extractRootDomain} from "../../../../shared/utils";
+import {getUrl, extractRootDomainWithoutCountryCode} from "../../../../shared/utils";
 import AppWrapper from "./AppWrapper";
 
 const matchUrls = (website, hostname) => {
@@ -9,11 +9,10 @@ const matchUrls = (website, hostname) => {
 };
 
 function filter_apps(apps, url) {
-  console.log('url', url);
   let hostname = getUrl(url).hostname;
   if (hostname.indexOf('google') === -1)
-    hostname = extractRootDomain(url);
-  console.log('hostname', hostname);
+    hostname = extractRootDomainWithoutCountryCode(url);
+
   return Object.keys(apps)
       .map(item => (apps[item]))
       .filter(item => {

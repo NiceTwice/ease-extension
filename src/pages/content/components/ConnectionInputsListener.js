@@ -173,7 +173,6 @@ class ConnectionInputsListener extends Component {
     }
   };
   closeFillInMenu = () => {
-    console.log('closing fill in menu');
     this.removeCloseListeners();
     this.setState({currentInput: null});
     browser.runtime.onMessage.removeListener(this.runtimeMessageListener);
@@ -346,7 +345,6 @@ class ConnectionInputsListener extends Component {
       }
       document.addEventListener('scroll', this.onResize, true);
       window.addEventListener('resize', this.onResize);
-      console.log('connection input listener did mount');
     }, 700);
   }
   componentWillUnmount(){
