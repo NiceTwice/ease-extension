@@ -41,7 +41,7 @@ class App extends Component {
     return (
         <Fragment>
           <FormSubmissionListener tabId={this.state.tabId}/>
-          {<ConnectionInputsListener tabId={this.state.tabId}/>}
+          <ConnectionInputsListener tabId={this.state.tabId}/>
         </Fragment>
     )
   }

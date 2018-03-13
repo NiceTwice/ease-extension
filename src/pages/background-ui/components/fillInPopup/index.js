@@ -105,7 +105,7 @@ class Accounts extends Component {
   }
   filterApps = () => {
     const apps = this.props.dashboard.apps;
-    const domain = extractRootDomain(this.state.tab.url);
+    const domain = extractRootDomain(this.state.tab.url).split('.')[0];
     const filtered = [];
 
     Object.keys(apps).forEach(app_id => {
