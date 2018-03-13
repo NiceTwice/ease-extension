@@ -162,11 +162,11 @@ class WebsiteIntegrationBar extends Component {
     if (!wib || window.top !== window)
       return null;
     return (
-          <div style={{...websiteIntegrationBarWrapperStyles, ...this.state.wrapperStyles}}>
-            <iframe style={websiteIntegrationBarStyles}
-                    src={browser.runtime.getURL('pages/background-ui.html#/websiteIntegrationBar')}>
-            </iframe>
-          </div>
+        <div style={{...websiteIntegrationBarWrapperStyles, ...this.state.wrapperStyles}}>
+          <iframe style={websiteIntegrationBarStyles}
+                  src={browser.runtime.getURL('pages/background-ui.html#/websiteIntegrationBar')}>
+          </iframe>
+        </div>
     );
   }
 }

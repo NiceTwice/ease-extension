@@ -11,10 +11,9 @@ export const initWebsiteIntegration = ({tabId}) => {
         checkAlreadyLoggedSteps: [],
         checkAlreadyLoggedSelector: '',
         connectionInfo: [
-          {key: 'login', text: 'login', value: 'login'},
-          {key: 'password', text: 'password', value: 'password'}
-        ],
-        chosenConnectionInfo: ['login', 'password']
+          {name: "login", testValue: ''},
+          {name: "password", testValue: ''}
+        ]
       }
     }
   }
@@ -155,23 +154,67 @@ export const websiteCheckAlreadyLoggedSelectorChanged = ({tabId, selector}) => {
   }
 };
 
+export const websiteIntegrationStepToggleActive = ({tabId, index, stepsType}) => {
+  return {
+    type: 'WEBSITE_INTEGRATION_STEPS_TOGGLE_ACTIVE',
+    payload: {
+      tabId: tabId,
+      index: index,
+      stepsType: stepsType
+    }
+  }
+};
+
 //connection info form {name: 'login', removable: false}
-export const websiteAddConnectionInfo = ({tabId, connectionInfoName}) => {
+export const websiteAddConnectionInfo = ({tabId}) => {
   return {
     type: 'WEBSITE_ADD_CONNECTION_INFO',
     payload: {
-      tabId: tabId,
-      connectionInfoName: connectionInfoName
+      tabId: tabId
     }
   }
 };
 
 export const websiteRemoveConnectionInfo = ({tabId, index}) => {
   return {
-    type: 'WEBSITE_REMOVE_CONNECION_INFO',
+    type: 'WEBSITE_REMOVE_CONNECTION_INFO',
     payload: {
       tabId: tabId,
       index: index
+    }
+  }
+};
+
+export const websiteConnectionInfoNameChanged = ({tabId, index, value}) => {
+  return {
+    type: 'WEBSITE_CONNECTION_INFO_NAME_CHANGED',
+    payload: {
+      tabId: tabId,
+      index: index,
+      value: value
+    }
+  }
+};
+
+export const websiteConnectionInfoTestValueChanged = ({tabId, index, value}) => {
+  return {
+    type: 'WEBSITE_CONNECTION_INFO_TEST_VALUE_CHANGED',
+    payload: {
+      tabId: tabId,
+      index: index,
+      value: value
+    }
+  }
+};
+
+export const websiteConnectionMoveStep = ({tabId, connectionType, sourceIndex, destinationIndex}) => {
+  return {
+    type: 'WEBSITE_CONNECTION_STEP_MOVED',
+    payload: {
+      tabId: tabId,
+      connectionType: connectionType,
+      sourceIndex: sourceIndex,
+      destinationIndex: destinationIndex
     }
   }
 };

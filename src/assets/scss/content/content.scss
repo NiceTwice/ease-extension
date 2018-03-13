@@ -114,6 +114,14 @@
   }
 }
 
+.float-left {
+  float: left;
+}
+
+.float-right {
+  float: right;
+}
+
 a {
   cursor: pointer;
 }
@@ -327,6 +335,29 @@ a {
   padding: 15px;
   transition: transform .3s;
   overflow: auto;
+  .connection_info_fields {
+    .connection_info_field {
+      .connection_info_name {
+        padding: 0;
+        border: none;
+        box-shadow: none;
+        margin-bottom: 5px;
+        padding-left: 5px;
+        &::placeholder {
+          color: $themeDarkGrayTextColor;
+        }
+      }
+      .connection_info_value {
+        position: relative;
+        .delete_icon {
+          position: absolute;
+          right:-8px;
+          top:-10px;
+          background-color: $themeRedLightColor;
+        }
+      }
+    }
+  }
   .actions_tab {
     & > .menu {
       & > .item {
@@ -350,6 +381,11 @@ a {
         .delete_button {
           display: block;
         }
+      }
+      &.dragging {
+        background-color: rgba(white, .7);
+        border: 1px solid #373B60;
+        box-shadow: none !important;
       }
       .delete_button {
         display:none;

@@ -53,12 +53,25 @@ export const websiteIntegrationBar = createReducer({
       }
     })
   },
+  ['WEBSITE_INTEGRATION_STEPS_TOGGLE_ACTIVE'](state, action){
+    const {tabId, index, stepsType} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        [stepsType] : {
+          [index]: {
+            uiActive: {$set: !(state[tabId][stepsType][index].uiActive)}
+          }
+        }
+      }
+    });
+  },
   ['WEBSITE_ADD_LOGIN_STEP'](state, action){
     const {tabId, step} = action.payload;
 
     return update(state, {
       [tabId]: {
-        loginSteps: {$push: [step]}
+        loginSteps: {$push: [{uiActive: true, description: step}]}
       }
     })
   },
@@ -69,7 +82,9 @@ export const websiteIntegrationBar = createReducer({
       [tabId]: {
         loginSteps:{
           [stepIndex]: {
-            [stepParamName]: {$set: stepParamValue}
+            description: {
+              [stepParamName]: {$set: stepParamValue}
+            }
           }
         }
       }
@@ -89,7 +104,7 @@ export const websiteIntegrationBar = createReducer({
 
     return update(state, {
       [tabId]: {
-        logoutSteps: {$push: [step]}
+        logoutSteps: {$push: [{uiActive: true, description: step}]}
       }
     })
   },
@@ -120,7 +135,7 @@ export const websiteIntegrationBar = createReducer({
 
     return update(state, {
       [tabId]: {
-        checkAlreadyLoggedSteps: {$push: [step]}
+        checkAlreadyLoggedSteps: {$push: [{uiActive: true, description: step}]}
       }
     })
   },
@@ -156,23 +171,57 @@ export const websiteIntegrationBar = createReducer({
     })
   },
   ['WEBSITE_ADD_CONNECTION_INFO'](state, action){
-    const {tabId, connectionInfoName} = action.payload;
+    const {tabId} = action.payload;
 
     return update(state, {
       [tabId]: {
-        connectionInfo: {$push: [{key: connectionInfoName, text: connectionInfoName, value: connectionInfoName}]},
-        chosenConnectionInfo: {$push: [connectionInfoName]}
+        connectionInfo: {$push: [{name: '', testValue: ''}]}
       }
     });
   },
-  ['WEBSITE_REMOVE_CONNECION_INFO'](state, action){
+  ['WEBSITE_REMOVE_CONNECTION_INFO'](state, action){
     const {tabId, index} = action.payload;
 
     return update(state, {
       [tabId]: {
-        connectionInfo: {$splice: [[index, 1]]},
-        chosenConnectionInfo: {$splice: [[index, 1]]}
+        connectionInfo: {$splice: [[index, 1]]}
       }
     })
+  },
+  ['WEBSITE_CONNECTION_INFO_NAME_CHANGED'](state, action){
+    const {tabId, index, value} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        connectionInfo: {
+          [index]: {
+            name: {$set: value}
+          }
+        }
+      }
+    });
+  },
+  ['WEBSITE_CONNECTION_INFO_TEST_VALUE_CHANGED'](state, action){
+    const {tabId, index, value} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        connectionInfo: {
+          [index]: {
+            testValue: {$set: value}
+          }
+        }
+      }
+    });
+  },
+  ['WEBSITE_CONNECTION_STEP_MOVED'](state, action){
+    const {tabId, connectionType, sourceIndex, destinationIndex} = action.payload;
+
+    const step = state[tabId][connectionType][sourceIndex];
+    return update(state, {
+      [tabId]: {
+        [connectionType]: {$splice: [[sourceIndex, 1], [destinationIndex, 0, step]]}
+      }
+    });
   }
 });
