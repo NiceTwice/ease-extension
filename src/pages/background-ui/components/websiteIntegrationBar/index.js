@@ -234,7 +234,7 @@ class LoginSteps extends Component {
             </Droppable>
             <StepChooserDropdown color="green" chooseStep={this.addStep}/>
           </Table>
-          <Button basic animated fluid onClick={this.testSteps}>
+          <Button basic type="button" animated fluid onClick={this.testSteps}>
             <Button.Content visible>Test</Button.Content>
             <Button.Content hidden>
               Test login steps
@@ -370,7 +370,7 @@ class LogoutSteps extends Component {
             </Droppable>
             <StepChooserDropdown color="green" chooseStep={this.addStep}/>
           </Table>
-          <Button basic animated fluid onClick={this.testSteps}>
+          <Button basic type="button" animated fluid onClick={this.testSteps}>
             <Button.Content visible>Test</Button.Content>
             <Button.Content hidden>
               Test logout steps
@@ -839,6 +839,7 @@ class ConnectionInfoInput extends Component {
             {index > 1 &&
             <Icon name="delete"
                   size="small"
+                  title="Remove"
                   onClick={remove}
                   circular
                   fitted
@@ -902,6 +903,7 @@ class ConnectionInfoChooser extends Component {
           </div>
           <div style={{textAlign: 'right'}}>
             <Button onClick={this.connectionInfoAdded}
+                    type="button"
                     style={{margin: '10px 0 0 0'}}
                     content="Add another"/>
           </div>
@@ -1122,8 +1124,6 @@ class WebsiteIntegrationBar extends Component {
                             onChange={this.changeWebsiteHome}
                             placeholder="https://facebook.com"/>
               </Form.Field>
-              {/*<WebsiteConnectionInfoChooser connectionInfo={info.connectionInfo}
-                                            chosenConnectionInfo={info.chosenConnectionInfo}/>*/}
               <ConnectionInfoChooser connectionInfo={info.connectionInfo}/>
               <Divider hidden />
               <Form.Field class="full_flex">
