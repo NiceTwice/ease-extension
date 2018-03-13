@@ -59,22 +59,24 @@ class WebsiteIntegrationBar extends Component {
         }
       };
       const clickListener = (e) => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
         const selector = select(e.target);
-        document.removeEventListener('click', clickListener);
+        document.removeEventListener('click', clickListener, true);
         document.removeEventListener('keydown', escapeListener);
         browser.runtime.onMessage.removeListener(selectionEndListener);
         resolve(selector);
       };
       const escapeListener = (e) => {
         if (e.keyCode === 27){
-          document.removeEventListener('click', clickListener);
+          document.removeEventListener('click', clickListener, true);
           document.removeEventListener('keydown', escapeListener);
           browser.runtime.onMessage.removeListener(selectionEndListener);
           reject();
         }
       };
       browser.runtime.onMessage.addListener(selectionEndListener);
-      document.addEventListener('click', clickListener);
+      document.addEventListener('click', clickListener,true);
       document.addEventListener('keydown', escapeListener);
     });
   };
