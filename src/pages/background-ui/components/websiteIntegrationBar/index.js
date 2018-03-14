@@ -323,7 +323,7 @@ class LogoutSteps extends Component {
     }))
   };
   render(){
-    const {steps} = this.props;
+    const {steps, info} = this.props;
 
     return (
         <Fragment>
@@ -352,6 +352,7 @@ class LogoutSteps extends Component {
                                           {getActionComponent(action.description.action, {
                                             action: action,
                                             idx: idx,
+                                            info:info,
                                             paramChanged: this.stepParamChanged,
                                             toggleActive: this.toggleActive.bind(null, idx)
                                           })}
@@ -509,7 +510,7 @@ class CheckAlreadyLoggedSteps extends Component {
             </Droppable>
             <Table.Row>
               <Table.Cell>
-                <label>Check selector <Icon name="magic" link onClick={this.startSelection}/></label>
+                <label>Check selector <a class="float-right" onClick={this.startSelection} title="Pick manually">choose manually</a></label>
                 <TextArea placeholder="CSS selector"
                           rows={1}
                           autoHeight={true}
