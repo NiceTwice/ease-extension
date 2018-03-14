@@ -6,7 +6,6 @@ import {Store} from "react-chrome-redux";
 import {serverUrl} from "../../shared/strings";
 import App from "./App";
 
-console.log('initializing background ui');
 window.storage = () => {
   Storage.local.get(null).then(storage => {
     console.log('storage:', storage);

@@ -21,7 +21,6 @@ class App extends Component {
   }
   componentWillMount() {
     ContentApi.getTabId().then(tabId => {
-      console.log('tabId: ', tabId);
       this.setState({tabId: tabId});
     });
   }

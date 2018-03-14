@@ -10,5 +10,3 @@ browser.runtime.onMessage.addListener(
         return true;
       }
     });
-
-console.log('listeners setup');
