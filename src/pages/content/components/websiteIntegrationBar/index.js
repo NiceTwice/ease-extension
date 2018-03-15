@@ -52,7 +52,7 @@ class WebsiteIntegrationBar extends Component {
     return new Promise((resolve, reject) => {
       const selectionEndListener = (request) => {
         if (request.type === 'websiteIntegrationBar_endSelection'){
-          document.removeEventListener('click', clickListener);
+          document.removeEventListener('click', clickListener, true);
           document.removeEventListener('keydown', escapeListener);
           browser.runtime.onMessage.removeListener(selectionEndListener);
           reject();
@@ -147,6 +147,9 @@ class WebsiteIntegrationBar extends Component {
       case 'getOptimizedSelector':
         const selector = this.generateOptimizedSelector(request.data);
         sendResponse(MessageResponse(false, selector));
+        break;
+      case 'scrapDocumentBody':
+        sendResponse(MessageResponse(false, document.body.outerHTML));
         break;
       default:
         return;

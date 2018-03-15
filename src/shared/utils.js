@@ -109,3 +109,8 @@ export const extractRootDomainWithoutCountryCode = (url) => {
   const split = extractRootDomain(url).split('.');
   return split.slice(0, split.length - 1).join('.');
 };
+
+export const stringToBodyElement = (str) => {
+  const parser = new DOMParser();
+  return parser.parseFromString(str, 'text/html').body;
+};

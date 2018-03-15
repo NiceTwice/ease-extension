@@ -1,9 +1,13 @@
 import React, {Component, Fragment} from "react";
 import classnames from "classnames";
 import Tabs from "../../../../shared/tabs_api";
-import {Label, Dropdown,Divider,Tab, Icon, Header, Input, Button, Form, Table, Accordion, TextArea, Checkbox} from "semantic-ui-react";
+import {Label,Message, Dropdown,Divider,Tab, Icon, Header, Input, Button, Form, Table, Accordion, TextArea, Checkbox} from "semantic-ui-react";
 import * as wi from "../../../../shared/actions/websiteIntegration";
-import {copyTextToClipboard, TabMessage, extractRootDomain, BackgroundMessage} from "../../../../shared/utils";
+import {copyTextToClipboard,
+  TabMessage,
+  extractRootDomain,
+  stringToBodyElement,
+  BackgroundMessage} from "../../../../shared/utils";
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import {connect} from "react-redux";
 
@@ -22,16 +26,19 @@ const actions = {
 
 const initClickActionDetector = () => {
   TabMessage(tabId, 'websiteIntegrationBar_startSelection', {});
-  return TabMessage(tabId, 'pick_click_element_selector').then(selectorInfo => {
+  return TabMessage(tabId, 'pick_click_element_selector').then(async (selectorInfo) => {
     const selector = selectorInfo.selector;
+    const ret = {
+      action: {action: 'click', grave:true, search: selector},
+      frameSelector: null
+    };
     if (!!selectorInfo.frameSrc){
       console.log('selected in the frame');
-      TabMessage(tabId, 'getOptimizedSelector', `[src="${selectorInfo.frameSrc}"]`, {frameId: 0}).then(response => {
-        console.log('selected frame unique selector is', response);
-      });
+      ret.frameSelector = await TabMessage(tabId, 'getOptimizedSelector', `[src="${selectorInfo.frameSrc}"]`, {frameId: 0});
+      console.log('selected frame unique selector is', ret.frameSelector);
     }
     TabMessage(tabId, 'websiteIntegrationBar_endSelection', {});
-    return {action: 'click', grave:true, search: selector};
+    return ret;
   }).catch(err => {
     TabMessage(tabId, 'websiteIntegrationBar_endSelection', {});
   });
@@ -39,16 +46,19 @@ const initClickActionDetector = () => {
 
 const initFillInActionDetector = () => {
   TabMessage(tabId, 'websiteIntegrationBar_startSelection', {});
-  return TabMessage(tabId, 'pick_fill_element_selector').then(selectorInfo => {
+  return TabMessage(tabId, 'pick_fill_element_selector').then(async (selectorInfo) => {
     const selector = selectorInfo.selector;
+    const ret = {
+      action: {action: 'fill', what: 'login', search: selector, grave: true},
+      frameSelector: null
+    };
     if (!!selectorInfo.frameSrc){
       console.log('selected in the frame');
-      TabMessage(tabId, 'getOptimizedSelector', `[src="${selectorInfo.frameSrc}"]`, {frameId: 0}).then(response => {
-        console.log('selected frame unique selector is', response);
-      });
+      ret.frameSelector = await (tabId, 'getOptimizedSelector', `[src="${selectorInfo.frameSrc}"]`, {frameId: 0});
+      console.log('selected frame unique selector is', ret.frameSelector);
     }
     TabMessage(tabId, 'websiteIntegrationBar_endSelection', {});
-    return {action: 'fill', grave:true, search: selector, what:'login'};
+    return ret;
   }).catch(err => {
     TabMessage(tabId, 'websiteIntegrationBar_endSelection', {});
   });
@@ -109,6 +119,28 @@ const getActionComponent = (name, props) => {
   }
 };
 
+const isEnterFramePresent = (steps, frameSelector) => {
+  for (let i = steps.length - 1; i >= 0; i--){
+    const action = steps[i].description;
+    if (action.action === 'leaveFrame')
+      return false;
+    if (action.action === 'enterFrame' && action.search === frameSelector)
+      return true;
+  }
+  return false;
+};
+
+const isFrameEntered = (steps) => {
+  for (let i = steps.length - 1; i >= 0; i--){
+    const action = steps[i].description;
+    if (action.action === 'leaveFrame')
+      return false;
+    if (action.action === 'enterFrame')
+      return true;
+  }
+  return false;
+};
+
 @connect()
 class LoginSteps extends Component {
   constructor(props){
@@ -129,12 +161,27 @@ class LoginSteps extends Component {
     });
   };
   addStep = (name) => {
+    const {info} = this.props;
+    const loginSteps = info.loginSteps;
+
     switch (name) {
       case 'click':
         initClickActionDetector().then(response => {
+          const {frameSelector, action} = response;
+          if (!!frameSelector && !isEnterFramePresent(loginSteps, frameSelector)){
+            this.props.dispatch(wi.websiteAddLoginStep({
+              tabId: this.props.tabId,
+              step: {action: "enterFrame", search: frameSelector}
+            }));
+          } else if (!frameSelector && isFrameEntered(loginSteps)){
+            this.props.dispatch(wi.websiteAddLoginStep({
+              tabId: this.props.tabId,
+              step: {action: 'leaveFrame'}
+            }));
+          }
           this.props.dispatch(wi.websiteAddLoginStep({
             tabId: this.props.tabId,
-            step: response
+            step: action
           }));
         }).catch(err => {
           this.props.dispatch(wi.websiteAddLoginStep({
@@ -145,9 +192,21 @@ class LoginSteps extends Component {
         break;
       case 'fill':
         initFillInActionDetector().then(response => {
+          const {frameSelector, action} = response;
+          if (!!frameSelector && !isEnterFramePresent(loginSteps, frameSelector)){
+            this.props.dispatch(wi.websiteAddLoginStep({
+              tabId: this.props.tabId,
+              step: {action: "enterFrame", search: frameSelector}
+            }));
+          } else if (!frameSelector && isFrameEntered(loginSteps)){
+            this.props.dispatch(wi.websiteAddLoginStep({
+              tabId: this.props.tabId,
+              step: {action: 'leaveFrame'}
+            }));
+          }
           this.props.dispatch(wi.websiteAddLoginStep({
             tabId: this.props.tabId,
-            step: response
+            step: action
           }));
         }).catch(err => {
           this.props.dispatch(wi.websiteAddLoginStep({
@@ -267,12 +326,26 @@ class LogoutSteps extends Component {
     });
   };
   addStep = (name) => {
+    const {info} = this.props;
+    const logoutSteps = info.logoutSteps;
     switch (name) {
       case 'click':
         initClickActionDetector().then(response => {
+          const {frameSelector, action} = response;
+          if (!!frameSelector && !isEnterFramePresent(logoutSteps, frameSelector)){
+            this.props.dispatch(wi.websiteAddLogoutStep({
+              tabId: this.props.tabId,
+              step: {action: "enterFrame", search: frameSelector}
+            }));
+          } else if (!frameSelector && isFrameEntered(logoutSteps)){
+            this.props.dispatch(wi.websiteAddLogoutStep({
+              tabId: this.props.tabId,
+              step: {action: 'leaveFrame'}
+            }));
+          }
           this.props.dispatch(wi.websiteAddLogoutStep({
             tabId: this.props.tabId,
-            step: response
+            step: action
           }));
         }).catch(err => {
           this.props.dispatch(wi.websiteAddLogoutStep({
@@ -283,9 +356,21 @@ class LogoutSteps extends Component {
         break;
       case 'fill':
         initFillInActionDetector().then(response => {
+          const {frameSelector, action} = response;
+          if (!!frameSelector && !isEnterFramePresent(logoutSteps, frameSelector)){
+            this.props.dispatch(wi.websiteAddLogoutStep({
+              tabId: this.props.tabId,
+              step: {action: "enterFrame", search: frameSelector}
+            }));
+          } else if (!frameSelector && isFrameEntered(logoutSteps)){
+            this.props.dispatch(wi.websiteAddLogoutStep({
+              tabId: this.props.tabId,
+              step: {action: 'leaveFrame'}
+            }));
+          }
           this.props.dispatch(wi.websiteAddLogoutStep({
             tabId: this.props.tabId,
-            step: response
+            step: action
           }));
         }).catch(err => {
           this.props.dispatch(wi.websiteAddLogoutStep({
@@ -320,7 +405,7 @@ class LogoutSteps extends Component {
       tabId: tabId,
       index: index,
       stepsType: 'logoutSteps'
-    }))
+    }));
   };
   render(){
     const {steps, info} = this.props;
@@ -388,14 +473,35 @@ class LogoutSteps extends Component {
 class CheckAlreadyLoggedSteps extends Component {
   constructor(props){
     super(props);
+    this.state = {
+      scrapingLoggedInDOM : false,
+      scrapingLoggedOutDOM: false,
+      checkMessage: '',
+      checkError: false
+    }
   }
   addStep = (name) => {
+    const {info} = this.props;
+    const checkAlreadyLoggedSteps = info.checkAlreadyLoggedSteps;
+
     switch (name) {
       case 'click':
         initClickActionDetector().then(response => {
+          const {frameSelector, action} = response;
+          if (!!frameSelector && !isEnterFramePresent(checkAlreadyLoggedSteps, frameSelector)){
+            this.props.dispatch(wi.websiteAddCheckAlreadyLoggedStep({
+              tabId: this.props.tabId,
+              step: {action: "enterFrame", search: frameSelector}
+            }));
+          } else if (!frameSelector && isFrameEntered(checkAlreadyLoggedSteps)){
+            this.props.dispatch(wi.websiteAddCheckAlreadyLoggedStep({
+              tabId: this.props.tabId,
+              step: {action: 'leaveFrame'}
+            }));
+          }
           this.props.dispatch(wi.websiteAddCheckAlreadyLoggedStep({
             tabId: this.props.tabId,
-            step: response
+            step: action
           }));
         }).catch(err => {
           this.props.dispatch(wi.websiteAddCheckAlreadyLoggedStep({
@@ -406,9 +512,21 @@ class CheckAlreadyLoggedSteps extends Component {
         break;
       case 'fill':
         initFillInActionDetector().then(response => {
+          const {frameSelector, action} = response;
+          if (!!frameSelector && !isEnterFramePresent(checkAlreadyLoggedSteps, frameSelector)){
+            this.props.dispatch(wi.websiteAddCheckAlreadyLoggedStep({
+              tabId: this.props.tabId,
+              step: {action: "enterFrame", search: frameSelector}
+            }));
+          } else if (!frameSelector && isFrameEntered(checkAlreadyLoggedSteps)){
+            this.props.dispatch(wi.websiteAddCheckAlreadyLoggedStep({
+              tabId: this.props.tabId,
+              step: {action: 'leaveFrame'}
+            }));
+          }
           this.props.dispatch(wi.websiteAddCheckAlreadyLoggedStep({
             tabId: this.props.tabId,
-            step: response
+            step: action
           }));
         }).catch(err => {
           this.props.dispatch(wi.websiteAddCheckAlreadyLoggedStep({
@@ -463,10 +581,68 @@ class CheckAlreadyLoggedSteps extends Component {
       stepsType: 'checkAlreadyLoggedSteps'
     }))
   };
+  saveLoggedInDOM = () => {
+    this.setState({scrapingLoggedInDOM: true});
+    TabMessage(tabId, 'scrapDocumentBody', null, {frameId: 0}).then(document => {
+      this.props.dispatch(wi.websiteConnectionSaveLoggedInDOM({
+        tabId: tabId,
+        dom:document
+      }));
+      this.setState({scrapingLoggedInDOM: false});
+    });
+  };
+  saveLoggedOutDOM = () => {
+    this.setState({scrapingLoggedOutDOM: true});
+    TabMessage(tabId, 'scrapDocumentBody', null, {frameId: 0}).then(document => {
+      this.props.dispatch(wi.websiteConnectionSaveLoggedOutDOM({
+        tabId: tabId,
+        dom:document
+      }));
+      this.setState({scrapingLoggedOutDOM: false});
+    });
+  };
+  testCheckAlreadyLoggedSelector = () => {
+    const {info, checkSelector} = this.props;
+    const {loggedInDOM, loggedOutDOM} = info;
+
+    if (!loggedInDOM || !loggedOutDOM){
+      this.setState({checkError: true, checkMessage: 'doms are not saved'});
+      return;
+    }else if (!checkSelector.length){
+      this.setState({checkError: true, checkMessage: 'checkAlreadyLogged selector is empty'});
+      return;
+    }
+    const loggedInBody = stringToBodyElement(loggedInDOM);
+    const loggedOutBody = stringToBodyElement(loggedOutDOM);
+    const loggedInResult = loggedInBody.querySelector(checkSelector);
+    const loggedOutResult = loggedOutBody.querySelector(checkSelector);
+    if (!loggedInResult){
+      this.setState({checkError: true, checkMessage:'element is not present in logged in dom'});
+    }else if (!!loggedOutResult){
+      this.setState({checkError: true, checkMessage: 'element is present in logged out dom'});
+    } else if (!!loggedInResult && !loggedOutResult){
+      this.setState({checkError: false, checkMessage: 'Your selector is valid !'});
+    }
+  };
   render(){
-    const {steps, checkSelector} = this.props;
+    const {steps, info, checkSelector} = this.props;
+    const {loggedInDOM, loggedOutDOM} = info;
 
     return (
+        <Fragment>
+          <Button fluid
+                  loading={this.state.scrapingLoggedInDOM}
+                  content="save logged in dom"
+                  icon={!!loggedInDOM ? 'check' : 'delete'}
+                  labelPosition='right'
+                  onClick={this.saveLoggedInDOM}/>
+          <Button fluid
+                  loading={this.state.scrapingLoggedOutDOM}
+                  style={{marginTop: '10px'}}
+                  labelPosition='right'
+                  icon={!!loggedOutDOM ? 'check' : 'delete'}
+                  content="save logged out dom"
+                  onClick={this.saveLoggedOutDOM}/>
         <Table compact celled color="green">
           <Table.Body class="action_list">
             <Droppable droppableId="checkAlreadyLoggedSteps">
@@ -516,11 +692,22 @@ class CheckAlreadyLoggedSteps extends Component {
                           autoHeight={true}
                           onChange={this.checkSelectorChanged}
                           value={checkSelector}/>
+                <div class="display_flex flex_direction_column" style={{textAlign: 'center', marginTop: '10px'}}>
+                  {!!this.state.checkMessage.length &&
+                    <span style={{color: this.state.checkError ? '#E84855' : '#45C997', marginBottom: '10px'}}>
+                    {this.state.checkMessage}
+                  </span>}
+                  <Button content="check it"
+                          type="button"
+                          style={{margin: 0}}
+                          onClick={this.testCheckAlreadyLoggedSelector}/>
+                </div>
               </Table.Cell>
             </Table.Row>
           </Table.Body>
           <StepChooserDropdown color="green" chooseStep={this.addStep}/>
         </Table>
+        </Fragment>
     )
   }
 }
@@ -712,7 +899,7 @@ class EnterFrameAction extends Component {
                              onChange={(e) => {
                                paramChanged(idx, 'search', e.target.value);
                              }}
-                             value={action.search}/>
+                             value={action.description.search}/>
             </Form>
           </Accordion.Content>
         </Accordion>
@@ -775,7 +962,7 @@ class EraseCookieAction extends Component {
             <Form as="div">
               <Form.Input label="Name"
                           placeholder="Cookie name"
-                          value={action.name}
+                          value={action.description.name}
                           onChange={(e) => {
                             paramChanged(idx, 'name', e.target.value)
                           }}
@@ -804,7 +991,7 @@ class GotoAction extends Component {
             <Form as="div">
               <Form.Input label="Url"
                           placeholder="Url"
-                          value={action.url}
+                          value={action.description.url}
                           onChange={(e) => {
                             paramChanged(idx, 'url', e.target.value);
                           }}
@@ -906,7 +1093,7 @@ class ConnectionInfoChooser extends Component {
             <Button onClick={this.connectionInfoAdded}
                     type="button"
                     style={{margin: '10px 0 0 0'}}
-                    content="Add another"/>
+                    content="Add another field"/>
           </div>
         </Form.Field>
     )
@@ -980,11 +1167,6 @@ class WebsiteIntegrationBar extends Component {
   constructor(props){
     super(props);
     this.state = {
-      websiteName: '',
-      websiteHome: '',
-      loginSteps: [],
-      logoutSteps: [],
-      checkAlreadyLoggedSteps: [],
       styles : {
         transform: "translateX(-100%)"
       },
@@ -1069,6 +1251,12 @@ class WebsiteIntegrationBar extends Component {
       }));
     }
   };
+  connectionStepsTabIndexChanged = (e, {activeIndex}) => {
+    this.props.dispatch(wi.websiteConnectionChangeTabIndex({
+      tabId: tabId,
+      index: activeIndex
+    }));
+  };
   render(){
     const {websiteIntegrationBar,tabId} = this.props;
     const info = websiteIntegrationBar[tabId];
@@ -1094,6 +1282,7 @@ class WebsiteIntegrationBar extends Component {
         menuItem: { key: 'IsLogged', icon: 'help', content: 'IsLogged' },
         render: () => (<Tab.Pane>
           <CheckAlreadyLoggedSteps tabId={tabId}
+                                   info={info}
                                    checkSelector={info.checkAlreadyLoggedSelector}
                                    steps={info.checkAlreadyLoggedSteps}/>
         </Tab.Pane>),
@@ -1129,6 +1318,8 @@ class WebsiteIntegrationBar extends Component {
               <Divider hidden />
               <Form.Field class="full_flex">
                 <Tab class="actions_tab"
+                     onTabChange={this.connectionStepsTabIndexChanged}
+                     activeIndex={info.connectionStepsTabIndex}
                      menu={{secondary: true}}
                      panes={panes}/>
               </Form.Field>

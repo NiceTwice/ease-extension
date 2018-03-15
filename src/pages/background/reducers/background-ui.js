@@ -115,7 +115,9 @@ export const websiteIntegrationBar = createReducer({
       [tabId]: {
         logoutSteps:{
           [stepIndex]: {
-            [stepParamName]: {$set: stepParamValue}
+            description: {
+              [stepParamName]: {$set: stepParamValue}
+            }
           }
         }
       }
@@ -146,7 +148,9 @@ export const websiteIntegrationBar = createReducer({
       [tabId]: {
         checkAlreadyLoggedSteps:{
           [stepIndex]: {
-            [stepParamName]: {$set: stepParamValue}
+            description: {
+              [stepParamName]: {$set: stepParamValue}
+            }
           }
         }
       }
@@ -221,6 +225,33 @@ export const websiteIntegrationBar = createReducer({
     return update(state, {
       [tabId]: {
         [connectionType]: {$splice: [[sourceIndex, 1], [destinationIndex, 0, step]]}
+      }
+    });
+  },
+  ['WEBSITE_CONNECTION_SAVE_LOGGED_IN_DOM'](state, action){
+    const {tabId, dom} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        loggedInDOM: {$set: dom}
+      }
+    })
+  },
+  ['WEBSITE_CONNECTION_SAVE_LOGGED_OUT_DOM'](state, action){
+    const {tabId, dom} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        loggedOutDOM: {$set: dom}
+      }
+    })
+  },
+  ['WEBSITE_CONNECTION_CHANGE_TAB_INDEX'](state, action){
+    const {tabId, index} = action.payload;
+
+    return update(state, {
+      [tabId]: {
+        connectionStepsTabIndex: {$set: index}
       }
     });
   }

@@ -43,6 +43,7 @@ config = {
       `${PAGES_PATH}/ease`
     ],
     "background-ui": [
+      'babel-polyfill',
       `${PAGES_PATH}/background-ui`
     ]
   },

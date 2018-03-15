@@ -8,8 +8,11 @@ export const initWebsiteIntegration = ({tabId}) => {
         websiteHome: '',
         loginSteps: [],
         logoutSteps: [],
+        connectionStepsTabIndex: 0,
         checkAlreadyLoggedSteps: [],
         checkAlreadyLoggedSelector: '',
+        loggedInDOM: null,
+        loggedOutDOM: null,
         connectionInfo: [
           {name: "login", testValue: ''},
           {name: "password", testValue: ''}
@@ -215,6 +218,36 @@ export const websiteConnectionMoveStep = ({tabId, connectionType, sourceIndex, d
       connectionType: connectionType,
       sourceIndex: sourceIndex,
       destinationIndex: destinationIndex
+    }
+  }
+};
+
+export const websiteConnectionSaveLoggedInDOM = ({tabId, dom}) => {
+  return {
+    type: 'WEBSITE_CONNECTION_SAVE_LOGGED_IN_DOM',
+    payload: {
+      tabId: tabId,
+      dom: dom
+    }
+  }
+};
+
+export const websiteConnectionSaveLoggedOutDOM = ({tabId, dom}) => {
+  return {
+    type: 'WEBSITE_CONNECTION_SAVE_LOGGED_OUT_DOM',
+    payload: {
+      tabId: tabId,
+      dom: dom
+    }
+  }
+};
+
+export const websiteConnectionChangeTabIndex = ({tabId, index}) => {
+  return {
+    type: 'WEBSITE_CONNECTION_CHANGE_TAB_INDEX',
+    payload: {
+      tabId: tabId,
+      index: index
     }
   }
 };
