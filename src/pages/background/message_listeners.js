@@ -772,8 +772,8 @@ export const actions = {
 browser.runtime.onMessageExternal.addListener(
     (request, sender, sendResponse) => {
       if (!!actions[request.type]){
-        console.log('new request', request);
-        console.log(request);
+//        console.log('new request', request);
+//        console.log(request);
         actions[request.type](request.data, sendResponse, sender.tab);
         return true;
       }
@@ -783,7 +783,7 @@ browser.runtime.onMessageExternal.addListener(
 browser.runtime.onMessage.addListener(
     (request, sender, sendResponse) => {
       if (!!actions[request.type]){
-        console.log(request);
+//        console.log(request);
         actions[request.type](request.data, sendResponse, sender.tab);
         return true;
       } else if (request.type === 'getTabId') {
