@@ -4,7 +4,11 @@
   "version": "0.0.1",
   "scripts": {
     "watch": "webpack --watch --progress",
-    "build": "NODE_ENV='production' webpack -p"
+    "watchChrome": "plateform='chrome' webpack --watch --progress",
+    "watchFirefox": "plateform='firefox' webpack --watch --progress",
+    "build": "NODE_ENV='production' webpack -p",
+    "chromeBuild": "NODE_ENV='production' plateform='chrome' webpack -p",
+    "firefoxBuild": "NODE_ENV='production' plateform='firefox' webpack -p"
   },
   "babel": {
     "presets": [

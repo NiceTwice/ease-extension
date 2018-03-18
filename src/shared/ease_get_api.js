@@ -72,6 +72,12 @@ const api = {
         account_information: account_information
       });
     }
+  },
+  track: ({name, data}) => {
+    return basic_post('/api/v1/trackEvent', {
+      name: name,
+      data: data
+    });
   }
 };
 

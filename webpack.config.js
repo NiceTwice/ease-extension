@@ -103,4 +103,32 @@ if (process.env.NODE_ENV === 'production') {
   )
 }
 
+if (process.env.plateform === 'chrome') {
+  config.plugins.push(
+      new CopyPlugin(
+          [
+            {
+              from: '/src/manifest.json',
+              to: '/dist/manifest.json',
+              force: true
+            }
+          ]
+      )
+  )
+}
+
+if (process.env.plateform === 'firefox') {
+  config.plugins.push(
+      new CopyPlugin(
+          [
+            {
+              from: 'src/firefox_manifest.json',
+              to: path.resolve('dist/manifest.json'),
+              force: true
+            }
+          ]
+      )
+  )
+}
+
 module.exports = config;

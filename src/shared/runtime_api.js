@@ -17,6 +17,13 @@ const runtime = {
     browser.runtime.reload();
   },
   sendMessage: (extensionId, message, options) => {
+/*    console.log('sendMessage function');
+    browser.runtime.sendMessage(extensionId, message, options).then(response => {
+      console.log('sendMessage function response');
+    });
+    return new Promise((resolve, reject) => {
+      resolve(911);
+    });*/
     return new Promise((resolve, reject) => {
       browser.runtime.sendMessage(extensionId, message, options, (response) => {
         if (!!browser.runtime.lastError) {

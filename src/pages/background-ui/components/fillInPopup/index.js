@@ -47,6 +47,20 @@ class CopyCredentialsDropdown extends Component {
   constructor(props){
     super(props);
   }
+  copy = (value) => {
+    const {app} = this.props;
+
+    copyTextToClipboard(value);
+    BackgroundMessage('track', {
+      name: 'PasswordUsed',
+      info: {
+        id: app.id,
+        type: app.type,
+        sub_type: app.sub_type,
+        from: "CopyCredential"
+      }
+    });
+  };
   render(){
     const {account_information} = this.props;
 
@@ -63,7 +77,7 @@ class CopyCredentialsDropdown extends Component {
                   <Dropdown.Item
                       key={name}
                       text={`Copy ${name}`}
-                      onClick={copyTextToClipboard.bind(null, value)}/>
+                      onClick={this.copy.bind(null, value)}/>
               )
             })}
           </Dropdown.Menu>
@@ -90,6 +104,15 @@ class Accounts extends Component {
   }
   chooseApp(appId){
     const app = this.props.dashboard.apps[appId];
+    BackgroundMessage('track', {
+      name: 'PasswordUser',
+      info: {
+        id: app.id,
+        type: app.type,
+        sub_type: app.sub_type,
+        from: "FillIn"
+      }
+    });
     if (!!app){
       Tabs.sendMessage(
           this.state.tab.id,
@@ -145,7 +168,7 @@ class Accounts extends Component {
                       <span class="overflow-ellipsis">{app.name}</span>
                       <strong class="overflow-ellipsis">{app.account_information.login}</strong>
                     </div>
-                    <CopyCredentialsDropdown account_information={app.account_information}/>
+                    <CopyCredentialsDropdown account_information={app.account_information} app={app}/>
                   </List.Item>
               )
             })}

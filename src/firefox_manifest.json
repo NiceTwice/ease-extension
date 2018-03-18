@@ -1,0 +1,61 @@
+{
+  "background": {
+    "page": "pages/background.html"
+  },
+  "browser_action": {
+    "default_icon": "assets/images/logo_296.png",
+    "default_popup": "pages/popup.html"
+  },
+  "chrome_url_overrides": {
+    "newtab": "pages/homepage.html"
+  },
+  "omnibox":{
+    "keyword": "e"
+  },
+  "commands": {
+    "logout-ease": {
+      "description": "Logout from ease and all connected websites.",
+      "suggested_key": {
+        "default": "Ctrl+L",
+        "mac": "Ctrl+L"
+      }
+    },
+    "open-ease": {
+      "description": "Open Ease in a new tab.",
+      "suggested_key": {
+        "default": "Ctrl+Space",
+        "mac": "Ctrl+Space"
+      }
+    }
+  },
+  "content_scripts": [ {
+    "all_frames": true,
+    "js": [ "resources/js/jquery-3.3.1.min.js","resources/js/jquery-ui.min.js","resources/js/jquery.appear.js", "pages/content.js"],
+    "matches": [ "<all_urls>"],
+    "exclude_matches": ["*://*.ease.space/*", "*://localhost/*", "*://192.168.0.20/*", "*://192.168.0.19/*", "*://192.168.0.18/*"]
+  }, {
+    "all_frames": true,
+    "css": ["assets/css/content.css", "assets/css/loading.css", "assets/fonts/museo-font.css"],
+    "matches": [ "<all_urls>"],
+    "run_at": "document_start",
+    "exclude_matches": ["*://*.ease.space/*", "*://localhost/*"]
+  }, {
+    "js": ["pages/facebook.js"],
+    "matches": ["*://*.facebook.com/*"]
+  }, {
+    "js": ["pages/ease.js"],
+    "matches": ["*://*.ease.space/*", "*://localhost/*", "*://192.168.0.20/*","*://192.168.0.19/*", "*://192.168.0.18/*"]
+  }],
+  "description": "Password and access manager for teams",
+  "icons": {
+    "128": "assets/images/logo_128.png"
+  },
+  "manifest_version": 2,
+  "name": "Ease",
+  "permissions": [ "tabs", "<all_urls>", "webNavigation", "storage","unlimitedStorage", "identity", "privacy", "cookies"],
+  "version": "1.7.3",
+  "web_accessible_resources": [
+    "assets/*",
+    "pages/*"
+  ]
+}

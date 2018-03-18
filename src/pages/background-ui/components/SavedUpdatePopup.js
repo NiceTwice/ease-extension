@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from "react";
 import {connect} from "react-redux";
-import {Icon,Transition} from 'semantic-ui-react';
+import {Icon,Transition, Progress} from 'semantic-ui-react';
 import {closeSavedUpdatePopup} from "../../../shared/actions/background-ui";
 
 @connect(store => ({
@@ -9,12 +9,23 @@ import {closeSavedUpdatePopup} from "../../../shared/actions/background-ui";
 class SavedUpdate extends Component {
   constructor(props){
     super(props);
+    this.state = {
+      progress: 0
+    }
   }
   close = () => {
     this.props.dispatch(closeSavedUpdatePopup({
       tabId: this.props.tab.id
     }))
   };
+  componentDidMount(){
+    const interval = setInterval(() => {
+      if (this.state.progress > 99){
+        clearInterval(interval);
+      }
+      this.setState({progress: this.state.progress + 0.5});
+    }, 50);
+  }
   render(){
     const savedUpdate = this.props.savedUpdatePopup[this.props.tab.id];
     if (!savedUpdate)
@@ -25,22 +36,25 @@ class SavedUpdate extends Component {
             animation='drop'
             duration={300}
             transitionOnMount={true}>
-          <div class="display_flex savedUpdate">
-            <Icon onClick={this.close}
-                  class="close-popup-button"
-                  name="close"
-                  link/>
-            <div class="img_holder">
-              <img src={savedUpdate.logo_url}/>
+          <Fragment>
+            <div class="display_flex savedUpdate">
+              <Progress percent={this.state.progress} id="progress"/>
+              <Icon onClick={this.close}
+                    class="close-popup-button"
+                    name="minus square outline"
+                    link/>
+              <div class="img_holder">
+                <img src={savedUpdate.logo_url}/>
+              </div>
+              <div class="savedUpdateContent display_flex flex_direction_column">
+                <h5>Update detected</h5>
+                <span class="overflow-ellipsis">{savedUpdate.origin}</span>
+                <span class="overflow-ellipsis">{savedUpdate.account_information.login}</span>
+                <span>●●●●●●●●</span>
+                <span class="link" style={{textAlign: 'right', color: '#414141'}}><a target="_blank" href="https://ease.space/#/main/catalog/website">Manage now</a><Icon name="caret right"/></span>
+              </div>
             </div>
-            <div class="savedUpdateContent display_flex flex_direction_column">
-              <h5>Update detected</h5>
-              <span class="overflow-ellipsis">{savedUpdate.origin}</span>
-              <span class="overflow-ellipsis">{savedUpdate.account_information.login}</span>
-              <span>●●●●●●●●</span>
-              <span class="link" style={{textAlign: 'right', color: '#414141'}}><a target="_blank" href="https://ease.space/#/main/catalog/website">Manage now</a><Icon name="caret right"/></span>
-            </div>
-          </div>
+          </Fragment>
         </Transition>
     )
   }

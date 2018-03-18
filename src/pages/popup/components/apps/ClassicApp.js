@@ -17,6 +17,15 @@ class ClassicApp extends Component {
   connect = () => {
     const {app, tab} = this.props;
     this.setState({connecting: true});
+    BackgroundMessage('track', {
+      name: 'PasswordUsed',
+      info: {
+        id: app.id,
+        type: app.type,
+        sub_type: app.sub_type,
+        from: 'Extension'
+      }
+    });
     BackgroundMessage('app_connection', {
       app_id: app.id,
       tab: tab,

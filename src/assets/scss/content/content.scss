@@ -326,6 +326,18 @@
   &.display_flex {
     display: flex !important;
   }
+  #progress {
+    position: absolute;
+    height:3px;
+    width: 100%;
+    left: 0;
+    top: -3px;
+    background-color: rgba(#000000, 0);
+    .bar {
+      background-color: $themeGreenColor;
+      height: 3px;
+    }
+  }
   .img_holder {
     margin-right: 10px;
     img {
@@ -342,19 +354,23 @@
       text-decoration: underline;
       cursor: pointer;
     }
+    span {
+      color: #d2dae4;
+    }
     h5 {
       color: $themeDarkGrayTextColor;
       font-size: 14px;
     }
     .link {
-      color: $themeDarkGrayTextColor;
+      color: $themeBlue2Color;
       @include display-flex();
       @include align-items(center);
       @include justify-content(flex-end);
       a {
-        color: $themeDarkGrayTextColor;
+        color: $themeBlue2Color;
       }
       i {
+        color: $themeBlue2Color;
         margin:0;
         height: auto;
       }

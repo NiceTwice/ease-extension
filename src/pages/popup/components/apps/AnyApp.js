@@ -1,6 +1,6 @@
 import React, {Component, Fragment} from "react";
 import {List, Button, Input, Icon} from "semantic-ui-react";
-import {copyTextToClipboard} from "../../../../shared/utils";
+import {copyTextToClipboard, BackgroundMessage} from "../../../../shared/utils";
 
 class CopyInput extends Component {
   constructor(props){
@@ -10,7 +10,16 @@ class CopyInput extends Component {
     }
   }
   copy = () => {
-    const {info} = this.props;
+    const {info, app} = this.props;
+    BackgroundMessage('track', {
+      name: 'PasswordUsed',
+      info: {
+        id: app.id,
+        type: app.type,
+        sub_type: app.sub_type,
+        from: "CopyCredentialExtensionPopup"
+      }
+    });
     copyTextToClipboard(info.value);
     this.setState({copied: true});
     setTimeout(() => {
@@ -60,7 +69,7 @@ class AnyApp extends Component {
             {inputs.map((item,idx) => {
               return (
                   <List.Item key={idx}>
-                    <CopyInput info={item}/>
+                    <CopyInput info={item} app={app}/>
                   </List.Item>
               )
             })}
