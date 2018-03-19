@@ -16,14 +16,14 @@ class SavedUpdate extends Component {
   close = () => {
     this.props.dispatch(closeSavedUpdatePopup({
       tabId: this.props.tab.id
-    }))
+    }));
   };
   componentDidMount(){
     const interval = setInterval(() => {
       if (this.state.progress > 99){
         clearInterval(interval);
       }
-      this.setState({progress: this.state.progress + 0.5});
+      this.setState({progress: this.state.progress + 1});
     }, 50);
   }
   render(){
