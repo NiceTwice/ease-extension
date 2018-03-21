@@ -353,7 +353,6 @@ class ConnectionInputsListener extends Component {
     clearInterval(this.formObservationInterval);
   }
   render(){
-    console.log('connection input listeners setup');
     return (
         <Fragment>
           {this.state.inputs.map((item, idx) => {

@@ -47,19 +47,20 @@ class CopyCredentialsDropdown extends Component {
   constructor(props){
     super(props);
   }
-  copy = (value) => {
+  copy = (value, name) => {
     const {app} = this.props;
 
     copyTextToClipboard(value);
-    BackgroundMessage('track', {
-      name: 'PasswordUsed',
-      info: {
-        id: app.id,
-        type: app.type,
-        sub_type: app.sub_type,
-        from: "CopyCredential"
-      }
-    });
+    if (name === 'password')
+      BackgroundMessage('track', {
+        name: 'PasswordUsed',
+        info: {
+          id: app.id,
+          type: app.type,
+          sub_type: app.sub_type,
+          from: "CopyPassword"
+        }
+      });
   };
   render(){
     const {account_information} = this.props;
@@ -77,7 +78,7 @@ class CopyCredentialsDropdown extends Component {
                   <Dropdown.Item
                       key={name}
                       text={`Copy ${name}`}
-                      onClick={this.copy.bind(null, value)}/>
+                      onClick={this.copy.bind(null, value, name)}/>
               )
             })}
           </Dropdown.Menu>

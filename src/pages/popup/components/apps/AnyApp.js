@@ -11,15 +11,16 @@ class CopyInput extends Component {
   }
   copy = () => {
     const {info, app} = this.props;
-    BackgroundMessage('track', {
-      name: 'PasswordUsed',
-      info: {
-        id: app.id,
-        type: app.type,
-        sub_type: app.sub_type,
-        from: "CopyCredentialExtensionPopup"
-      }
-    });
+    if (info.name === 'password')
+      BackgroundMessage('track', {
+        name: 'PasswordUsed',
+        info: {
+          id: app.id,
+          type: app.type,
+          sub_type: app.sub_type,
+          from: "CopyPasswordExtensionPopup"
+        }
+      });
     copyTextToClipboard(info.value);
     this.setState({copied: true});
     setTimeout(() => {

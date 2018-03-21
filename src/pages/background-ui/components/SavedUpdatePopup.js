@@ -22,6 +22,9 @@ class SavedUpdate extends Component {
     const interval = setInterval(() => {
       if (this.state.progress > 99){
         clearInterval(interval);
+        this.props.dispatch(closeSavedUpdatePopup({
+          tabId: this.props.tab.id
+        }));
       }
       this.setState({progress: this.state.progress + 1});
     }, 50);
