@@ -6,7 +6,6 @@ const webpack = require('webpack');
 
 require("babel-core/register");
 require("babel-polyfill");
-
 const PAGES_PATH = './src/pages';
 
 function generateHtmlPlugins(items) {

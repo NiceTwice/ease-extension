@@ -7,7 +7,6 @@ import ConnectionOverlay from "./ConnectionOverlay";
 import ScrapGoogleOverlay from "./ScrapGoogleOverlay";
 import ConnectionInputsListener from "./ConnectionInputsListener";
 import SavedUpdatePopup from "./SavedUpdatePopup";
-import FillInPopup from "./fillInPopup";
 
 @connect(store => ({
   loading: store.loading
@@ -20,9 +19,16 @@ class App extends Component {
     }
   }
   componentWillMount() {
-    ContentApi.getTabId().then(tabId => {
+    try {
+      chrome.runtime.sendMessage(null, {type: 'getTabId'}, null, (response) => {
+        console.log('sendMessage getTabId response', response);
+      });
+    } catch(e) {
+      console.log('error batard', e);
+    }
+/*    ContentApi.getTabId().then(tabId => {
       this.setState({tabId: tabId});
-    });
+    });*/
   }
   render(){
     if (this.props.loading || this.state.tabId === -1)

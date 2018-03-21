@@ -1,6 +1,6 @@
 {
   "background": {
-    "page": "pages/background.html"
+    "scripts": [ "pages/background.js"]
   },
   "browser_action": {
     "default_icon": "assets/images/logo_296.png",
@@ -30,9 +30,11 @@
   },
   "content_scripts": [ {
     "all_frames": true,
-    "js": [ "resources/js/jquery-3.3.1.min.js","resources/js/jquery-ui.min.js","resources/js/jquery.appear.js", "pages/content.js"],
+    "js": [ "resources/js/browser-polyfill.min.js", "pages/content.js"],
+    "include_globs": ["*"],
     "matches": [ "<all_urls>"],
-    "exclude_matches": ["*://*.ease.space/*", "*://localhost/*", "*://192.168.0.20/*", "*://192.168.0.19/*", "*://192.168.0.18/*"]
+    "exclude_matches": ["*://*.ease.space/*", "*://localhost/*", "*://192.168.0.20/*", "*://192.168.0.19/*", "*://192.168.0.18/*"],
+    "run_at": "document_end"
   }, {
     "all_frames": true,
     "css": ["assets/css/content.css", "assets/css/loading.css", "assets/fonts/museo-font.css"],

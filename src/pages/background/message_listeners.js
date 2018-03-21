@@ -778,6 +778,7 @@ export const actions = {
 
 browser.runtime.onMessageExternal.addListener(
     (request, sender, sendResponse) => {
+      console.log('runtime onMessageExternal handler');
       if (!!actions[request.type]){
         actions[request.type](request.data, sendResponse, sender.tab);
         return true;
@@ -785,14 +786,20 @@ browser.runtime.onMessageExternal.addListener(
     }
 );
 
-browser.runtime.onMessage.addListener(
+chrome.runtime.onMessage.addListener(
     (request, sender, sendResponse) => {
+      console.log('runtime message', request);
       if (!!actions[request.type]){
         actions[request.type](request.data, sendResponse, sender.tab);
         return true;
       } else if (request.type === 'getTabId') {
         console.log('getTabId request');
+        console.log('sender is', sender);
+        console.log('sendResponse function', sendResponse);
+        sendResponse(911);
+        console.log('response sent');
         sendResponse(MessageResponse(false, sender.tab.id));
+        return false;
       }
     }
 );

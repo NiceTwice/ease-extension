@@ -1,4 +1,4 @@
-import "./shortcut";
+/*import "./shortcut";
 import "./message_listeners";
 import "./omnibox";
 import Storage from "../../shared/storage_api";
@@ -27,4 +27,18 @@ store.dispatch(getUserInformation()).then(response => {
   store.dispatch(getProfiles());
   store.dispatch(getCatalogWebsites());
 });
+
+browser.tabs.query({active: true, currentWindow: true}).then(tabs => {
+  console.log('tabs query then', tabs);
+});
+
 console.log('background script successfully loaded.');
+*/
+
+function handleMessage(request, sender, sendResponse) {
+  console.log("Message from the content script: " +
+      request.greeting);
+  sendResponse({response: "Response from background script"});
+}
+
+browser.runtime.onMessage.addListener(handleMessage);

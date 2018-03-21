@@ -17,15 +17,20 @@ const runtime = {
     browser.runtime.reload();
   },
   sendMessage: (extensionId, message, options) => {
-/*    console.log('sendMessage function');
-    browser.runtime.sendMessage(extensionId, message, options).then(response => {
-      console.log('sendMessage function response');
+    return new Promise((resolve, reject) => {
+      console.log('in sendMessage promise');
+      const promise = chrome.runtime.sendMessage(message);
+      console.log('after promise call');
+      promise.then((response) => {
+        console.log('promise response', response);
+      }, (err) => {
+        console.log('promise error', err);
+      });
     });
     return new Promise((resolve, reject) => {
-      resolve(911);
-    });*/
-    return new Promise((resolve, reject) => {
+      console.log('in sendMessage promise');
       browser.runtime.sendMessage(extensionId, message, options, (response) => {
+        console.log('in sendMessage call response');
         if (!!browser.runtime.lastError) {
           reject(browser.runtime.lastError.message);
           return;
