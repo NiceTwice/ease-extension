@@ -106,7 +106,7 @@ class Accounts extends Component {
   chooseApp(appId){
     const app = this.props.dashboard.apps[appId];
     BackgroundMessage('track', {
-      name: 'PasswordUser',
+      name: 'PasswordUsed',
       info: {
         id: app.id,
         type: app.type,
