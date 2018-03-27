@@ -34,9 +34,7 @@ class FillInMenu extends Component {
     let input = $(this.target);
     let inputHeight = input.outerHeight();
     let inputWidth = input.outerWidth();
-    let inputOffset = input.offset();
     let position = input[0].getBoundingClientRect();
-    let documentScrollTop = $(document).scrollTop();
     this.setState({
       ready: true,
       top: position.top + inputHeight,
