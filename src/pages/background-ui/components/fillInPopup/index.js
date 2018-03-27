@@ -23,6 +23,7 @@ class LoginView extends Component {
     }
   }
   componentWillMount(){
+    BackgroundMessage('getUser');
     Cookies.get({
       url: 'https://ease.space',
       name: 'fname'
@@ -135,7 +136,7 @@ class Accounts extends Component {
     Object.keys(apps).forEach(app_id => {
       const app = apps[app_id];
 
-      if (!!app.website && !app.empty){
+      if (!!app.account_information && !!app.website && !app.empty){
         if (app.website.login_url.indexOf(domain) !== -1 || app.website.landing_url.indexOf(domain) !== -1)
           filtered.push(app);
       }

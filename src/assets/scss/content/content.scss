@@ -323,6 +323,7 @@
   border-radius: 5px;
   background: white;
   position: relative;
+  overflow: hidden;
   &.display_flex {
     display: flex !important;
   }
@@ -331,7 +332,7 @@
     height:3px;
     width: 100%;
     left: 0;
-    top: -3px;
+    top: 0;
     background-color: rgba(#000000, 0);
     .bar {
       background-color: $themeGreenColor;
@@ -408,4 +409,3 @@
   -ms-transform: translateY(0);
   transform: translateY(0);
 }
-

@@ -54,7 +54,7 @@ class SavedUpdate extends Component {
                 <span class="overflow-ellipsis">{savedUpdate.origin}</span>
                 <span class="overflow-ellipsis">{savedUpdate.account_information.login}</span>
                 <span>●●●●●●●●</span>
-                <span class="link" style={{textAlign: 'right', color: '#414141'}}><a target="_blank" href="https://ease.space/#/main/catalog/website">Manage now</a><Icon name="caret right"/></span>
+                <span class="link" style={{textAlign: 'right'}}>Encrypting to&nbsp;<a style={{fontWeight: 'bold'}} target="_blank" href="https://ease.space/#/main/catalog/website">catalog</a>...</span>
               </div>
             </div>
           </Fragment>
