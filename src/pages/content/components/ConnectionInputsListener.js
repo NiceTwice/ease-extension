@@ -198,7 +198,8 @@ class ConnectionInputsListener extends Component {
           fillField(formObj.loginEl, account_information.login);
         if (!!formObj.passwordEl && !!account_information.password)
           fillField(formObj.passwordEl, account_information.password);
-      }
+      } else
+        fillField(this.state.currentInput, account_information.password);
       this.closeFillInMenu();
     }
   };

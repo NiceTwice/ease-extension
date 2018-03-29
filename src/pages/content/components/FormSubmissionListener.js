@@ -27,7 +27,7 @@ const getInputs = ({form}) => {
   return ret;
 };
 
-const getLastPasswordInput = (inputs) => {
+const getFirstPasswordInput = (inputs) => {
   for (let i = 0; i < inputs.length; i++){
     if (inputs[i].type === 'password' && $(inputs[i]).is(':visible'))
       return i;
@@ -61,21 +61,34 @@ const getLoginInputFromPasswordIndex = (inputs, passwordInputIndex) => {
   return loginInput;
 };
 
+const searchLastPasswordInput = (inputs, index) => {
+  let ret = null;
+
+  for (let i = index; i < inputs.length; i++){
+    const input = inputs[i];
+    if ($(input).is('input[type=password]:visible'))
+      ret = input;
+  }
+  return ret;
+};
+
 const checkForm = (form) => {
-  let account = {};
+  let account = {
+    password: null,
+    login: null
+  };
   let inputs = getInputs({
     form: form
   });
-  let passwordInputIndex = getLastPasswordInput(inputs);
-  if (passwordInputIndex < 1)
+  let passwordInputIndex = getFirstPasswordInput(inputs);
+  if (passwordInputIndex < 0)
     return;
-  let passwordInput = inputs[passwordInputIndex];
   let loginInput = getLoginInputFromPasswordIndex(inputs, passwordInputIndex);
-  if (!loginInput)
-    return;
+  let passwordInput = searchLastPasswordInput(inputs, passwordInputIndex);
   account.password = passwordInput.value;
-  account.login = loginInput.value;
-  if (!account.password || !account.login)
+  if (!!loginInput)
+    account.login = loginInput.value;
+  if (!account.password)
     return;
   Runtime.sendMessage(null,
       {

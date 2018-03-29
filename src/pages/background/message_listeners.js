@@ -608,6 +608,7 @@ export const actions = {
   },
   formSubmission: async (data, sendResponse, senderTab) => {
     let {account, hostname, url, origin} = data;
+    console.log('form submission !', account, hostname, url, origin);
     if (url.indexOf('google.com') !== -1){
       const query = queryString.parseUrl(url);
       console.log('query is', query);
@@ -791,7 +792,6 @@ browser.runtime.onMessage.addListener(
         actions[request.type](request.data, sendResponse, sender.tab);
         return true;
       } else if (request.type === 'getTabId') {
-        console.log('getTabId request');
         sendResponse(MessageResponse(false, sender.tab.id));
       }
     }
