@@ -53,7 +53,7 @@ class FillInMenu extends Component {
   componentWillReceiveProps(nextProps){
     if (this.props !== nextProps && this.props.target !== nextProps.target){
       this.target = nextProps.target;
-      this.initialView = this.target.getAttribute('autocomplete') === 'new-password' ? 'PasswordGenerator' : 'Accounts';
+      this.initialView = (this.target.autocomplete === 'new-password' || this.target.autocomplete === 'off') ? 'PasswordGenerator' : 'Accounts';
       this.setState({styles: {transition: 'top .3s, left .3s'}});
       this.placeIt();
       setTimeout(() => {
@@ -67,7 +67,7 @@ class FillInMenu extends Component {
   }
   componentDidMount(){
     this.target = this.props.target;
-    this.initialView = this.target.getAttribute('autocomplete') === 'new-password' ? 'PasswordGenerator' : 'Accounts';
+    this.initialView = (this.target.autocomplete === 'new-password' || this.target.autocomplete === 'off') ? 'PasswordGenerator' : 'Accounts';
     this.placeIt();
     document.addEventListener('scroll', this.onScroll, true);
     window.addEventListener('resize', this.onResize);

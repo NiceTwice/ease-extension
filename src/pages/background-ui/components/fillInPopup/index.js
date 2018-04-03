@@ -226,11 +226,11 @@ class PasswordGenerator extends Component {
   sendGeneratedPassword = () => {
     Tabs.getCurrent().then(tab => {
       Tabs.sendMessage(tab.id, {
-        type: 'fillAccountInformation',
+        type: 'fillGeneratedPassword',
         data: {
           password: this.state.password
         }
-      })
+      });
     });
   };
   handleInput = handleSemanticInput.bind(this);

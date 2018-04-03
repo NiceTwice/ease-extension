@@ -139,6 +139,27 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
+const getFirstPasswordInputIndex = (inputs) => {
+  for (let i = 0; i < inputs.length; i++){
+    if (inputs[i].type === 'password')
+      return i;
+  }
+  return -1;
+};
+
+const describeForm = (form) => {
+  let inputs = getVisibleInputs(form);
+  let formInputs = [];
+  let passwordInputIndex = getPasswordInputIndex(inputs);
+
+  if (passwordInputIndex > 0)
+    formInputs.push(inputs[passwordInputIndex - 1]);
+  for (let i = passwordInputIndex; i < inputs.length; i++){
+    const input = inputs[i];
+    if (input.type === 'password')
+      formInputs.push(input);
+  };
+};
 
 class ConnectionInputsListener extends Component {
   constructor(props){
@@ -182,11 +203,38 @@ class ConnectionInputsListener extends Component {
       case 'fillAccountInformation':
         this.fillFields(request.data);
         break;
+      case 'fillGeneratedPassword':
+        this.fillGeneratedPassword(request.data);
+        break;
       case 'closeFillInMenu':
         this.closeFillInMenu();
         break;
       default:
         return;
+    }
+    return false;
+  };
+  fillGeneratedPassword = ({password}) => {
+    if (!!this.state.currentInput){
+      const form = $(this.state.currentInput).closest('form');
+      if (!!form.length) {
+        const inputs = getVisibleInputs(form[0]);
+        const newPasswordInput = inputs.find(item => {
+          return item.type === 'password' && (item.autocomplete === 'new-password' || item.autocomplete === 'off');
+        });
+        if (!!newPasswordInput){
+          inputs.forEach(input => {
+            if (input.type === 'password' && (input.autocomplete === 'new-password' || input.autocomplete === 'off'))
+              fillField(input, password);
+          });
+        }else {
+          inputs.forEach(input => {
+            if (input.type === 'password')
+              fillField(input, password)
+          });
+        }
+      }
+      this.closeFillInMenu();
     }
   };
   fillFields = (account_information) => {
@@ -224,25 +272,24 @@ class ConnectionInputsListener extends Component {
   };
   describeForms = (form) => {
     let inputs = getVisibleInputs(form.formEl);
-    let loginEl = null;
-    let passwordEl = null;
-    let passwordIndex = getPasswordInputIndex(inputs);
-    if (passwordIndex > -1)
-      passwordEl = inputs[passwordIndex];
-    if (passwordIndex > 0){
-      loginEl = inputs[passwordIndex - 1];
-    }
-    form.loginEl = loginEl;
-    form.passwordEl = passwordEl;
-    if (!!passwordEl)
-      this.setupConnectionInput(passwordEl);
-    if (!!loginEl)
-      this.setupConnectionInput(loginEl);
+    let formInputs = [];
+    let passwordInputIndex = getPasswordInputIndex(inputs);
+
+    if (passwordInputIndex > 0)
+      formInputs.push(inputs[passwordInputIndex - 1]);
+    for (let i = passwordInputIndex; i < inputs.length; i++){
+      const input = inputs[i];
+      if (input.type === 'password')
+        formInputs.push(input);
+    };
+    form.inputs = formInputs;
+    formInputs.forEach(item => {
+      this.setupConnectionInput(item);
+    });
   };
   hideForm = (form) => {
     const inputs = this.state.inputs.filter(item => {
-      const toRemove = item.input === form.passwordEl || item.input === form.loginEl;
-      return !toRemove;
+      return !(form.inputs.includes(item.input));
     });
     this.setState({inputs: inputs});
   };
@@ -263,25 +310,24 @@ class ConnectionInputsListener extends Component {
     let docForms = document.querySelectorAll('form');
     let forms = [];
     for (let form of docForms){
-      if (!form.dataset || !form.dataset.easeWatching) {
+      if (!form.dataset || !form.dataset.easeWatching){
         form.dataset.easeWatching = 'true';
-        if (form.querySelector('input[type=password]')) {
+        if (form.querySelector('input[type=password]')){
           forms.push({
             formEl: form,
             isVisible: false,
-            loginEl: null,
-            passwordEl: null
+            inputs: []
           });
         }
       }
     }
-    this.forms = forms;
+    this.forms = this.forms.concat(forms);
   };
   checkRemovedNodes = (removedNodes) => {
     for (let i = 0; i < removedNodes.length; i++){
       let node = removedNodes[i];
       this.forms = this.forms.filter(item => {
-        const toRemove = node === item.formEl || node.contains(item.formEl);
+        const toRemove = (node === item.formEl || node.contains(item.formEl));
         if (toRemove)
           this.hideForm(item);
         return !toRemove;

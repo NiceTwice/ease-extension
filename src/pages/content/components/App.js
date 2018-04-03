@@ -5,7 +5,7 @@ import {connect} from "react-redux";
 import FormSubmissionListener from "./FormSubmissionListener";
 import ConnectionOverlay from "./ConnectionOverlay";
 import ScrapGoogleOverlay from "./ScrapGoogleOverlay";
-import ConnectionInputsListener from "./ConnectionInputsListener2";
+import ConnectionInputsListener from "./ConnectionInputsListener";
 import SavedUpdatePopup from "./SavedUpdatePopup";
 
 @connect(store => ({
