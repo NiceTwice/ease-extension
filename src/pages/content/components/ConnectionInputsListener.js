@@ -1,7 +1,7 @@
 import React, {Fragment, Component} from "react";
 import "../../../shared/browser";
 import {EaseInputLogoIconActive, EaseInputLogoIcon} from "../../../shared/ImagesBase64";
-import Storage from "../../../shared/storage_api";
+import {isNewPasswordInput} from "../../../shared/utils";
 import FillInPopup from "./fillInPopup";
 
 function sendKey(input, key) {
@@ -220,11 +220,11 @@ class ConnectionInputsListener extends Component {
       if (!!form.length) {
         const inputs = getVisibleInputs(form[0]);
         const newPasswordInput = inputs.find(item => {
-          return item.type === 'password' && (item.autocomplete === 'new-password' || item.autocomplete === 'off');
+          return isNewPasswordInput(item);
         });
         if (!!newPasswordInput){
           inputs.forEach(input => {
-            if (input.type === 'password' && (input.autocomplete === 'new-password' || input.autocomplete === 'off'))
+            if (isNewPasswordInput(input))
               fillField(input, password);
           });
         }else {
