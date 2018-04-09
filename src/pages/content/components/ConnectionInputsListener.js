@@ -262,11 +262,32 @@ class ConnectionInputsListener extends Component {
       left: position.left + width - 16 - heightOffset
     }
   };
+  inputClickListener = (e) => {
+    const rect = e.target.getBoundingClientRect();
+    const startX = rect.width / 100 * 98 - 18 + rect.left;
+
+    if (e.x >= startX){
+      console.log('click on icon');
+      this.openListener(e.target);
+    }
+  };
   setupConnectionInput = (input) => {
     let inputs = this.state.inputs;
+    const styles = getComputedStyle(input);
+    const haveBackground = styles.backgroundImage !== 'none';
+
+    if (!haveBackground) {
+      input.style.backgroundImage = EaseInputLogoIcon;
+      input.style.backgroundRepeat = 'no-repeat';
+      input.style.backgroundAttachment = 'scroll';
+      input.style.backgroundSize = '18px 18px';
+      input.style.backgroundPosition = '98% 50%';
+      input.addEventListener('click', this.inputClickListener);
+    }
     inputs.push({
       input: input,
-      iconPosition: this.getInputIconPosition(input)
+      iconPosition: this.getInputIconPosition(input),
+      backgroundSetup: !haveBackground
     });
     this.setState({inputs: inputs});
   };
@@ -373,7 +394,7 @@ class ConnectionInputsListener extends Component {
   onResize = () => {
     const inputs = this.state.inputs.map(input => {
       return {
-        input: input.input,
+          ...input,
         iconPosition: this.getInputIconPosition(input.input)
       }
     });
@@ -402,6 +423,8 @@ class ConnectionInputsListener extends Component {
     return (
         <Fragment>
           {this.state.inputs.map((item, idx) => {
+            if (item.backgroundSetup)
+              return null;
             return (
                 <ConnectionInputIcon
                     key={idx}
