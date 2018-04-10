@@ -45,8 +45,7 @@ const connectionActiveInputStyles = {
   backgroundRepeat: 'no-repeat',
   backgroundAttachment: 'scroll',
   backgroundSize: '18x 18px',
-  backgroundPosition: '98% 50%',
-  cursor: 'auto'
+  backgroundPosition: '98% 50%'
 };
 
 const connectionInputStyles = {
@@ -54,8 +53,7 @@ const connectionInputStyles = {
   backgroundRepeat: 'no-repeat',
   backgroundAttachment: 'scroll',
   backgroundSize: '18px 18px',
-  backgroundPosition: '98% 50%',
-  cursor: 'auto'
+  backgroundPosition: '98% 50%'
 };
 
 const ConnectionInputIcon = (props) => {
@@ -262,32 +260,50 @@ class ConnectionInputsListener extends Component {
       left: position.left + width - 16 - heightOffset
     }
   };
-  inputClickListener = (e) => {
+  connectionInputClickListener = (e) => {
     const rect = e.target.getBoundingClientRect();
     const startX = rect.width / 100 * 98 - 18 + rect.left;
 
     if (e.x >= startX){
-      console.log('click on icon');
       this.openListener(e.target);
     }
+  };
+  connectionInputMouseEnterListener = (e) => {
+    const input = e.target;
+
+    input.style.backgroundImage = EaseInputLogoIconActive;
+    input.style.backgroundRepeat = 'no-repeat';
+    input.style.backgroundAttachment ='scroll';
+    input.style.backgroundSize = '18px 18px';
+    input.style.backgroundPosition = '98% 50%';
+  };
+  connectionInputMouseLeaveListener = (e) => {
+    const input = e.target;
+
+    input.style.backgroundImage = EaseInputLogoIcon;
+    input.style.backgroundRepeat = 'no-repeat';
+    input.style.backgroundAttachment ='scroll';
+    input.style.backgroundSize = '18px 18px';
+    input.style.backgroundPosition = '98% 50%';
   };
   setupConnectionInput = (input) => {
     let inputs = this.state.inputs;
     const styles = getComputedStyle(input);
-    const haveBackground = styles.backgroundImage !== 'none';
+    const hasBackground = styles.backgroundImage !== 'none';
 
-    if (!haveBackground) {
+    if (!hasBackground) {
       input.style.backgroundImage = EaseInputLogoIcon;
       input.style.backgroundRepeat = 'no-repeat';
-      input.style.backgroundAttachment = 'scroll';
+      input.style.backgroundAttachment ='scroll';
       input.style.backgroundSize = '18px 18px';
       input.style.backgroundPosition = '98% 50%';
-      input.addEventListener('click', this.inputClickListener);
+      input.addEventListener('click', this.connectionInputClickListener);
+      input.addEventListener('mouseenter', this.connectionInputMouseEnterListener);
+      input.addEventListener('mouseleave', this.connectionInputMouseLeaveListener);
     }
     inputs.push({
       input: input,
-      iconPosition: this.getInputIconPosition(input),
-      backgroundSetup: !haveBackground
+      iconPosition: !hasBackground ? null : this.getInputIconPosition(input)
     });
     this.setState({inputs: inputs});
   };
@@ -310,7 +326,13 @@ class ConnectionInputsListener extends Component {
   };
   hideForm = (form) => {
     const inputs = this.state.inputs.filter(item => {
-      return !(form.inputs.includes(item.input));
+      const toRemove = form.inputs.includes(item.input);
+      if (toRemove && !item.iconPosition){
+        item.input.removeEventListener('click', this.connectionInputClickListener);
+        item.input.removeEventListener('mouseenter', this.connectionInputMouseEnterListener);
+        item.input.removeEventListener('mouseleave', this.connectionInputMouseLeaveListener);
+      }
+      return !toRemove;
     });
     this.setState({inputs: inputs});
   };
@@ -393,8 +415,10 @@ class ConnectionInputsListener extends Component {
   };
   onResize = () => {
     const inputs = this.state.inputs.map(input => {
+      if (!input.iconPosition)
+        return input;
       return {
-          ...input,
+        ...input,
         iconPosition: this.getInputIconPosition(input.input)
       }
     });
@@ -423,14 +447,14 @@ class ConnectionInputsListener extends Component {
     return (
         <Fragment>
           {this.state.inputs.map((item, idx) => {
-            if (item.backgroundSetup)
-              return null;
-            return (
-                <ConnectionInputIcon
-                    key={idx}
-                    onClick={this.openListener.bind(null, item.input)}
-                    style={item.iconPosition}/>
-            )
+            if (!!item.iconPosition)
+              return (
+                  <ConnectionInputIcon
+                      key={idx}
+                      onClick={this.openListener.bind(null, item.input)}
+                      style={item.iconPosition}/>
+              );
+            return null;
           })}
           {!!this.state.currentInput &&
           <FillInPopup

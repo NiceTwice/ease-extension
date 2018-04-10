@@ -6,7 +6,6 @@ export const getProfiles = () => {
   return (dispatch, getState) => {
     dispatch({type: 'GET_PROFILES_PENDING'});
     return get_api.getProfiles().then(response => {
-      console.log('get profiles:', response);
       dispatch({
         type: 'GET_PROFILES_FULFILLED',
         payload: {

@@ -5,6 +5,7 @@ import Cookies from "../../../../shared/cookies_api";
 import Tabs from "../../../../shared/tabs_api";
 import {handleSemanticInput,
   extractRootDomain,
+  reflect,
   resolveImageURL,
   copyTextToClipboard} from "../../../../shared/utils";
 import {BackgroundMessage, extractRootDomainWithoutCountryCode} from "../../../../shared/utils";
@@ -307,7 +308,7 @@ class FillInPopup extends Component {
     });
   };
   componentWillMount(){
-    BackgroundMessage('getProfiles');
+    reflect(BackgroundMessage('getProfiles'));
   }
   render(){
     return (
