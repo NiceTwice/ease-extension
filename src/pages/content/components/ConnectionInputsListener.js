@@ -455,10 +455,19 @@ class ConnectionInputsListener extends Component {
         let addedNode = mutations[i].addedNodes[j];
         if (!addedNode)
           continue;
-        if (addedNode.tagName && addedNode.tagName.toLowerCase() === 'form' &&
-            (!addedNode.dataset || !addedNode.dataset.easeWatching)) {
-          doCollect = true;
-          break;
+        if (addedNode.tagName){
+          const tagName = addedNode.tagName.toLowerCase();
+          if (tagName === 'input'){
+            if (addedNode.type === 'password' && !addedNode.closest('form')){
+              doCollect = true;
+              break;
+            }
+          } else if (tagName === 'form'){
+            if (!addedNode.dataset || !addedNode.dataset.easeWatching){
+              doCollect = true;
+              break;
+            }
+          }
         }
         if (!addedNode.querySelectorAll)
           continue;
