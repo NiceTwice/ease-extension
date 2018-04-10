@@ -1,7 +1,7 @@
 import React, {Fragment, Component} from "react";
 import "../../../shared/browser";
 import {EaseInputLogoIconActive, EaseInputLogoIcon} from "../../../shared/ImagesBase64";
-import {isNewPasswordInput} from "../../../shared/utils";
+import Storage from "../../../shared/storage_api";
 import FillInPopup from "./fillInPopup";
 
 function sendKey(input, key) {
@@ -45,7 +45,8 @@ const connectionActiveInputStyles = {
   backgroundRepeat: 'no-repeat',
   backgroundAttachment: 'scroll',
   backgroundSize: '18x 18px',
-  backgroundPosition: '98% 50%'
+  backgroundPosition: '98% 50%',
+  cursor: 'auto'
 };
 
 const connectionInputStyles = {
@@ -53,7 +54,8 @@ const connectionInputStyles = {
   backgroundRepeat: 'no-repeat',
   backgroundAttachment: 'scroll',
   backgroundSize: '18px 18px',
-  backgroundPosition: '98% 50%'
+  backgroundPosition: '98% 50%',
+  cursor: 'auto'
 };
 
 const ConnectionInputIcon = (props) => {
@@ -137,27 +139,6 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-const getFirstPasswordInputIndex = (inputs) => {
-  for (let i = 0; i < inputs.length; i++){
-    if (inputs[i].type === 'password')
-      return i;
-  }
-  return -1;
-};
-
-const describeForm = (form) => {
-  let inputs = getVisibleInputs(form);
-  let formInputs = [];
-  let passwordInputIndex = getPasswordInputIndex(inputs);
-
-  if (passwordInputIndex > 0)
-    formInputs.push(inputs[passwordInputIndex - 1]);
-  for (let i = passwordInputIndex; i < inputs.length; i++){
-    const input = inputs[i];
-    if (input.type === 'password')
-      formInputs.push(input);
-  };
-};
 
 class ConnectionInputsListener extends Component {
   constructor(props){
@@ -169,6 +150,7 @@ class ConnectionInputsListener extends Component {
     this.domObservationCollectTimeout = null;
     this.formObservationInterval = -1;
     this.forms = [];
+    this.itemsToFill = [];
   }
   openListener = (input) => {
     if (this.state.currentInput !== input){
@@ -201,38 +183,11 @@ class ConnectionInputsListener extends Component {
       case 'fillAccountInformation':
         this.fillFields(request.data);
         break;
-      case 'fillGeneratedPassword':
-        this.fillGeneratedPassword(request.data);
-        break;
       case 'closeFillInMenu':
         this.closeFillInMenu();
         break;
       default:
         return;
-    }
-    return false;
-  };
-  fillGeneratedPassword = ({password}) => {
-    if (!!this.state.currentInput){
-      const form = $(this.state.currentInput).closest('form');
-      if (!!form.length) {
-        const inputs = getVisibleInputs(form[0]);
-        const newPasswordInput = inputs.find(item => {
-          return isNewPasswordInput(item);
-        });
-        if (!!newPasswordInput){
-          inputs.forEach(input => {
-            if (isNewPasswordInput(input))
-              fillField(input, password);
-          });
-        }else {
-          inputs.forEach(input => {
-            if (input.type === 'password')
-              fillField(input, password)
-          });
-        }
-      }
-      this.closeFillInMenu();
     }
   };
   fillFields = (account_information) => {
@@ -244,8 +199,7 @@ class ConnectionInputsListener extends Component {
           fillField(formObj.loginEl, account_information.login);
         if (!!formObj.passwordEl && !!account_information.password)
           fillField(formObj.passwordEl, account_information.password);
-      } else
-        fillField(this.state.currentInput, account_information.password);
+      }
       this.closeFillInMenu();
     }
   };
@@ -261,78 +215,34 @@ class ConnectionInputsListener extends Component {
       left: position.left + width - 16 - heightOffset
     }
   };
-  connectionInputClickListener = (e) => {
-    const rect = e.target.getBoundingClientRect();
-    const startX = rect.width / 100 * 98 - 18 + rect.left;
-
-    if (e.x >= startX){
-      this.openListener(e.target);
-    }
-  };
-  connectionInputMouseEnterListener = (e) => {
-    const input = e.target;
-
-    input.style.backgroundImage = EaseInputLogoIconActive;
-    input.style.backgroundRepeat = 'no-repeat';
-    input.style.backgroundAttachment ='scroll';
-    input.style.backgroundSize = '18px 18px';
-    input.style.backgroundPosition = '98% 50%';
-  };
-  connectionInputMouseLeaveListener = (e) => {
-    const input = e.target;
-
-    input.style.backgroundImage = EaseInputLogoIcon;
-    input.style.backgroundRepeat = 'no-repeat';
-    input.style.backgroundAttachment ='scroll';
-    input.style.backgroundSize = '18px 18px';
-    input.style.backgroundPosition = '98% 50%';
-  };
   setupConnectionInput = (input) => {
     let inputs = this.state.inputs;
-    const styles = getComputedStyle(input);
-    const hasBackground = styles.backgroundImage !== 'none';
-
-    if (!hasBackground) {
-      input.style.backgroundImage = EaseInputLogoIcon;
-      input.style.backgroundRepeat = 'no-repeat';
-      input.style.backgroundAttachment ='scroll';
-      input.style.backgroundSize = '18px 18px';
-      input.style.backgroundPosition = '98% 50%';
-      input.addEventListener('click', this.connectionInputClickListener);
-      input.addEventListener('mouseenter', this.connectionInputMouseEnterListener);
-      input.addEventListener('mouseleave', this.connectionInputMouseLeaveListener);
-    }
     inputs.push({
       input: input,
-      iconPosition: !hasBackground ? null : this.getInputIconPosition(input)
+      iconPosition: this.getInputIconPosition(input)
     });
     this.setState({inputs: inputs});
   };
   describeForms = (form) => {
     let inputs = getVisibleInputs(form.formEl);
-    let formInputs = [];
-    let passwordInputIndex = getPasswordInputIndex(inputs);
-
-    if (passwordInputIndex > 0)
-      formInputs.push(inputs[passwordInputIndex - 1]);
-    for (let i = passwordInputIndex; i < inputs.length; i++){
-      const input = inputs[i];
-      if (input.type === 'password')
-        formInputs.push(input);
-    };
-    form.inputs = formInputs;
-    formInputs.forEach(item => {
-      this.setupConnectionInput(item);
-    });
+    let loginEl = null;
+    let passwordEl = null;
+    let passwordIndex = getPasswordInputIndex(inputs);
+    if (passwordIndex > -1)
+      passwordEl = inputs[passwordIndex];
+    if (passwordIndex > 0){
+      loginEl = inputs[passwordIndex - 1];
+    }
+    form.loginEl = loginEl;
+    form.passwordEl = passwordEl;
+    if (!!passwordEl)
+      this.setupConnectionInput(passwordEl);
+    if (!!loginEl)
+      this.setupConnectionInput(loginEl);
   };
   hideForm = (form) => {
     const inputs = this.state.inputs.filter(item => {
-      const toRemove = form.inputs.includes(item.input);
-      if (toRemove && !item.iconPosition){
-        item.input.removeEventListener('click', this.connectionInputClickListener);
-        item.input.removeEventListener('mouseenter', this.connectionInputMouseEnterListener);
-        item.input.removeEventListener('mouseleave', this.connectionInputMouseLeaveListener);
-      }
+      const toRemove = item.input === form.passwordEl || item.input === form.loginEl;
       return !toRemove;
     });
     this.setState({inputs: inputs});
@@ -354,24 +264,25 @@ class ConnectionInputsListener extends Component {
     let docForms = document.querySelectorAll('form');
     let forms = [];
     for (let form of docForms){
-      if (!form.dataset || !form.dataset.easeWatching){
+      if (!form.dataset || !form.dataset.easeWatching) {
         form.dataset.easeWatching = 'true';
         if (form.querySelector('input[type=password]')){
           forms.push({
             formEl: form,
             isVisible: false,
-            inputs: []
+            loginEl: null,
+            passwordEl: null
           });
         }
       }
     }
-    this.forms = this.forms.concat(forms);
+    this.forms = forms;
   };
   checkRemovedNodes = (removedNodes) => {
     for (let i = 0; i < removedNodes.length; i++){
       let node = removedNodes[i];
       this.forms = this.forms.filter(item => {
-        const toRemove = (node === item.formEl || node.contains(item.formEl));
+        const toRemove = node === item.formEl || node.contains(item.formEl);
         if (toRemove)
           this.hideForm(item);
         return !toRemove;
@@ -416,10 +327,8 @@ class ConnectionInputsListener extends Component {
   };
   onResize = () => {
     const inputs = this.state.inputs.map(input => {
-      if (!input.iconPosition)
-        return input;
       return {
-        ...input,
+        input: input.input,
         iconPosition: this.getInputIconPosition(input.input)
       }
     });
@@ -448,14 +357,12 @@ class ConnectionInputsListener extends Component {
     return (
         <Fragment>
           {this.state.inputs.map((item, idx) => {
-            if (!!item.iconPosition)
-              return (
-                  <ConnectionInputIcon
-                      key={idx}
-                      onClick={this.openListener.bind(null, item.input)}
-                      style={item.iconPosition}/>
-              );
-            return null;
+            return (
+                <ConnectionInputIcon
+                    key={idx}
+                    onClick={this.openListener.bind(null, item.input)}
+                    style={item.iconPosition}/>
+            )
           })}
           {!!this.state.currentInput &&
           <FillInPopup

@@ -7,7 +7,6 @@ import ConnectionOverlay from "./ConnectionOverlay";
 import ScrapGoogleOverlay from "./ScrapGoogleOverlay";
 import ConnectionInputsListener from "./ConnectionInputsListener";
 import SavedUpdatePopup from "./SavedUpdatePopup";
-import FillInPopup from "./fillInPopup";
 
 @connect(store => ({
   loading: store.loading

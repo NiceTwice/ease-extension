@@ -109,3 +109,7 @@ export const extractRootDomainWithoutCountryCode = (url) => {
   const split = extractRootDomain(url).split('.');
   return split.slice(0, split.length - 1).join('.');
 };
+
+export const isNewPasswordInput = (field) => {
+  return field.type === 'password' && (field.autocomplete === 'new-password' || field.name.includes('new') || field.name.includes('confirm'));
+};

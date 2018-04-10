@@ -5,6 +5,7 @@ import Cookies from "../../../../shared/cookies_api";
 import Tabs from "../../../../shared/tabs_api";
 import {handleSemanticInput,
   extractRootDomain,
+  reflect,
   resolveImageURL,
   copyTextToClipboard} from "../../../../shared/utils";
 import {BackgroundMessage, extractRootDomainWithoutCountryCode} from "../../../../shared/utils";
@@ -227,11 +228,11 @@ class PasswordGenerator extends Component {
   sendGeneratedPassword = () => {
     Tabs.getCurrent().then(tab => {
       Tabs.sendMessage(tab.id, {
-        type: 'fillAccountInformation',
+        type: 'fillGeneratedPassword',
         data: {
           password: this.state.password
         }
-      })
+      });
     });
   };
   handleInput = handleSemanticInput.bind(this);
@@ -308,7 +309,7 @@ class FillInPopup extends Component {
     });
   };
   componentWillMount(){
-    BackgroundMessage('getProfiles');
+    reflect(BackgroundMessage('getProfiles'));
   }
   render(){
     return (
