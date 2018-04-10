@@ -332,9 +332,15 @@ class ConnectionInputsListener extends Component {
     const inputs = this.state.inputs.filter(item => {
       const toRemove = form.inputs.includes(item.input);
       if (toRemove && !item.iconPosition){
-        item.input.removeEventListener('click', this.connectionInputClickListener);
-        item.input.removeEventListener('mouseenter', this.connectionInputMouseEnterListener);
-        item.input.removeEventListener('mouseleave', this.connectionInputMouseLeaveListener);
+        const input = item.input;
+        input.style.backgroundImage = '';
+        input.style.backgroundRepeat = '';
+        input.style.backgroundAttachment ='';
+        input.style.backgroundSize = '';
+        input.style.backgroundPosition = '';
+        input.removeEventListener('click', this.connectionInputClickListener);
+        input.removeEventListener('mouseenter', this.connectionInputMouseEnterListener);
+        input.removeEventListener('mouseleave', this.connectionInputMouseLeaveListener);
       }
       return !toRemove;
     });
@@ -344,9 +350,15 @@ class ConnectionInputsListener extends Component {
     const inputs = this.state.inputs.filter(item => {
       const toRemove = input.input === item.input;
       if (toRemove && !item.iconPosition){
-        item.input.removeEventListener('click', this.connectionInputClickListener);
-        item.input.removeEventListener('mouseenter', this.connectionInputMouseEnterListener);
-        item.input.removeEventListener('mouseleave', this.connectionInputMouseLeaveListener);
+        const input = item.input;
+        input.style.backgroundImage = '';
+        input.style.backgroundRepeat = '';
+        input.style.backgroundAttachment ='';
+        input.style.backgroundSize = '';
+        input.style.backgroundPosition = '';
+        input.removeEventListener('click', this.connectionInputClickListener);
+        input.removeEventListener('mouseenter', this.connectionInputMouseEnterListener);
+        input.removeEventListener('mouseleave', this.connectionInputMouseLeaveListener);
       }
       return !toRemove;
     });
