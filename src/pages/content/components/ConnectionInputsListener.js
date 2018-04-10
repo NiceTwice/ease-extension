@@ -333,7 +333,7 @@ class ConnectionInputsListener extends Component {
       const toRemove = form.inputs.includes(item.input);
       if (toRemove && !item.iconPosition){
         const input = item.input;
-        input.style.backgroundImage = '';
+        input.style.backgroundImage = 'none';
         input.style.backgroundRepeat = '';
         input.style.backgroundAttachment ='';
         input.style.backgroundSize = '';
