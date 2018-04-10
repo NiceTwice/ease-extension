@@ -169,6 +169,7 @@ class ConnectionInputsListener extends Component {
     this.domObservationCollectTimeout = null;
     this.formObservationInterval = -1;
     this.forms = [];
+    this.singleInputs = [];
   }
   openListener = (input) => {
     if (this.state.currentInput !== input){
@@ -231,6 +232,8 @@ class ConnectionInputsListener extends Component {
               fillField(input, password)
           });
         }
+      }else {
+        fillField(this.state.currentInput, password);
       }
       this.closeFillInMenu();
     }
@@ -337,6 +340,18 @@ class ConnectionInputsListener extends Component {
     });
     this.setState({inputs: inputs});
   };
+  hideSingleInput = (input) => {
+    const inputs = this.state.inputs.filter(item => {
+      const toRemove = input.input === item.input;
+      if (toRemove && !item.iconPosition){
+        item.input.removeEventListener('click', this.connectionInputClickListener);
+        item.input.removeEventListener('mouseenter', this.connectionInputMouseEnterListener);
+        item.input.removeEventListener('mouseleave', this.connectionInputMouseLeaveListener);
+      }
+      return !toRemove;
+    });
+    this.setState({inputs: inputs});
+  };
   checkForms = () => {
     this.forms = this.forms.map(form => {
       const isVisible = $(form.formEl).is(':visible');
@@ -349,33 +364,67 @@ class ConnectionInputsListener extends Component {
       }
       return form;
     });
+    this.singleInputs = this.singleInputs.map(input => {
+      const isVisible = $(input.input).is(':visible');
+      if (input.isVisible && !isVisible){
+        input.isVisible = isVisible;
+        this.hideSingleInput(input);
+      }else if (!input.isVisible && isVisible){
+        input.isVisible = isVisible;
+        this.setupConnectionInput(input.input);
+      }
+      return input;
+    });
   };
   collectForms = () => {
-    let docForms = document.querySelectorAll('form');
     let forms = [];
-    for (let form of docForms){
-      if (!form.dataset || !form.dataset.easeWatching){
-        form.dataset.easeWatching = 'true';
-        if (form.querySelector('input[type=password]')){
+    let singleInputs = [];
+
+    let docInputs = document.querySelectorAll('input[type=password]');
+    for (let passwordInput of docInputs){
+      const closestForm = passwordInput.closest('form');
+
+      if (!!closestForm){
+        if (!closestForm.dataset || !closestForm.dataset.easeWatching){
+          closestForm.dataset.easeWatching = 'true';
           forms.push({
-            formEl: form,
+            formEl: closestForm,
             isVisible: false,
             inputs: []
           });
         }
+      } else {
+        if (!(this.singleInputs.find(item => (item.input === passwordInput))))
+          singleInputs.push({
+            input : passwordInput,
+            isVisible: false
+          });
       }
     }
+    this.singleInputs = this.singleInputs.concat(singleInputs);
     this.forms = this.forms.concat(forms);
   };
   checkRemovedNodes = (removedNodes) => {
     for (let i = 0; i < removedNodes.length; i++){
       let node = removedNodes[i];
-      this.forms = this.forms.filter(item => {
-        const toRemove = (node === item.formEl || node.contains(item.formEl));
-        if (toRemove)
-          this.hideForm(item);
-        return !toRemove;
-      });
+      if (node.tagName) {
+        const tagName = node.tagName.toLowerCase();
+        if (tagName === 'form'){
+          this.forms = this.forms.filter(item => {
+            const toRemove = (node === item.formEl || node.contains(item.formEl));
+            if (toRemove)
+              this.hideForm(item);
+            return !toRemove;
+          });
+        } else if (tagName === 'input'){
+          this.singleInputs = this.singleInputs.filter(item => {
+            const toRemove = node === item.input || node.contains(item.input);
+            if (toRemove)
+              this.hideSingleInput(item.input);
+            return !toRemove;
+          })
+        }
+      }
     }
   };
   domObserverFunction = (mutations) => {
