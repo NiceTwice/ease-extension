@@ -461,7 +461,7 @@ export const actions = {
       }, 1000);
     sendResponse(MessageResponse(false, 'connection finished'));
   },*/
-  app_connection: async (data, sendResponse) => {
+  app_connection: async (data, sendResponse, senderTab) => {
     const {app_id, active_tab, website} = data;
     console.log('app connection !');
     /*    if (!website.sso_id && !!current_connections.find(item => (website.name === item))){
@@ -472,11 +472,17 @@ export const actions = {
     let tab;
     if (!!data.tab)
       tab = data.tab;
-    else
+    else {
+      const currentTab = !!senderTab ? senderTab : (await Tabs.query({
+        currentWindow: true,
+        active: true
+      }))[0];
       tab = await Tabs.create({
         url: 'chrome-extension://hnacegpfmpknpdjmhdmpkmedplfcmdmp/pages/connection_transition.html',
-        active: active_tab
+        active: active_tab,
+        index: currentTab.index + 1
       });
+    }
     console.log('tab creation');
     await Promise.all([
       reflect(Privacy.passwordSaving.set(false)),
@@ -521,10 +527,15 @@ export const actions = {
       }, 1000);
     sendResponse(MessageResponse(false, 'connection finished'));
   },
-  test_website_connection: async (data, sendResponse) => {
+  test_website_connection: async (data, sendResponse, senderTab) => {
     const {website_id, account_information} = data;
+    const currentTab = !!senderTab ? senderTab : (await Tabs.query({
+      currentWindow: true,
+      active: true
+    }))[0];
     const tab = await Tabs.create({
-      url: 'chrome-extension://hnacegpfmpknpdjmhdmpkmedplfcmdmp/pages/connection_transition.html'
+      url: 'chrome-extension://hnacegpfmpknpdjmhdmpkmedplfcmdmp/pages/connection_transition.html',
+      index: currentTab.index + 1
     });
     await Promise.all([
       reflect(Privacy.passwordSaving.set(false)),
@@ -567,9 +578,9 @@ export const actions = {
     }))[0];
     console.log('get current tab response', currentTab);
     await Promise.all([
-        Tabs.waitLoading(currentTab.id),
-        get_api.dashboard.getApp({app_id : app_id}),
-        get_api.dashboard.getAppPassword({app_id: app_id})
+      Tabs.waitLoading(currentTab.id),
+      get_api.dashboard.getApp({app_id : app_id}),
+      get_api.dashboard.getAppPassword({app_id: app_id})
     ]).then(response => {
       app = response[1];
       password = response[2];
@@ -738,8 +749,13 @@ export const actions = {
     await reflect(Privacy.passwordSaving.set(false));
     await reflect(Privacy.autofill.set(false));
     await asyncWait(100);
+    const currentTab = !!senderTab ? senderTab : (await Tabs.query({
+      currentWindow: true,
+      active: true
+    }))[0];
     let tab = await Tabs.create({
-      url: 'https://passwords.google.com'
+      url: 'https://passwords.google.com',
+      index: currentTab.index + 1
     });
     store.dispatch(showScrapingChromeOverlay({
       tabId: tab.id
