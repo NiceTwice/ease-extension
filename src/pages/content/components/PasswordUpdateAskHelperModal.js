@@ -30,6 +30,9 @@ class PasswordUpdateAskHelperModal extends Component {
   render(){
     const {popup} = this.props;
 
+    if (!popup)
+      return null;
+
     return (
       <div style={passwordUpdateAskHelperModalStyles}>
         <iframe style={passwordUpdateAskHelperModalIframeStyles}
