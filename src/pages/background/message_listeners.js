@@ -16,7 +16,7 @@ import {InitialiseConnectionOverlay, UpdateConnectionOverlay, DeleteConnectionOv
 import {setCurrentTab, getCatalogWebsites} from "../../shared/actions/common";
 import {scrapChrome} from "./google";
 import {deleteScrapingChromeOverlay, showScrapingChromeOverlay} from "../../shared/actions/scraping";
-import {showSavedUpdatePopup, closeSavedUpdatePopup} from "../../shared/actions/background-ui";
+import {showSavedUpdatePopup, closeSavedUpdatePopup, showPasswordUpdateAskHelperModal} from "../../shared/actions/background-ui";
 import {saveLogwithTabCookies, setLogwithHostnameCookies, saveTabCookies, setHostnameCookies, removeHostnameCookies} from "./cookies_management";
 import {serverUrl} from "../../shared/strings";
 
@@ -783,6 +783,19 @@ export const actions = {
   },
   easeLogout: (data, sendResponse, senderTab) => {
     store.dispatch(logout());
+  },
+  showPasswordUpdateHelperModal: async (data, sendResponse, senderTab) => {
+    const {appName, login} = data;
+
+    const activeTab = (await Tabs.query({
+      currentWindow: true,
+      active: true
+    }))[0];
+    store.dispatch(showPasswordUpdateAskHelperModal({
+      tabId: activeTab.id,
+      appName: appName,
+      login: login
+    }))
   },
   track: (data, sendResponse, senderTab) => {
     const {name, info} = data;

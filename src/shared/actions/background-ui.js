@@ -21,3 +21,24 @@ export function closeSavedUpdatePopup({tabId}){
     }
   }
 }
+
+export function showPasswordUpdateAskHelperModal({tabId, appName, adminName, login}){
+  return {
+    type: 'SHOW_PASSWORD_UPDATE_ASK_HELPER_MODAL',
+    payload: {
+      tabId: tabId,
+      appName: appName,
+      adminName: adminName,
+      login: login
+    }
+  }
+}
+
+export function closePasswordUpdateAskHelperModal({tabId}){
+  return {
+    type: 'CLOSE_PASSWORD_UPDATE_ASK_HELPER_MODAL',
+    payload: {
+      tabId: tabId
+    }
+  }
+}

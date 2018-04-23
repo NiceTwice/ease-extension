@@ -7,6 +7,7 @@ import ConnectionOverlay from "./ConnectionOverlay";
 import ScrapGoogleOverlay from "./ScrapGoogleOverlay";
 import ConnectionInputsListener from "./ConnectionInputsListener";
 import SavedUpdatePopup from "./SavedUpdatePopup";
+import PasswordUpdateAskHelperModal from "./PasswordUpdateAskHelperModal";
 
 @connect(store => ({
   loading: store.loading
@@ -34,6 +35,7 @@ class App extends Component {
             <FormSubmissionListener tabId={this.state.tabId}/>
             <ConnectionInputsListener tabId={this.state.tabId}/>
             <SavedUpdatePopup tabId={this.state.tabId}/>
+            <PasswordUpdateAskHelperModal tabId={this.state.tabId}/>
           </Fragment>
       );
     return (

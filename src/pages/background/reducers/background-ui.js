@@ -18,3 +18,22 @@ export const savedUpdatePopup = createReducer({
     });
   }
 });
+
+export const passwordUpdateAskHelperModal = createReducer({
+
+}, {
+  ['SHOW_PASSWORD_UPDATE_ASK_HELPER_MODAL'](state, action){
+     const {tabId} = action.payload;
+
+     return update(state, {
+       [tabId]: {$set: action.payload}
+     });
+  },
+  ['CLOSE_PASSWORD_UPDATE_ASK_HELPER_MODAL'](state, action){
+    const {tabId} = action.payload;
+
+    return update(state, {
+      $unset: [tabId]
+    });
+  }
+});
