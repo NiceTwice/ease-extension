@@ -462,7 +462,7 @@ export const actions = {
     sendResponse(MessageResponse(false, 'connection finished'));
   },*/
   app_connection: async (data, sendResponse, senderTab) => {
-    const {app_id, active_tab, website} = data;
+    const {app_id, active_tab, website, passwordChangeReminder, appName, login} = data;
     console.log('app connection !');
     /*    if (!website.sso_id && !!current_connections.find(item => (website.name === item))){
           sendResponse(MessageResponse(true, 'there is already pending connection on this website'));
@@ -520,6 +520,12 @@ export const actions = {
         tabId: connectionResponse.data.id
       }));
     }
+    if (!!passwordChangeReminder)
+      store.dispatch(showPasswordUpdateAskHelperModal({
+        tabId: json.tab.id,
+        appName: appName,
+        login: login
+      }));
     if (!current_connections.length)
       setTimeout(() => {
         reflect(Privacy.passwordSaving.set(true));
@@ -795,7 +801,7 @@ export const actions = {
       tabId: activeTab.id,
       appName: appName,
       login: login
-    }))
+    }));
   },
   track: (data, sendResponse, senderTab) => {
     const {name, info} = data;
